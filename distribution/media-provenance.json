@@ -1,0 +1,986 @@
+{
+  "schemaVersion": 1,
+  "name": "movement-public-media-provenance",
+  "description": "Canonical provenance inventory for media in the Movement Timeline Studio Public Alpha candidate.",
+  "inventory": {
+    "expectedSourceFileCount": 387,
+    "expectedAuthoringKitFileCount": 386,
+    "expectedSourceTotalBytes": 88454525,
+    "expectedUniqueSha256": 356,
+    "expectedSourceInventorySha256": "6a5c9fe6687cf77daaaa38d487ae4842be1b3bd985a0b8cedad0b04a57228eb3",
+    "expectedAuthoringKitInventorySha256": "7bf49de6abe404efd81955722871292753771ae57653f7cfd299222fdcd449cf",
+    "mediaExtensions": [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".webp",
+      ".gif",
+      ".avif",
+      ".svg",
+      ".ico",
+      ".bmp",
+      ".tif",
+      ".tiff",
+      ".mp3",
+      ".wav",
+      ".ogg",
+      ".m4a",
+      ".aac",
+      ".flac",
+      ".opus",
+      ".mp4",
+      ".webm",
+      ".mov",
+      ".mkv",
+      ".avi",
+      ".m4v",
+      ".pdf",
+      ".woff",
+      ".woff2",
+      ".ttf",
+      ".otf",
+      ".eot",
+      ".glb",
+      ".gltf",
+      ".obj",
+      ".fbx"
+    ],
+    "excludedDirectoryNames": [
+      ".git",
+      ".agents",
+      ".codex",
+      "node_modules",
+      "dist",
+      "oldversion",
+      "attmptedversion",
+      "vendor",
+      "bower_components",
+      ".cache",
+      "tmp",
+      "temp",
+      "build",
+      "coverage",
+      "_build",
+      "private",
+      "uploads"
+    ]
+  },
+  "licensePolicy": {
+    "sourceCodeLicense": "MIT",
+    "sourceCodeLicenseFile": "LICENSE",
+    "mediaLicense": "SEPARATE_FROM_SOURCE_CODE",
+    "requiredMediaLicenseMarker": "NOT_COVERED_BY_REPOSITORY_MIT",
+    "notice": "Bundled media is governed by its recorded provenance, owner authorization, and any applicable provider terms. AI-generated media and provider voices are not automatically MIT-licensed."
+  },
+  "ownerMediaPolicy": {
+    "appliesToProvenanceRecords": [
+      "example-image-chatgpt-filename-identified",
+      "example-image-fictional-red-haired-presenter",
+      "example-images-ai-tool-not-individually-recorded",
+      "movement-icon-source",
+      "movement-icon-derived-files",
+      "wanaka-background-photograph",
+      "root-favicon"
+    ],
+    "authorizedProjectUses": [
+      "distribution and viewing as part of this project",
+      "bundled examples",
+      "project website",
+      "Windows Authoring Kit",
+      "Public Alpha release"
+    ],
+    "independentReuseLicense": "NOT_GRANTED",
+    "independentModificationLicense": "NOT_GRANTED",
+    "relicensingPermission": "NOT_GRANTED",
+    "standaloneRedistributionLicense": "NOT_GRANTED",
+    "mandatoryCreditLine": "NONE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_EXPLICITLY_STATES_OTHERWISE",
+    "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+    "provenanceSource": "OWNER_CONFIRMATION_2026_09_05"
+  },
+  "sourceReferences": {
+    "OWNER_CONFIRMATION_2026_09_05": {
+      "type": "OWNER_CONFIRMATION",
+      "description": "Ezra's M05-B confirmation of creator, tool-family, likeness, voice, photograph, icon, and favicon provenance."
+    },
+    "REPOSITORY_FILENAME": {
+      "type": "REPOSITORY_EVIDENCE",
+      "description": "The repository filename identifies a tool, without establishing an exact model, prompt, or generation date."
+    },
+    "REPOSITORY_ICON_BUILD": {
+      "type": "REPOSITORY_EVIDENCE",
+      "description": "tools/build-windows-icon.cjs and docs/DESKTOP_DEVELOPMENT.md establish the derived icon-file relationship."
+    },
+    "SPEECHELO_COMMERCIAL_USE": {
+      "type": "PROVIDER_DOCUMENTATION",
+      "url": "https://support.speechelo.com/support/solutions/articles/47001189738-can-we-use-the-generated-voiceovers-for-commercial-purposes-",
+      "description": "Official Speechelo support states that PRO is required for the commercial license."
+    },
+    "SPEECHELO_LICENSE_RECORD": {
+      "type": "PROVIDER_DOCUMENTATION",
+      "url": "https://support.speechelo.com/support/solutions/articles/47001189744-do-you-provide-any-certificate-or-pdf-for-commercial-license-holders-",
+      "description": "Official Speechelo support states that PRO permits commercial use and that commercial users are recorded by the provider."
+    },
+    "SPEECHELO_TERMS": {
+      "type": "PROVIDER_TERMS",
+      "url": "https://speechelo.com/terms-conditions/"
+    },
+    "OPENAI_TERMS": {
+      "type": "PROVIDER_TERMS",
+      "url": "https://openai.com/policies/terms-of-use/"
+    },
+    "OPENAI_SERVICE_TERMS": {
+      "type": "PROVIDER_TERMS",
+      "url": "https://openai.com/policies/service-terms/"
+    },
+    "GOOGLE_TERMS": {
+      "type": "PROVIDER_TERMS",
+      "url": "https://policies.google.com/terms"
+    }
+  },
+  "provenanceRecords": [
+    {
+      "id": "example-image-chatgpt-filename-identified",
+      "selector": {
+        "paths": [
+          "examples/what-this-project-is/img/ChatGPT Image Jul 20, 2026, 04_22_12 AM.png"
+        ]
+      },
+      "expectedFileCount": 1,
+      "mediaType": "IMAGE",
+      "publicArea": "EXAMPLES",
+      "creator": "Ezra",
+      "sourceTool": "ChatGPT; exact model and prompt not recorded",
+      "aiGeneratedStatus": "YES",
+      "recognizableRealPersonStatus": "OWNER_CONFIRMED_NONE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Created by Ezra for this project and included in the Public Alpha candidate; applicable OpenAI terms continue to apply.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY_SUBJECT_TO_APPLICABLE_PROVIDER_TERMS",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED",
+        "REPOSITORY_VERIFIED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "REPOSITORY_FILENAME",
+        "OPENAI_TERMS"
+      ],
+      "includedInAuthoringKit": true
+    },
+    {
+      "id": "example-image-fictional-red-haired-presenter",
+      "selector": {
+        "paths": [
+          "examples/about/img/foreground1.png",
+          "examples/about/img/foreground2.png",
+          "examples/about/img/foreground3.png",
+          "examples/creating-new-forms-of-expression/img/Image1.png",
+          "examples/getting-to-know-the-system/img/Image1.png",
+          "examples/getting-to-know-the-system/img/presenter1.png",
+          "examples/sharing/img/fr_presenter2.png",
+          "examples/sharing/img/presenter1.png",
+          "examples/what-this-project-is/img/fr_image1.png",
+          "examples/what-this-project-is/img/fr_presenter2.png",
+          "examples/what-this-project-is/img/Image1.png"
+        ]
+      },
+      "expectedFileCount": 11,
+      "mediaType": "IMAGE",
+      "publicArea": "EXAMPLES",
+      "creator": "Ezra",
+      "sourceTool": "AI image-generation tools (ChatGPT or Gemini); exact tool per file not individually recorded",
+      "aiGeneratedStatus": "YES",
+      "recognizableRealPersonStatus": "OWNER_CONFIRMED_FICTIONAL_CHARACTER_NOT_BASED_ON_A_REAL_PERSON",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Original fictional character created by Ezra from his imagination for this project; applicable AI-provider terms continue to apply.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY_SUBJECT_TO_APPLICABLE_PROVIDER_TERMS",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED",
+        "REPOSITORY_VERIFIED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "OPENAI_TERMS",
+        "GOOGLE_TERMS"
+      ],
+      "includedInAuthoringKit": true
+    },
+    {
+      "id": "example-images-ai-tool-not-individually-recorded",
+      "selector": {
+        "directories": [
+          "examples/about/img",
+          "examples/creating-new-forms-of-expression/img",
+          "examples/getting-to-know-the-system/img",
+          "examples/sharing/img",
+          "examples/what-this-project-is/img"
+        ],
+        "extensions": [
+          ".png",
+          ".webp"
+        ],
+        "excludePaths": [
+          "examples/about/img/foreground1.png",
+          "examples/about/img/foreground2.png",
+          "examples/about/img/foreground3.png",
+          "examples/creating-new-forms-of-expression/img/Image1.png",
+          "examples/getting-to-know-the-system/img/Image1.png",
+          "examples/getting-to-know-the-system/img/presenter1.png",
+          "examples/sharing/img/fr_presenter2.png",
+          "examples/sharing/img/presenter1.png",
+          "examples/what-this-project-is/img/ChatGPT Image Jul 20, 2026, 04_22_12 AM.png",
+          "examples/what-this-project-is/img/fr_image1.png",
+          "examples/what-this-project-is/img/fr_presenter2.png",
+          "examples/what-this-project-is/img/Image1.png"
+        ]
+      },
+      "expectedFileCount": 211,
+      "mediaType": "IMAGE",
+      "publicArea": "EXAMPLES",
+      "creator": "Ezra",
+      "sourceTool": "AI image-generation tools (ChatGPT or Gemini); exact tool for each file not individually recorded",
+      "aiGeneratedStatus": "YES",
+      "recognizableRealPersonStatus": "OWNER_CONFIRMED_NONE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Created by Ezra for this project; no stock site, third-party image site, other person's photograph, or external media collection was used; applicable AI-provider terms continue to apply.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY_SUBJECT_TO_APPLICABLE_PROVIDER_TERMS",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "OPENAI_TERMS",
+        "GOOGLE_TERMS"
+      ],
+      "includedInAuthoringKit": true
+    },
+    {
+      "id": "example-narration-speechelo-pro",
+      "selector": {
+        "directories": [
+          "examples/about/speech",
+          "examples/creating-new-forms-of-expression/speech",
+          "examples/getting-to-know-the-system/speech",
+          "examples/sharing/speech",
+          "examples/what-this-project-is/speech"
+        ],
+        "extensions": [
+          ".mp3"
+        ]
+      },
+      "expectedFileCount": 159,
+      "mediaType": "SPEECH",
+      "publicArea": "EXAMPLES",
+      "creator": "Ezra",
+      "sourceTool": "Speechelo PRO / BlasterOnline",
+      "aiGeneratedStatus": "SYNTHETIC_TEXT_TO_SPEECH",
+      "recognizableRealPersonStatus": "NOT_APPLICABLE",
+      "voiceType": "SYNTHETIC_TTS_NOT_A_HUMAN_RECORDING_AND_NOT_A_REAL_PERSON_VOICE_CLONE",
+      "permissionBasis": "Generated by Ezra under a Speechelo PRO commercial-license subscription; official provider support confirms commercial use for PRO voiceovers.",
+      "redistributionStatus": "DISTRIBUTED_AS_PROJECT_MEDIA_SUBJECT_TO_APPLICABLE_SPEECHELO_TERMS",
+      "modificationStatus": "NOT_INDEPENDENTLY_VERIFIED; no downstream modification right is granted by this repository",
+      "attributionRequirement": "NOT_SEPARATELY_SPECIFIED; retain the canonical provenance documentation and provider identification",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED",
+        "PROVIDER_DOCUMENTATION_VERIFIED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "SPEECHELO_COMMERCIAL_USE",
+        "SPEECHELO_LICENSE_RECORD",
+        "SPEECHELO_TERMS"
+      ],
+      "includedInAuthoringKit": true
+    },
+    {
+      "id": "movement-icon-source",
+      "selector": {
+        "paths": [
+          "desktop/assets/movement-icon-source.png"
+        ]
+      },
+      "expectedFileCount": 1,
+      "mediaType": "APPLICATION_ICON_SOURCE",
+      "publicArea": "DESKTOP",
+      "creator": "Ezra, using OpenAI Codex under his direction",
+      "sourceTool": "OpenAI Codex; exact image model, prompt, and generation date not recorded",
+      "aiGeneratedStatus": "YES",
+      "recognizableRealPersonStatus": "NOT_APPLICABLE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Created for this project under Ezra's direction; applicable OpenAI terms continue to apply.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY_SUBJECT_TO_APPLICABLE_PROVIDER_TERMS",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "OPENAI_TERMS",
+        "OPENAI_SERVICE_TERMS"
+      ],
+      "includedInAuthoringKit": true,
+      "expectedSha256": "0c047ee6c09258ead5913406d8ab60812c95ba2976ccf2c07a552cac2807c463"
+    },
+    {
+      "id": "movement-icon-derived-files",
+      "selector": {
+        "paths": [
+          "desktop/assets/movement-icon.png",
+          "desktop/assets/movement-icon.ico"
+        ]
+      },
+      "expectedFileCount": 2,
+      "mediaType": "APPLICATION_ICON_DERIVATIVE",
+      "publicArea": "DESKTOP",
+      "creator": "Derived by the project from Ezra's Movement icon source artwork",
+      "sourceTool": "tools/build-windows-icon.cjs",
+      "aiGeneratedStatus": "DERIVED_FROM_AI_GENERATED_SOURCE",
+      "recognizableRealPersonStatus": "NOT_APPLICABLE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Derived application forms of desktop/assets/movement-icon-source.png; the source was created for this project using OpenAI Codex under Ezra's direction.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY_SUBJECT_TO_APPLICABLE_PROVIDER_TERMS",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED",
+        "DERIVED_FILE",
+        "REPOSITORY_VERIFIED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05",
+        "REPOSITORY_ICON_BUILD",
+        "OPENAI_TERMS",
+        "OPENAI_SERVICE_TERMS"
+      ],
+      "includedInAuthoringKit": true,
+      "expectedSha256ByPath": {
+        "desktop/assets/movement-icon.png": "834fd57b57bae8263540ada3070d6ab541fb0022ce6880f42d2dc08daab52079",
+        "desktop/assets/movement-icon.ico": "a0e0436bb72d613d92c43ed769d5f0aed3323a596ec95c32e540de9e9a09b196"
+      }
+    },
+    {
+      "id": "wanaka-background-photograph",
+      "selector": {
+        "paths": [
+          "img/bg_wanaka.webp"
+        ]
+      },
+      "expectedFileCount": 1,
+      "mediaType": "PHOTOGRAPH",
+      "publicArea": "WEBSITE_AND_DESKTOP",
+      "creator": "Ezra",
+      "sourceTool": "Original photograph taken personally by Ezra in Wanaka",
+      "aiGeneratedStatus": "NO",
+      "recognizableRealPersonStatus": "OWNER_CONFIRMED_NONE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Owner-created original photograph; no third-party photographer.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05"
+      ],
+      "includedInAuthoringKit": true,
+      "expectedSha256": "4d5e4a40c77d93a4d2bf0b7ab24a17a51c9f79e160e0c9062fd9b33f101ea17d"
+    },
+    {
+      "id": "root-favicon",
+      "selector": {
+        "paths": [
+          "favicon.ico"
+        ]
+      },
+      "expectedFileCount": 1,
+      "mediaType": "FAVICON",
+      "publicArea": "PUBLIC_WEBSITE",
+      "creator": "Ezra",
+      "sourceTool": "Original project asset created personally by Ezra; creation method not recorded",
+      "aiGeneratedStatus": "NOT_RECORDED",
+      "recognizableRealPersonStatus": "NOT_APPLICABLE",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Owner-created original project asset, separate from the Movement application icon family.",
+      "redistributionStatus": "OWNER_AUTHORIZED_FOR_PROJECT_BUNDLES_ONLY",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_MANDATORY_CREDIT_LINE_UNLESS_AN_INDIVIDUAL_ASSET_RECORD_STATES_OTHERWISE",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "OWNER_CONFIRMED"
+      ],
+      "provenanceSources": [
+        "OWNER_CONFIRMATION_2026_09_05"
+      ],
+      "includedInAuthoringKit": false,
+      "expectedSha256": "22e4c63817d901a06e480b9889dac99f42069cd25d954c27480bad77935cf31c"
+    }
+  ],
+  "assets": [
+    { "path": "desktop/assets/movement-icon-source.png", "provenanceId": "movement-icon-source" },
+    { "path": "desktop/assets/movement-icon.ico", "provenanceId": "movement-icon-derived-files" },
+    { "path": "desktop/assets/movement-icon.png", "provenanceId": "movement-icon-derived-files" },
+    { "path": "examples/about/img/blank.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/foreground1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/about/img/foreground2.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/about/img/foreground3.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/about/img/market1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/wide1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/wide3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/wide5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/wide6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/img/wide7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/about/speech/slide1.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/about/speech/slide2.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/about/speech/slide3.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/about/speech/slide4.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/about/speech/slide5.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/img/1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/aera1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/aera2.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/aera4.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/aera5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/black9.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/blank.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/computer7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/Image1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/creating-new-forms-of-expression/img/language1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/language2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/language3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/letters1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/letters2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media10.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media11.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/media9.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/nots1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/past1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/possibilities1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/possibilities3.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/prompt1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/sphere1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/sphere8.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view6.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view7.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/img/view8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide1.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide10.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide11.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide12.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide13.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide14.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide15.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide16.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide17.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide18.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide19.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide2.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide20.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide21.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide22.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide23.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide24.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide25.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide26.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide27.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide28.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide29.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide3.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide30.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide31.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide32.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide33.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide34.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide35.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide36.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide37.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide4.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide5.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide6.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide7.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide8.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/creating-new-forms-of-expression/speech/slide9.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/img/aera1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/aera4.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/aera5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/already1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/already2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/already3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/already5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/already6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/blank.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/button1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/computer1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/computer3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/computer6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/computer7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/custom1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/custom2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/effectslide1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/effectslide2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/effectslide3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/effectslide4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/effectslide5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/end1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/end2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/end3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/end4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/end5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/export1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/export2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/export3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/hall1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/hall2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/hall3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/Image1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/getting-to-know-the-system/img/layers1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/layers2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/layers3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/layers4.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/layers5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/library1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/library2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/library3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/library4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/library5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/possibilities2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/possibilities3.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/presenter1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/getting-to-know-the-system/img/screen1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen10.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen11.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen12.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen13.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen14.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/screen9.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/transition1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/transition2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/transition3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/transition4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/view6.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/img/view7.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/getting-to-know-the-system/speech/slide1.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide10.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide11.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide12.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide13.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide14.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide15.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide16.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide17.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide18.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide19.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide2.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide20.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide21.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide22.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide23.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide24.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide26.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide27.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide28.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide29.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide3.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide30.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide31.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide32.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide33.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide34.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide35.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide36.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide37.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide38.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide39.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide4.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide40.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide41.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide42.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide43.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide44.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide45.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide46.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide47.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide48.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide49.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide5.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide50.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide51.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide6.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide7.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide8.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/getting-to-know-the-system/speech/slide9.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/img/aera3.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/aera5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/bg1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/bg3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/blank.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/controls1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/controls2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/engine1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/engine2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/fr_presenter2.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/sharing/img/library1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/library2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/library3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/library4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/making1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/need1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/need2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/need3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/need4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/need5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities3.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/possibilities7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/presenter1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/sharing/img/room11.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/sharing2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/img/sharing3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/sharing/speech/slide1.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide10.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide11.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide12.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide13.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide14.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide15.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide16.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide17.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide18.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide19.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide2.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide20.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide3.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide4.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide5.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide6.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide7.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide8.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/sharing/speech/slide9.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/img/aera1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/aera2.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/aera3.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/aera4.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/aera5.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/ai1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/barrier1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/bg1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/bg2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/bg5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/bg6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/chambers1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/chambers2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/chambers3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/ChatGPT Image Jul 20, 2026, 04_22_12 AM.png", "provenanceId": "example-image-chatgpt-filename-identified" },
+    { "path": "examples/what-this-project-is/img/cinima1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/cinima2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/cinima3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/cinima4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/expression1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/fr_image1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/what-this-project-is/img/fr_presenter2.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/what-this-project-is/img/hall1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/hall8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/Image1.png", "provenanceId": "example-image-fictional-red-haired-presenter" },
+    { "path": "examples/what-this-project-is/img/image1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/image2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/image3.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/image4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/image5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/memory1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/nots1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/road1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room0.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room10.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room11.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room12.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room13.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room14.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room15.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room17.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room4.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room5.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room6.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room7.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room8.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/room9.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/stream1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/strip1.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/trans1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/transperent.png", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/video1.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/img/video2.webp", "provenanceId": "example-images-ai-tool-not-individually-recorded" },
+    { "path": "examples/what-this-project-is/speech/slide1.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide10.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide11.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide12.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide13.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide14.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide15.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide16.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide17.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide18.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide19.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide2.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide20.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide21.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide22.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide23.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide24.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide25.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide26.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide27.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide28.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide29.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide3.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide30.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide31.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide32.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide33.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide34.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide35.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide36.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide37.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide38.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide39.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide4.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide40.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide41.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide42.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide43.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide44.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide45.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide46.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide47.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide5.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide6.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide7.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide8.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "examples/what-this-project-is/speech/slide9.mp3", "provenanceId": "example-narration-speechelo-pro" },
+    { "path": "favicon.ico", "provenanceId": "root-favicon" },
+    { "path": "img/bg_wanaka.webp", "provenanceId": "wanaka-background-photograph" }
+  ],
+  "exactDuplicateGroups": [
+    {
+      "sha256": "3999ea65a4d5fa0b15cdaad4667adc7f4bdc04947527317f854647563e987611",
+      "paths": [
+        "examples/about/img/blank.png",
+        "examples/creating-new-forms-of-expression/img/blank.png",
+        "examples/getting-to-know-the-system/img/blank.png",
+        "examples/sharing/img/blank.png"
+      ]
+    },
+    {
+      "sha256": "a3738b8f6960bd42c17b6717361640c1baef84b715de0f142aa409ebaca97ff2",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/aera1.png",
+        "examples/getting-to-know-the-system/img/aera1.png",
+        "examples/what-this-project-is/img/aera1.png"
+      ]
+    },
+    {
+      "sha256": "f167f39bbac257b4732d38f4014d2d253ca37d476b15771b451f96b4e3299a07",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/aera2.png",
+        "examples/what-this-project-is/img/aera2.png"
+      ]
+    },
+    {
+      "sha256": "021a5eb78fb9613a9fbada54428f137d9cda0bab58d92512d1718470517cbe21",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/aera4.png",
+        "examples/getting-to-know-the-system/img/aera4.png",
+        "examples/what-this-project-is/img/aera4.png"
+      ]
+    },
+    {
+      "sha256": "11bd7ed2152b005ea5c6a71c17e87698ad5ce11a5500095476c0174b0c4cd19e",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/aera5.png",
+        "examples/getting-to-know-the-system/img/aera5.png",
+        "examples/sharing/img/aera5.png",
+        "examples/what-this-project-is/img/aera5.png"
+      ]
+    },
+    {
+      "sha256": "18d13fc6ab515cda3d42967ea4ac629328b8270c62f1eb3240b2926753bd446e",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/computer1.webp",
+        "examples/getting-to-know-the-system/img/computer1.webp"
+      ]
+    },
+    {
+      "sha256": "950acb37c3be1ebafc9490602da7e2f010f9c86c3fcc741ff6062f8c887dbcc6",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/computer3.webp",
+        "examples/getting-to-know-the-system/img/computer3.webp"
+      ]
+    },
+    {
+      "sha256": "dd7a514531f6c0fc720b7d7cc10cfcb694394e8f77aacc25cdaa942c1c9b5374",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/computer6.webp",
+        "examples/getting-to-know-the-system/img/computer6.webp"
+      ]
+    },
+    {
+      "sha256": "811ca59c1894793cc79300892f3a0c57133e836daa67f5b0bf8dfa4237ccb848",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/Image1.png",
+        "examples/getting-to-know-the-system/img/Image1.png",
+        "examples/what-this-project-is/img/fr_image1.png",
+        "examples/what-this-project-is/img/Image1.png"
+      ]
+    },
+    {
+      "sha256": "8adaa37d9951296443b5828571cade4f46b40551e07cfd657f8ca0ee996af541",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/nots1.png",
+        "examples/what-this-project-is/img/nots1.png"
+      ]
+    },
+    {
+      "sha256": "ed1c25c7b62cf5a04f1d10beb4fb03d01179b7c27b343845389d6238a2263a94",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/possibilities3.png",
+        "examples/getting-to-know-the-system/img/possibilities3.png",
+        "examples/sharing/img/possibilities3.png"
+      ]
+    },
+    {
+      "sha256": "e06f9d37c33e1fac6e9920270ca6f2d813f4bef54544d4d78c24e6773bf3e6aa",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/view6.png",
+        "examples/getting-to-know-the-system/img/view6.png"
+      ]
+    },
+    {
+      "sha256": "371144f6779f36c8e7072f76d9e55727b9607966f1fc6704c0b06dd41e1d492e",
+      "paths": [
+        "examples/creating-new-forms-of-expression/img/view7.png",
+        "examples/getting-to-know-the-system/img/view7.png"
+      ]
+    },
+    {
+      "sha256": "9c0ca85efbef06555a66b8d910aeafb8f80db60ab2f8cf952f25af4b6baa522d",
+      "paths": [
+        "examples/getting-to-know-the-system/img/hall1.webp",
+        "examples/what-this-project-is/img/hall1.webp"
+      ]
+    },
+    {
+      "sha256": "d0dec6f7d3a9cd51c9c253799c27f8d1c9bb57c823832a0310cfb76ea23349c5",
+      "paths": [
+        "examples/getting-to-know-the-system/img/hall2.webp",
+        "examples/what-this-project-is/img/hall2.webp"
+      ]
+    },
+    {
+      "sha256": "0a5237a243e6e9abef1dfc3e93f2b7d2994bdd32320a8259fbc79eb95566036f",
+      "paths": [
+        "examples/getting-to-know-the-system/img/hall3.webp",
+        "examples/what-this-project-is/img/hall3.webp"
+      ]
+    },
+    {
+      "sha256": "b9d960ec0091d21323e974670f4f8c5e69892e6f7308ac94a48fc9f1e9264556",
+      "paths": [
+        "examples/getting-to-know-the-system/img/possibilities2.webp",
+        "examples/sharing/img/possibilities2.webp"
+      ]
+    },
+    {
+      "sha256": "b1d907e323bc24d3549052fcd7d2e9364247a3d8d2b036801eaf258e83c82555",
+      "paths": [
+        "examples/getting-to-know-the-system/img/presenter1.png",
+        "examples/sharing/img/presenter1.png"
+      ]
+    },
+    {
+      "sha256": "4b4f2466d7db104a808f0186117623014957ffe093d7ca6fc38cc42da85a49ab",
+      "paths": [
+        "examples/sharing/img/aera3.png",
+        "examples/what-this-project-is/img/aera3.png"
+      ]
+    },
+    {
+      "sha256": "8a86c44f85f2d5bcb6d3cb6ff093d3998c3d6e6e3bb20710a615845f21ee7179",
+      "paths": [
+        "examples/sharing/img/bg1.webp",
+        "examples/what-this-project-is/img/bg1.webp"
+      ]
+    },
+    {
+      "sha256": "f38902072e74036bf2e65ec60c82c85295ce66631e20e82a5f2c8d57ec61791c",
+      "paths": [
+        "examples/sharing/img/fr_presenter2.png",
+        "examples/what-this-project-is/img/fr_presenter2.png"
+      ]
+    },
+    {
+      "sha256": "6e4b3b87319f063a32e19b3e65e3f540d80e01ae14d80a14d1e77dab2e395741",
+      "paths": [
+        "examples/sharing/img/room11.webp",
+        "examples/what-this-project-is/img/room11.webp"
+      ]
+    }
+  ]
+}

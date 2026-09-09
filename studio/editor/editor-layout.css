@@ -1,0 +1,103 @@
+/* Shared three-panel editor layout enhancements for online and desktop modes. */
+
+#editorWorkspace > .panel {
+    min-width: 0;
+}
+
+.project-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.project-settings-title {
+    min-width: 0;
+}
+
+.project-settings-toggle {
+    display: inline-grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 11px;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.045);
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.project-settings-toggle::before {
+    content: "\2039";
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.project-settings-toggle:hover {
+    border-color: rgba(185, 99, 79, 0.58);
+    background: rgba(185, 99, 79, 0.14);
+}
+
+.project-settings-toggle:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+#editorWorkspace.project-settings-collapsed {
+    grid-template-columns: 58px var(--timeline-column-width) minmax(0, 1fr);
+}
+
+.project-settings-panel.is-collapsed .project-settings-content {
+    display: none;
+}
+
+.project-settings-panel.is-collapsed .project-settings-header {
+    flex: 1;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    padding: 12px 10px;
+    border-bottom: 0;
+}
+
+.project-settings-panel.is-collapsed .project-settings-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.project-settings-panel.is-collapsed .project-settings-toggle::before {
+    transform: rotate(180deg);
+}
+
+.editor-save-group {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.editor-save-status {
+    max-width: 260px;
+    color: var(--primary);
+    font-size: 0.78rem;
+    line-height: 1.3;
+    text-align: right;
+}
+
+.editor-save {
+    border-color: rgba(185, 99, 79, 0.5);
+    color: #fff8f1;
+    background: linear-gradient(135deg, #c57a64, #b9634f);
+}
+
+.editor-save:hover {
+    background: linear-gradient(135deg, #d18a73, #c56f5a);
+}

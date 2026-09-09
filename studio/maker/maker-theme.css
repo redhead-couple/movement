@@ -1,0 +1,147 @@
+body {
+    background: #0f172a;
+    color: #fff;
+    font-family: sans-serif;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.sidebar {
+    background: #1e293b;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-right: 1px solid #334155;
+    overflow-y: auto;
+}
+
+.group {
+    background: #0f172a;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.group h4 {
+    margin: 0 0 10px 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+label {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+input[type="range"] {
+    width: 100%;
+    display: block;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+select,
+input[type="text"],
+button,
+input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+    background: #020617;
+    border: 1px solid #475569;
+    color: white;
+    border-radius: 4px;
+}
+
+button {
+    background: #2563eb;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #3b82f6;
+}
+
+button.run {
+    background: #10b981;
+}
+
+.preview {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.marker {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    margin-top: -14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 2px solid #fda4af;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+    z-index: 3;
+}
+
+#marker {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    margin-top: -9px;
+    border: 2px solid #f43f5e;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.75);
+    pointer-events: none;
+    z-index: 2;
+}
+
+canvas {
+    max-width: 95%;
+    max-height: 95%;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Media Library Modal Global Override Styles (Optional cleanup) */
+#media-library-modal {
+    display: none; position: fixed; inset: 0; background: rgba(10,7,6,0.94); z-index: 2500;
+}
+.media-modal-content {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 900px; max-height: 80vh; background: #1e293b; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.media-modal-header {
+    padding: 16px 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;
+}
+.media-modal-close {
+    background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; padding: 0; margin: 0; width: auto; font-weight: normal;
+}
+.media-modal-close:hover {
+    background: none; color: white;
+}

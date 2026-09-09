@@ -1,0 +1,60 @@
+.feed-page .feed-content {
+  display: grid;
+  padding-top: var(--app-space-6);
+  gap: var(--app-space-5);
+}
+
+.feed-page .feed-back {
+  display: inline-flex;
+  margin-bottom: var(--app-space-4);
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+
+.feed-page .feed-back:hover,
+.feed-page .feed-author-link:hover {
+  color: var(--app-text);
+}
+
+.feed-page .feed-author-link {
+  font-weight: 700;
+}
+
+.feed-page .feed-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.feed-page .feed-page-link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid var(--app-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.feed-page .feed-page-link:hover {
+  border-color: var(--app-line-strong);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.feed-page .feed-page-current {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 520px) {
+  .feed-page .feed-pagination {
+    align-items: stretch;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .feed-page .feed-page-link {
+    justify-content: center;
+  }
+}

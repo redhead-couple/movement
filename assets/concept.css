@@ -1,0 +1,156 @@
+.concept-page .concept-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    align-items: start;
+    gap: clamp(36px, 7vw, 84px);
+    padding-top: var(--app-space-7);
+}
+
+.concept-page .concept-copy {
+    max-width: 68ch;
+}
+
+.concept-page .concept-copy p {
+    margin: 0 0 var(--app-space-4);
+    color: var(--app-text-muted);
+    font-size: 16px;
+    line-height: 1.78;
+}
+
+.concept-page .concept-copy .concept-lead {
+    color: var(--app-text);
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.concept-page .concept-feature {
+    min-width: 0;
+}
+
+.concept-page .concept-series-heading {
+    margin-bottom: var(--app-space-4);
+}
+
+.concept-page .concept-series-heading h2 {
+    margin: 6px 0 10px;
+    color: var(--app-text);
+    font-size: clamp(23px, 3vw, 30px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.concept-page .concept-series-heading > p:last-child {
+    margin: 0;
+    color: var(--app-text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.concept-page .concept-series {
+    display: grid;
+    gap: var(--app-space-5);
+}
+
+.concept-page .concept-slideshow {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--app-line);
+    border-radius: var(--app-radius-lg);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent),
+        var(--app-surface);
+    box-shadow: var(--app-shadow);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.concept-page .concept-slideshow:hover {
+    transform: translateY(-3px);
+    border-color: var(--app-line-strong);
+    box-shadow: 0 28px 64px rgba(0, 0, 0, 0.34);
+}
+
+.concept-page .concept-slideshow__image {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--app-bg-deep);
+}
+
+.concept-page .concept-slideshow__image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 45%, rgba(17, 14, 13, 0.52));
+}
+
+.concept-page .concept-slideshow__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 400ms ease;
+}
+
+.concept-page .concept-slideshow:hover img {
+    transform: scale(1.025);
+}
+
+.concept-page .concept-slideshow__badge {
+    position: absolute;
+    z-index: 1;
+    right: 14px;
+    bottom: 14px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    color: #fffaf4;
+    background: rgba(20, 18, 17, 0.72);
+    backdrop-filter: blur(10px);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.concept-page .concept-slideshow__copy {
+    display: grid;
+    gap: 12px;
+    padding: var(--app-space-5);
+    color: var(--app-text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.concept-page .concept-slideshow__copy .eyebrow {
+    margin: 0;
+}
+
+.concept-page .concept-slideshow__copy strong {
+    color: var(--app-text);
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+}
+
+.concept-page .concept-slideshow__action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-top: var(--app-space-3);
+    border-top: 1px solid var(--app-line);
+    color: var(--app-accent-strong);
+    font-weight: 600;
+}
+
+@media (max-width: 860px) {
+    .concept-page .concept-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .concept-page .concept-feature {
+        max-width: 620px;
+    }
+}

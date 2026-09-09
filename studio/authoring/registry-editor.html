@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maker Registry Editor</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #090d14;
+            --panel: #111827;
+            --panel-soft: #172033;
+            --line: #2a3850;
+            --text: #edf3ff;
+            --muted: #9dafc8;
+            --accent: #6ee7c7;
+            --accent-dark: #123d38;
+            --danger: #ff8896;
+            --danger-dark: #431b25;
+            --warning: #ffd27d;
+            --shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(70, 120, 180, 0.18), transparent 34rem),
+                radial-gradient(circle at 90% 10%, rgba(60, 180, 150, 0.12), transparent 30rem),
+                var(--bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button,
+        select,
+        input {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        .app {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 42px 0 70px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: clamp(1.8rem, 4vw, 2.75rem);
+            letter-spacing: -0.04em;
+        }
+
+        .lede {
+            max-width: 720px;
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .top-actions,
+        .tabs,
+        .category-actions,
+        .add-engine {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            min-height: 42px;
+            padding: 9px 15px;
+            background: var(--panel-soft);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .btn:hover:not(:disabled) {
+            border-color: #4b6389;
+        }
+
+        .btn-primary {
+            border-color: #4fd5b4;
+            background: var(--accent);
+            color: #06201b;
+        }
+
+        .btn-danger {
+            border-color: #70404b;
+            background: var(--danger-dark);
+            color: var(--danger);
+        }
+
+        .btn-small {
+            min-height: 34px;
+            padding: 6px 10px;
+            font-size: 0.86rem;
+        }
+
+        .workspace {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(17, 24, 39, 0.92);
+            box-shadow: var(--shadow);
+        }
+
+        .workspace-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(7, 12, 21, 0.55);
+        }
+
+        .tab {
+            min-height: 40px;
+            padding: 8px 15px;
+            border-color: transparent;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .tab.active {
+            border-color: #47766d;
+            background: var(--accent-dark);
+            color: var(--accent);
+        }
+
+        .catalog-count {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .status {
+            display: none;
+            margin: 18px 20px 0;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--muted);
+            background: #0c1421;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            border-color: #316d61;
+            color: var(--accent);
+        }
+
+        .status.error {
+            border-color: #71404b;
+            color: var(--danger);
+        }
+
+        .status.warning {
+            border-color: #6d5b34;
+            color: var(--warning);
+        }
+
+        .categories {
+            display: grid;
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .category {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--panel-soft);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .category-title-block {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .category-title {
+            margin: 0;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+        }
+
+        .category-summary {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .category-name {
+            min-width: 0;
+            flex: 1;
+            padding: 10px 12px;
+            background: #0c1421;
+            color: var(--text);
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .engine-list {
+            display: grid;
+            gap: 8px;
+            padding: 14px;
+        }
+
+        .engine-row {
+            display: grid;
+            grid-template-columns: minmax(160px, 1fr) auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid #26354c;
+            border-radius: 10px;
+            background: #0c1421;
+        }
+
+        .engine-name {
+            font-weight: 800;
+        }
+
+        .engine-status {
+            padding: 4px 8px;
+            border: 1px solid #316d61;
+            border-radius: 999px;
+            color: var(--accent);
+            background: rgba(18, 61, 56, 0.72);
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .engine-status.needs-attention {
+            border-color: #6d5b34;
+            color: var(--warning);
+            background: rgba(68, 50, 20, 0.72);
+        }
+
+        .category.editing {
+            border-color: #47766d;
+            box-shadow: 0 0 0 1px rgba(110, 231, 199, 0.08);
+        }
+
+        .empty {
+            padding: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .add-engine {
+            padding: 0 14px 14px;
+        }
+
+        .add-engine select {
+            min-width: 0;
+            flex: 1;
+            padding: 10px 12px;
+            background: #0c1421;
+            color: var(--text);
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 20px 20px;
+        }
+
+        .hint {
+            align-self: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 760px) {
+            .topbar,
+            .workspace-header,
+            .footer-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .top-actions {
+                flex-wrap: wrap;
+            }
+
+            .engine-row {
+                grid-template-columns: 1fr auto;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <div class="topbar">
+            <div>
+                <h1>Maker Registry Editor</h1>
+                <p class="lede">Organize your effects and transitions. Categories stay simple until you choose Edit, and experimental work is welcome.</p>
+            </div>
+            <div class="top-actions">
+                <button class="btn" id="openFilesBtn" type="button">Open developer files</button>
+                <button class="btn" id="reloadBtn" type="button">Reload from disk</button>
+                <button class="btn btn-primary" id="saveBtn" type="button">Save effects</button>
+                <button class="btn" id="closeBtn" type="button">Close</button>
+            </div>
+        </div>
+
+        <section class="workspace" aria-label="Registry editor">
+            <div class="workspace-header">
+                <div class="tabs" role="tablist" aria-label="Registry type">
+                    <button class="tab active" id="effectsTab" type="button" role="tab" aria-selected="true" data-type="effects">Effects</button>
+                    <button class="tab" id="transitionsTab" type="button" role="tab" aria-selected="false" data-type="transitions">Transitions</button>
+                </div>
+                <div class="catalog-count" id="catalogCount">Loading effects and transitions…</div>
+            </div>
+
+            <div class="status" id="status" role="status"></div>
+            <div class="categories" id="categories"></div>
+
+            <div class="footer-actions">
+                <button class="btn" id="addCategoryBtn" type="button">Add category</button>
+                <span class="hint">Edit only what you need, then save the registry.</span>
+            </div>
+        </section>
+    </main>
+
+    <script src="../../shared/frontend/platform-adapter.js"></script>
+    <script>
+        const api = typeof window.createMovementPlatformApi === 'function'
+            ? window.createMovementPlatformApi()
+            : null;
+        const state = {
+            activeType: new URLSearchParams(window.location.search).get('type') === 'transitions'
+                ? 'transitions'
+                : 'effects',
+            data: null,
+            dirty: new Set(),
+            writable: false,
+            writeBlockReason: '',
+            editingCategory: {
+                effects: null,
+                transitions: null
+            }
+        };
+
+        const elements = {
+            categories: document.getElementById('categories'),
+            catalogCount: document.getElementById('catalogCount'),
+            status: document.getElementById('status'),
+            saveBtn: document.getElementById('saveBtn'),
+            reloadBtn: document.getElementById('reloadBtn'),
+            openFilesBtn: document.getElementById('openFilesBtn'),
+            closeBtn: document.getElementById('closeBtn'),
+            addCategoryBtn: document.getElementById('addCategoryBtn'),
+            tabs: [...document.querySelectorAll('.tab')]
+        };
+
+        function titleCase(value) {
+            return String(value || '')
+                .split('-')
+                .filter(Boolean)
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(' ');
+        }
+
+        function setStatus(message = '', tone = '') {
+            elements.status.textContent = message;
+            elements.status.className = `status${message ? ' show' : ''}${tone ? ` ${tone}` : ''}`;
+        }
+
+        function markDirty(type = state.activeType) {
+            if (!state.writable) return;
+            state.dirty.add(type);
+            updateSaveButton();
+        }
+
+        function updateSaveButton() {
+            const type = state.activeType;
+            const label = type === 'effects' ? 'effects' : 'transitions';
+            elements.saveBtn.textContent = `${state.dirty.has(type) ? 'Save changes to' : 'Save'} ${label}`;
+            elements.saveBtn.disabled = (
+                !state.data
+                || !state.writable
+                || !state.dirty.has(type)
+            );
+            elements.addCategoryBtn.disabled = !state.data || !state.writable;
+        }
+
+        function normalizePayload(payload) {
+            for (const type of ['effects', 'transitions']) {
+                if (!payload[type]) continue;
+                payload[type].categories = payload[type].registry.map(group => ({
+                    Category: String(group.Category || ''),
+                    engines: String(group.engines || '')
+                        .split(',')
+                        .map(engine => engine.trim())
+                        .filter(Boolean)
+                }));
+            }
+            return payload;
+        }
+
+        function currentRegistry() {
+            return state.data[state.activeType];
+        }
+
+        function assignedEngines() {
+            const assigned = new Set();
+            currentRegistry().categories.forEach(group => {
+                group.engines.forEach(engine => assigned.add(engine));
+            });
+            return assigned;
+        }
+
+        function assetFor(engine) {
+            return currentRegistry().available.find(item => item.engine === engine) || null;
+        }
+
+        function makeButton(label, className, onClick) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = className;
+            button.textContent = label;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        function renderNotices() {
+            if (!state.writable && state.writeBlockReason) {
+                setStatus(state.writeBlockReason, 'warning');
+            } else {
+                setStatus();
+            }
+        }
+
+        function renderEngineRow(engine, categoryIndex, engineIndex, editing) {
+            const row = document.createElement('div');
+            row.className = 'engine-row';
+
+            const name = document.createElement('span');
+            name.className = 'engine-name';
+            name.textContent = titleCase(engine);
+            row.appendChild(name);
+
+            const asset = assetFor(engine);
+            const needsAttention = !asset || asset.status === 'needs-attention';
+            if (needsAttention) {
+                const status = document.createElement('span');
+                status.className = 'engine-status needs-attention';
+                status.textContent = 'Needs attention';
+                if (asset && asset.warnings && asset.warnings.length) {
+                    status.title = asset.warnings.join(' ');
+                }
+                row.appendChild(status);
+            }
+
+            if (editing) {
+                const removeButton = makeButton('Remove', 'btn btn-danger btn-small', () => {
+                    currentRegistry().categories[categoryIndex].engines.splice(engineIndex, 1);
+                    markDirty();
+                    render();
+                });
+                removeButton.disabled = !state.writable;
+                row.appendChild(removeButton);
+            }
+
+            return row;
+        }
+
+        function renderCategory(group, categoryIndex) {
+            const editing = state.editingCategory[state.activeType] === categoryIndex;
+            const experimental = group.Category.trim().toLowerCase() === 'experimental';
+            const card = document.createElement('article');
+            card.className = `category${editing ? ' editing' : ''}`;
+
+            const header = document.createElement('div');
+            header.className = 'category-header';
+
+            if (editing && !experimental) {
+                const nameInput = document.createElement('input');
+                nameInput.className = 'category-name';
+                nameInput.type = 'text';
+                nameInput.maxLength = 80;
+                nameInput.value = group.Category;
+                nameInput.disabled = !state.writable;
+                nameInput.setAttribute('aria-label', `Category ${categoryIndex + 1} name`);
+                nameInput.addEventListener('input', event => {
+                    group.Category = event.target.value;
+                    markDirty();
+                });
+                header.appendChild(nameInput);
+            } else {
+                const titleBlock = document.createElement('div');
+                titleBlock.className = 'category-title-block';
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.textContent = group.Category;
+                titleBlock.appendChild(title);
+                const summary = document.createElement('p');
+                summary.className = 'category-summary';
+                summary.textContent = experimental
+                    ? `${group.engines.length} item(s) · A home for new and experimental work`
+                    : `${group.engines.length} item(s)`;
+                titleBlock.appendChild(summary);
+                header.appendChild(titleBlock);
+            }
+
+            const categoryActions = document.createElement('div');
+            categoryActions.className = 'category-actions';
+            categoryActions.appendChild(makeButton(
+                editing ? 'Done' : 'Edit',
+                'btn btn-small',
+                () => {
+                    state.editingCategory[state.activeType] = editing ? null : categoryIndex;
+                    render();
+                }
+            ));
+            if (editing && !experimental) {
+                const deleteButton = makeButton('Delete', 'btn btn-danger btn-small', () => {
+                    if (group.engines.length && !window.confirm(`Delete "${group.Category}" and remove its ${group.engines.length} item(s)?`)) {
+                        return;
+                    }
+                    currentRegistry().categories.splice(categoryIndex, 1);
+                    state.editingCategory[state.activeType] = null;
+                    markDirty();
+                    render();
+                });
+                deleteButton.disabled = !state.writable;
+                categoryActions.appendChild(deleteButton);
+            }
+            header.appendChild(categoryActions);
+            card.appendChild(header);
+
+            const list = document.createElement('div');
+            list.className = 'engine-list';
+            if (!group.engines.length) {
+                const empty = document.createElement('div');
+                empty.className = 'empty';
+                empty.textContent = editing
+                    ? 'Nothing here yet. Add an item below.'
+                    : 'Nothing here yet. Click Edit to add something.';
+                list.appendChild(empty);
+            } else {
+                group.engines.forEach((engine, engineIndex) => {
+                    list.appendChild(renderEngineRow(engine, categoryIndex, engineIndex, editing));
+                });
+            }
+            card.appendChild(list);
+
+            if (editing) {
+                const addRow = document.createElement('div');
+                addRow.className = 'add-engine';
+                const select = document.createElement('select');
+                select.setAttribute('aria-label', `Add item to ${group.Category || `category ${categoryIndex + 1}`}`);
+                select.disabled = !state.writable;
+
+                const assigned = assignedEngines();
+                const choices = currentRegistry().available.filter(item => !assigned.has(item.engine));
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = choices.length
+                    ? 'Choose an available item…'
+                    : 'Everything found is already assigned';
+                select.appendChild(placeholder);
+
+                choices.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.engine;
+                    option.textContent = `${titleCase(item.engine)}${
+                        item.status === 'needs-attention' ? ' — Needs attention' : ''
+                    }`;
+                    select.appendChild(option);
+                });
+                addRow.appendChild(select);
+
+                const itemLabel = state.activeType === 'effects' ? 'effect' : 'transition';
+                const addButton = makeButton(`Add ${itemLabel}`, 'btn btn-small', () => {
+                    if (!select.value) return;
+                    group.engines.push(select.value);
+                    markDirty();
+                    render();
+                });
+                addButton.disabled = true;
+                select.addEventListener('change', () => {
+                    addButton.disabled = !state.writable || !select.value;
+                });
+                addRow.appendChild(addButton);
+                card.appendChild(addRow);
+            }
+
+            return card;
+        }
+
+        function render() {
+            if (!state.data) return;
+
+            elements.tabs.forEach(tab => {
+                const active = tab.dataset.type === state.activeType;
+                tab.classList.toggle('active', active);
+                tab.setAttribute('aria-selected', String(active));
+            });
+
+            const registry = currentRegistry();
+            const itemLabel = state.activeType === 'effects' ? 'effects' : 'transitions';
+            const attentionCount = registry.available.filter(
+                item => item.status === 'needs-attention'
+            ).length;
+            elements.catalogCount.textContent = `${registry.available.length} ${itemLabel} found${
+                attentionCount ? ` · ${attentionCount} need attention` : ''
+            }`;
+            elements.categories.replaceChildren();
+
+            if (!registry.categories.length) {
+                const empty = document.createElement('div');
+                empty.className = 'empty';
+                empty.textContent = 'This registry has no categories. Add one to begin.';
+                elements.categories.appendChild(empty);
+            } else {
+                registry.categories.forEach((group, index) => {
+                    elements.categories.appendChild(renderCategory(group, index));
+                });
+            }
+
+            updateSaveButton();
+            renderNotices();
+        }
+
+        async function loadRegistries(force = false) {
+            if (force && state.dirty.size && !window.confirm('Discard all unsaved registry changes and reload from disk?')) {
+                return;
+            }
+
+            elements.reloadBtn.disabled = true;
+            elements.saveBtn.disabled = true;
+            setStatus('Reading registries and looking for local effects and transitions…');
+            try {
+                if (!api || typeof api.listRegistries !== 'function') {
+                    throw new Error('Open the Registry Editor from Movement Timeline Studio.');
+                }
+                const payload = await api.listRegistries();
+                state.data = normalizePayload(payload);
+                state.writable = payload.writable !== false;
+                state.writeBlockReason = String(payload.writeBlockReason || '');
+                state.dirty.clear();
+                state.editingCategory.effects = null;
+                state.editingCategory.transitions = null;
+                render();
+                if (api && typeof api.reportReady === 'function') {
+                    api.reportReady({
+                        surface: 'registry',
+                        workspaceCount: 0,
+                        projectCount: 0,
+                        registryLoaded: Boolean(state.data.effects && state.data.transitions),
+                        registryWritable: state.writable,
+                        registryCleanList: elements.categories.querySelectorAll(
+                            '.category-name, .add-engine'
+                        ).length === 0,
+                        experimentalCategories: ['effects', 'transitions'].every(type => (
+                            state.data[type].categories.some(group => (
+                                group.Category.trim().toLowerCase() === 'experimental'
+                            ))
+                        ))
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                setStatus(error.message || 'Could not load registries.', 'error');
+            } finally {
+                elements.reloadBtn.disabled = false;
+                updateSaveButton();
+            }
+        }
+
+        async function saveActiveRegistry() {
+            const type = state.activeType;
+            if (!state.writable) {
+                setStatus(state.writeBlockReason || 'This registry is read-only.', 'warning');
+                return;
+            }
+            const registry = currentRegistry().categories.map(group => ({
+                Category: group.Category,
+                engines: [...group.engines]
+            }));
+
+            elements.saveBtn.disabled = true;
+            elements.reloadBtn.disabled = true;
+            setStatus(`Validating and saving ${type}…`);
+            try {
+                if (!api || typeof api.saveRegistry !== 'function') {
+                    throw new Error('Open the Registry Editor from Movement Timeline Studio.');
+                }
+                const payload = await api.saveRegistry(
+                    type,
+                    registry,
+                    currentRegistry().revision
+                );
+
+                state.data[type] = normalizePayload({ [type]: payload })[type];
+                state.dirty.delete(type);
+                render();
+                const backupNote = payload.backupName ? ' A backup was created.' : '';
+                setStatus(
+                    `${type === 'effects' ? 'Effects' : 'Transitions'} registry saved.${backupNote}`,
+                    'success'
+                );
+            } catch (error) {
+                console.error(error);
+                setStatus(error.message || `Could not save ${type}.`, 'error');
+            } finally {
+                elements.saveBtn.disabled = false;
+                elements.reloadBtn.disabled = false;
+                updateSaveButton();
+            }
+        }
+
+        elements.tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                state.activeType = tab.dataset.type;
+                render();
+            });
+        });
+
+        elements.addCategoryBtn.addEventListener('click', () => {
+            const categories = currentRegistry().categories;
+            const usedNames = new Set(categories.map(group => group.Category.toLowerCase()));
+            let name = 'New Category';
+            let suffix = 2;
+            while (usedNames.has(name.toLowerCase())) name = `New Category ${suffix++}`;
+            categories.push({ Category: name, engines: [] });
+            state.editingCategory[state.activeType] = categories.length - 1;
+            markDirty();
+            render();
+            const inputs = elements.categories.querySelectorAll('.category-name');
+            const input = inputs[inputs.length - 1];
+            if (input) {
+                input.focus();
+                input.select();
+            }
+        });
+
+        elements.reloadBtn.addEventListener('click', () => loadRegistries(true));
+        elements.saveBtn.addEventListener('click', saveActiveRegistry);
+        elements.openFilesBtn.addEventListener('click', async () => {
+            if (!api || typeof api.openDeveloperFiles !== 'function') return;
+            elements.openFilesBtn.disabled = true;
+            try {
+                await api.openDeveloperFiles();
+            } catch (error) {
+                setStatus(error.message || 'Could not open developer files.', 'error');
+            } finally {
+                elements.openFilesBtn.disabled = false;
+            }
+        });
+        elements.closeBtn.addEventListener('click', () => {
+            if (api && typeof api.closeCurrentWindow === 'function') {
+                api.closeCurrentWindow();
+            } else {
+                window.close();
+            }
+        });
+        if (!api) {
+            elements.openFilesBtn.hidden = true;
+            elements.closeBtn.hidden = true;
+        } else if (typeof api.onRegistryTypeRequested === 'function') {
+            api.onRegistryTypeRequested(details => {
+                state.activeType = details && details.type === 'transitions'
+                    ? 'transitions'
+                    : 'effects';
+                render();
+            });
+        }
+        window.addEventListener('beforeunload', event => {
+            if (!state.dirty.size) return;
+            event.preventDefault();
+            event.returnValue = '';
+        });
+
+        loadRegistries();
+    </script>
+</body>
+</html>

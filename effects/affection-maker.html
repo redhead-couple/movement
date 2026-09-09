@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Affection Flow v2</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>Affection Flow v2</h2>
+
+        <div class="group">
+            <h4>1. Target Image</h4>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+        </div>
+
+        <div class="group">
+            <h4>2. Settings</h4>
+            <label>Color</label> <input type="color" id="color" value="#ffb6c1">
+
+            <label>Shape</label>
+            <select id="shape">
+                <option value="orb">Orbs</option>
+                <option value="heart">Hearts</option>
+            </select>
+
+            <label>Size</label> <input type="range" id="size" min="5" max="50" value="15">
+            <label>Speed</label> <input type="range" id="speed" min="0.1" max="3.0" step="0.1" value="1.0">
+            <label>Density</label> <input type="range" id="flowRate" min="1" max="10" value="5">
+            <label>Curve Arch</label> <input type="range" id="curveHeight" min="-300" max="300" step="10" value="-100">
+            <label>Scatter</label> <input type="range" id="spread" min="0" max="100" value="20">
+        </div>
+
+        <div class="group">
+            <h4>3. Export</h4>
+            <input type="text" id="filename" value="affection-1.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <div id="m-start" class="marker">A</div>
+        <div id="m-end" class="marker">B</div>
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/affection-engine.js';
+        const ENGINE = 'affection';
+        import { runAffection } from '/effects/affection-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanupFunc = null;
+
+        const config = {
+            startX: 0.2, startY: 0.6,
+            endX: 0.8, endY: 0.6,
+            shape: 'orb', color: '#ffb6c1', size: 15,
+            speed: 1.0, flowRate: 5, spread: 20, curveHeight: -100
+        };
+
+        // --- 1. Marker Dragging Logic ---
+        const markers = { start: document.getElementById('m-start'), end: document.getElementById('m-end') };
+        let isDragging = null;
+        let activePoint = 'start';
+
+        function updateMarkerVis() {
+            // Markers move based on % of canvas size
+            const w = canvas.offsetWidth || 800;
+            const h = canvas.offsetHeight || 600;
+
+            // Canvas position relative to stage
+            const rect = canvas.getBoundingClientRect();
+            const stage = document.getElementById('stage').getBoundingClientRect();
+            const offX = rect.left - stage.left;
+            const offY = rect.top - stage.top;
+
+            markers.start.style.left = (offX + config.startX * w) + 'px';
+            markers.start.style.top = (offY + config.startY * h) + 'px';
+            markers.end.style.left = (offX + config.endX * w) + 'px';
+            markers.end.style.top = (offY + config.endY * h) + 'px';
+        }
+
+        // Mouse Listeners
+        ['start', 'end'].forEach((k) => markers[k].addEventListener('mousedown', (e) => {
+            activePoint = k;
+            isDragging = k;
+            e.preventDefault();
+        }));
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width;
+            let y = (e.clientY - rect.top) / rect.height;
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+
+            if (activePoint === 'start') {
+                config.startX = x;
+                config.startY = y;
+                activePoint = 'end';
+            } else {
+                config.endX = x;
+                config.endY = y;
+                activePoint = 'start';
+            }
+
+            updateMarkerVis();
+            runPreview();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width;
+            let y = (e.clientY - rect.top) / rect.height;
+            x = Math.max(0, Math.min(1, x)); y = Math.max(0, Math.min(1, y)); // Clamp
+
+            if (isDragging === 'start') { config.startX = x; config.startY = y; }
+            else { config.endX = x; config.endY = y; }
+
+            updateMarkerVis();
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) { isDragging = null; runPreview(); }
+        });
+
+        // --- 2. Preview Logic ---
+        window.runPreview = runPreview;
+        function runPreview() {
+            if (cleanupFunc) cleanupFunc();
+            cleanupFunc = runAffection(canvas, ctx, {
+                ...config,
+                imgSrc: window.imgData,
+                onResize: () => setTimeout(updateMarkerVis, 10)
+            });
+            setTimeout(updateMarkerVis, 50);
+        }
+
+        // --- 3. Inputs ---
+        // Image preloading and upload wiring are handled centrally by maker-engine.js.
+        document.getElementById('color').addEventListener('input', (e) => {
+            config.color = e.target.value;
+            runPreview();
+        });
+
+        document.getElementById('shape').addEventListener('change', (e) => {
+            config.shape = e.target.value;
+            runPreview();
+        });
+
+        ['size', 'speed', 'flowRate', 'curveHeight', 'spread'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', (e) => {
+                config[id] = parseFloat(e.target.value);
+                runPreview();
+            });
+        });
+
+        runPreview();
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
+            run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
+            getExportJSON: () => {
+                const code = `
+import { runAffection } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runAffection(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.imgName}',
+        startX: ${config.startX.toFixed(3)}, startY: ${config.startY.toFixed(3)},
+        endX: ${config.endX.toFixed(3)}, endY: ${config.endY.toFixed(3)},
+        shape: '${config.shape}', color: '${config.color}',
+        size: ${config.size}, speed: ${config.speed},
+        flowRate: ${config.flowRate}, spread: ${config.spread},
+        curveHeight: ${config.curveHeight}
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

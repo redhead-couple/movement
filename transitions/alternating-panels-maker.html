@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Alternating Panels Transition Maker</title>
+    <style>
+        :root { --bg:#0c1218; --panel:#151f29; --border:#304252; --text:#eef6fb; --muted:#9bb1c1; --accent:#d97706; --success:#22c55e; }
+        * { box-sizing:border-box; }
+        body { margin:0; height:100vh; display:grid; grid-template-columns:300px 1fr; overflow:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,sans-serif; }
+        .sidebar { background:var(--panel); border-right:1px solid var(--border); padding:18px; overflow-y:auto; }
+        h2 { margin:0 0 18px; font-size:1.1rem; }
+        .group { border-top:1px solid var(--border); padding-top:16px; margin-top:16px; }
+        label { display:block; margin:12px 0 6px; color:var(--muted); font-size:.85rem; font-weight:700; }
+        label span { float:right; color:#fbbf24; font-variant-numeric:tabular-nums; }
+        input, select, button { width:100%; font:inherit; }
+        input, select { color:var(--text); background:#0d151d; border:1px solid var(--border); border-radius:7px; padding:9px 10px; }
+        button { border:0; border-radius:7px; padding:11px 12px; cursor:pointer; font-weight:800; }
+        .run { background:var(--accent); color:#fff7ed; }
+        #downloadBtn { margin-top:10px; background:var(--success); color:#05200e; }
+        .preview { position:relative; overflow:hidden; display:grid; place-items:center; background:radial-gradient(circle at 50% 42%,rgba(217,119,6,.16),transparent 44%),#03070b; }
+        .stage { position:relative; width:min(72vw,960px); aspect-ratio:16/9; overflow:hidden; border:1px solid var(--border); border-radius:12px; background:#111827; box-shadow:0 26px 74px rgba(0,0,0,.44); }
+        .slide { position:absolute; inset:0; }
+        .slide canvas { display:block; width:100%; height:100%; object-fit:contain; }
+        .stage-label { position:absolute; left:16px; bottom:14px; z-index:10; padding:6px 9px; border-radius:999px; background:rgba(3,7,11,.72); color:#dbeafe; font-size:.75rem; pointer-events:none; }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2>Alternating Panels</h2>
+        <div class="group"><button id="runBtn" class="run" type="button">Play Transition</button></div>
+        <div class="group">
+            <label for="segments">Segments <span id="val-segments">8 panels</span></label>
+            <input type="range" id="segments" min="4" max="12" step="1" value="8">
+
+            <label for="stagger">Stagger <span id="val-stagger">0.06 s</span></label>
+            <input type="range" id="stagger" min="0" max="0.12" step="0.01" value="0.06">
+
+            <label for="duration">Duration <span id="val-duration">1.4 s</span></label>
+            <input type="range" id="duration" min="0.6" max="4" step="0.1" value="1.4">
+
+            <label for="easing">Movement character</label>
+            <select id="easing">
+                <option value="smooth">Smooth</option>
+                <option value="sharp">Sharp</option>
+                <option value="elastic">Elastic</option>
+                <option value="natural" selected>Natural</option>
+            </select>
+
+            <label for="shadow">Shadow <span id="val-shadow">35%</span></label>
+            <input type="range" id="shadow" min="0" max="100" step="5" value="35">
+        </div>
+        <div class="group">
+            <label for="transitionName">Transition name</label>
+            <input type="text" id="transitionName" value="Alternating Panels">
+            <button id="downloadBtn" type="button">Use Transition</button>
+        </div>
+    </aside>
+
+    <main class="preview">
+        <div class="stage" id="stage">
+            <div class="slide" id="incoming"><canvas id="incomingCanvas" width="960" height="540"></canvas></div>
+            <div class="slide" id="outgoing"><canvas id="outgoingCanvas" width="960" height="540"></canvas></div>
+            <div class="stage-label" id="stageLabel">Outgoing view</div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { DEFAULTS, normalizeConfig, runTransition } from '/transitions/alternating-panels-engine.js';
+
+        const ENGINE = 'alternating-panels';
+        const MAKER = 'transitions/alternating-panels-maker.html';
+        const REPLAY_DEBOUNCE_MS = 160;
+        const stage = document.getElementById('stage');
+        const outgoing = document.getElementById('outgoing');
+        const incoming = document.getElementById('incoming');
+        const stageLabel = document.getElementById('stageLabel');
+        const cfg = { ...DEFAULTS };
+        let activeFinish = null;
+        let replayTimer = null;
+        let replayRequest = 0;
+
+        function drawSample(canvas, incomingSample) {
+            const context = canvas.getContext('2d');
+            const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+            if (incomingSample) {
+                gradient.addColorStop(0, '#083344');
+                gradient.addColorStop(0.55, '#155e75');
+                gradient.addColorStop(1, '#172554');
+            } else {
+                gradient.addColorStop(0, '#451a03');
+                gradient.addColorStop(0.5, '#9a3412');
+                gradient.addColorStop(1, '#292524');
+            }
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = incomingSample ? 'rgba(103,232,249,.28)' : 'rgba(251,191,36,.24)';
+            context.fillRect(incomingSample ? 560 : 90, 78, 300, 300);
+            context.fillStyle = '#ffffff';
+            context.font = '800 58px system-ui, sans-serif';
+            context.textAlign = 'center';
+            context.fillText(incomingSample ? 'NEW COHERENT VIEW' : 'OLD FRAGMENTED VIEW', 480, 292);
+            context.font = '500 24px system-ui, sans-serif';
+            context.fillStyle = 'rgba(255,255,255,.78)';
+            context.fillText(incomingSample ? 'Incoming slide' : 'Outgoing slide', 480, 340);
+        }
+
+        function updateLabels() {
+            document.getElementById('val-segments').textContent = `${cfg.segments} panels`;
+            document.getElementById('val-stagger').textContent = `${cfg.stagger.toFixed(2)} s`;
+            document.getElementById('val-duration').textContent = `${cfg.duration.toFixed(1)} s`;
+            document.getElementById('val-shadow').textContent = `${Math.round(cfg.shadow)}%`;
+        }
+
+        function readControls() {
+            const normalized = normalizeConfig({
+                segments: document.getElementById('segments').value,
+                stagger: document.getElementById('stagger').value,
+                duration: document.getElementById('duration').value,
+                easing: document.getElementById('easing').value,
+                shadow: document.getElementById('shadow').value
+            });
+            Object.assign(cfg, normalized);
+            updateLabels();
+        }
+
+        function resetPreviewLayers() {
+            outgoing.removeAttribute('style');
+            incoming.removeAttribute('style');
+            incoming.style.zIndex = '1';
+            outgoing.style.zIndex = '2';
+            stageLabel.textContent = 'Outgoing view';
+        }
+
+        function playPreview() {
+            replayRequest += 1;
+            if (replayTimer !== null) {
+                clearTimeout(replayTimer);
+                replayTimer = null;
+            }
+            if (activeFinish) activeFinish();
+            activeFinish = null;
+            readControls();
+            resetPreviewLayers();
+            const request = replayRequest;
+            activeFinish = runTransition({
+                root: stage,
+                outgoing,
+                incoming,
+                config: cfg,
+                duration: cfg.duration,
+                onComplete: () => {
+                    if (request !== replayRequest) return;
+                    activeFinish = null;
+                    stageLabel.textContent = 'Incoming view — ready to replay';
+                    document.getElementById('runBtn').textContent = 'Replay Transition';
+                }
+            });
+        }
+
+        function scheduleReplay() {
+            const request = ++replayRequest;
+            if (replayTimer !== null) clearTimeout(replayTimer);
+            replayTimer = setTimeout(() => {
+                replayTimer = null;
+                if (request !== replayRequest) return;
+                playPreview();
+            }, REPLAY_DEBOUNCE_MS);
+        }
+
+        function loadEditConfig(config) {
+            const normalized = normalizeConfig(config);
+            Object.assign(cfg, normalized);
+            ['segments', 'stagger', 'duration', 'easing', 'shadow'].forEach(key => {
+                document.getElementById(key).value = String(cfg[key]);
+            });
+            updateLabels();
+            playPreview();
+        }
+
+        function getExportJSON() {
+            readControls();
+            return {
+                version: 1,
+                name: document.getElementById('transitionName').value.trim() || 'Alternating Panels',
+                engine: ENGINE,
+                maker: MAKER,
+                config: { ...cfg }
+            };
+        }
+
+        function sendDefinition() {
+            const payload = getExportJSON();
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(payload, '*');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const anchor = document.createElement('a');
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = 'alternating-panels-transition.json';
+            anchor.click();
+            URL.revokeObjectURL(anchor.href);
+        }
+
+        ['segments', 'stagger', 'duration', 'shadow'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                readControls();
+                scheduleReplay();
+            });
+        });
+        document.getElementById('easing').addEventListener('change', scheduleReplay);
+        document.getElementById('runBtn').addEventListener('click', playPreview);
+        document.getElementById('downloadBtn').addEventListener('click', sendDefinition);
+        window.addEventListener('message', event => {
+            if (event.data === 'trigger_apply') sendDefinition();
+        });
+
+        window.MakerAPI = { run: playPreview, getExportJSON, loadEditConfig };
+
+        drawSample(document.getElementById('outgoingCanvas'), false);
+        drawSample(document.getElementById('incomingCanvas'), true);
+
+        const storedJson = sessionStorage.getItem('transitionEditData');
+        if (storedJson) {
+            try {
+                const transitionData = JSON.parse(storedJson);
+                if (transitionData.name) document.getElementById('transitionName').value = transitionData.name;
+                loadEditConfig(transitionData.config);
+            } catch (error) {
+                playPreview();
+            }
+        } else {
+            playPreview();
+        }
+
+        window.addEventListener('pagehide', () => {
+            replayRequest += 1;
+            if (replayTimer !== null) clearTimeout(replayTimer);
+            if (activeFinish) activeFinish();
+        }, { once: true });
+    </script>
+</body>
+
+</html>

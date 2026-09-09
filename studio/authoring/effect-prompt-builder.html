@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Design a New Effect — Movement</title>
+    <link rel="stylesheet" href="../../assets/app.css">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #1b1817;
+            --surface: #272321;
+            --surface-soft: #302b28;
+            --surface-raised: #39322e;
+            --text: #f2ebe3;
+            --muted: #bdb1a6;
+            --line: rgba(242, 235, 227, 0.13);
+            --line-strong: rgba(242, 235, 227, 0.24);
+            --accent: #cf7d63;
+            --accent-dark: #a95843;
+            --accent-soft: rgba(207, 125, 99, 0.14);
+            --sage: #8ca08d;
+            --success: #93ba9b;
+            --danger: #e69b8f;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+            --font: Inter, "Segoe UI", system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            background:
+                radial-gradient(900px 520px at 92% -10%, rgba(207, 125, 99, 0.16), transparent 68%),
+                radial-gradient(700px 460px at -8% 25%, rgba(94, 116, 127, 0.15), transparent 70%),
+                var(--bg);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button,
+        label,
+        select {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        summary:focus-visible {
+            outline: 2px solid rgba(232, 157, 129, 0.9);
+            outline-offset: 3px;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .shell {
+            width: min(1160px, calc(100vw - 42px));
+            margin: 0 auto;
+            padding: 28px 0 70px;
+        }
+
+        .topbar {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 28px;
+            min-height: 168px;
+            margin-bottom: 22px;
+            padding: 28px 32px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background:
+                linear-gradient(125deg, rgba(207, 125, 99, 0.12), transparent 46%),
+                rgba(34, 30, 28, 0.78);
+        }
+
+        .hero-copy {
+            position: relative;
+            z-index: 2;
+            max-width: 790px;
+        }
+
+        .eyebrow {
+            margin: 0 0 9px;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.17em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 9px;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 570;
+            letter-spacing: -0.035em;
+        }
+
+        .lede {
+            max-width: 760px;
+            margin-bottom: 12px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .compatibility-note {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 0;
+            color: #aebdaf;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .compatibility-note span {
+            display: grid;
+            width: 18px;
+            height: 18px;
+            place-items: center;
+            border-radius: 50%;
+            color: #dff0e2;
+            background: rgba(140, 160, 141, 0.22);
+            font-weight: 850;
+        }
+
+        .creative-orbit {
+            position: absolute;
+            top: 50%;
+            right: 86px;
+            width: 190px;
+            height: 190px;
+            transform: translateY(-50%);
+            opacity: 0.72;
+            pointer-events: none;
+        }
+
+        .orbit,
+        .spark {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .orbit {
+            inset: 22px;
+            border: 1px solid rgba(207, 125, 99, 0.24);
+            animation: orbit-spin 16s linear infinite;
+        }
+
+        .orbit-two {
+            inset: 49px;
+            border-color: rgba(140, 160, 141, 0.28);
+            animation-direction: reverse;
+            animation-duration: 11s;
+        }
+
+        .orbit::after {
+            content: "";
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 18px rgba(207, 125, 99, 0.75);
+        }
+
+        .spark {
+            width: 6px;
+            height: 6px;
+            background: #e4b49f;
+            box-shadow: 0 0 16px rgba(228, 180, 159, 0.68);
+            animation: spark-drift 4s ease-in-out infinite;
+        }
+
+        .spark-one { top: 34px; right: 26px; }
+        .spark-two { bottom: 30px; left: 25px; animation-delay: -1.4s; }
+        .spark-three { top: 88px; left: 76px; animation-delay: -2.5s; }
+
+        @keyframes orbit-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spark-drift {
+            0%, 100% { opacity: 0.38; transform: translateY(4px) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-7px) scale(1.2); }
+        }
+
+        .btn {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.035);
+            cursor: pointer;
+            font-weight: 680;
+            transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            border-color: rgba(242, 235, 227, 0.36);
+            background: rgba(255, 255, 255, 0.075);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.48;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            border-color: transparent;
+            color: #fffaf4;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            box-shadow: 0 12px 30px rgba(169, 88, 67, 0.24);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            border-color: transparent;
+            background: linear-gradient(135deg, #dc8e72, #b9634c);
+        }
+
+        .btn-quiet {
+            border-color: transparent;
+            color: var(--muted);
+            background: transparent;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .step-marker {
+            display: flex;
+            min-height: 52px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.022);
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+        }
+
+        .step-marker span {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--text);
+            background: var(--surface-raised);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .step-marker strong {
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 690;
+        }
+
+        .step-marker small {
+            margin-left: auto;
+            color: #8f837b;
+            font-size: 10px;
+        }
+
+        .step-marker.active {
+            border-color: rgba(207, 125, 99, 0.55);
+            background: var(--accent-soft);
+            box-shadow: inset 0 0 0 1px rgba(207, 125, 99, 0.1);
+        }
+
+        .step-marker.active span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        }
+
+        .step-marker.completed span {
+            color: #eff8f0;
+            background: rgba(125, 146, 127, 0.52);
+        }
+
+        .step-marker:hover:not(:disabled) {
+            border-color: var(--line-strong);
+            transform: translateY(-1px);
+        }
+
+        .step-marker:disabled {
+            cursor: not-allowed;
+            opacity: 0.56;
+        }
+
+        .builder-card {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(39, 35, 33, 0.9);
+            box-shadow: var(--shadow);
+        }
+
+        .section {
+            min-height: 440px;
+            padding: 34px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section:last-child {
+            border-bottom: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .section-heading h2 {
+            margin-bottom: 6px;
+            font-size: 21px;
+            font-weight: 640;
+            letter-spacing: -0.015em;
+        }
+
+        .section-kicker {
+            margin-bottom: 8px !important;
+            color: var(--accent) !important;
+            font-size: 10px !important;
+            font-weight: 780;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .section-heading p {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .optional {
+            display: inline-flex;
+            margin-left: 6px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 19px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .field > span,
+        .field-label {
+            color: #e9dfd6;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line-strong);
+            border-radius: 12px;
+            color: var(--text);
+            background: #201d1b;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        input[type="text"],
+        select {
+            min-height: 45px;
+            padding: 10px 12px;
+        }
+
+        textarea {
+            min-height: 104px;
+            padding: 12px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #9a8d84;
+        }
+
+        input:hover,
+        select:hover,
+        textarea:hover {
+            border-color: rgba(242, 235, 227, 0.32);
+        }
+
+        .help {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .inspiration {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            margin-top: 20px;
+            padding: 16px 18px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .inspiration strong {
+            font-size: 12px;
+        }
+
+        .inspiration p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .inspiration-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 7px;
+        }
+
+        .inspiration-chips button {
+            min-height: 32px;
+            padding: 7px 11px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            background: #24201e;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 680;
+        }
+
+        .inspiration-chips button:hover,
+        .inspiration-chips button.selected {
+            border-color: rgba(207, 125, 99, 0.52);
+            color: var(--text);
+            background: var(--accent-soft);
+        }
+
+        .creative-details {
+            margin-top: 16px;
+            border-top: 1px solid var(--line);
+        }
+
+        .creative-details summary {
+            padding-top: 16px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .details-grid {
+            padding-top: 16px;
+        }
+
+        .wizard-actions,
+        .prepare-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 28px -34px -34px;
+            padding: 17px 34px;
+            border-top: 1px solid var(--line);
+            background: rgba(30, 27, 25, 0.96);
+        }
+
+        .wizard-hint {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .control-mode {
+            margin: 0 0 20px;
+            padding: 0;
+            border: 0;
+        }
+
+        .task-mode {
+            margin: 0 0 24px;
+            padding: 0 0 24px;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .task-mode legend,
+        .improvement-focus legend {
+            margin-bottom: 10px;
+        }
+
+        .control-mode legend {
+            margin-bottom: 10px;
+        }
+
+        .mode-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .mode-card {
+            position: relative;
+            display: flex;
+            min-height: 92px;
+            align-items: center;
+            gap: 14px;
+            padding: 17px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.018);
+            cursor: pointer;
+        }
+
+        .mode-card input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mode-card:has(input:checked) {
+            border-color: rgba(140, 160, 141, 0.62);
+            color: var(--text);
+            background: rgba(125, 146, 127, 0.15);
+            box-shadow: inset 0 0 0 1px rgba(140, 160, 141, 0.12);
+        }
+
+        .mode-icon {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 12px;
+            color: #e8c2b3;
+            background: rgba(207, 125, 99, 0.13);
+            font-size: 17px;
+        }
+
+        .mode-card strong,
+        .mode-card small {
+            display: block;
+        }
+
+        .mode-card strong {
+            margin-bottom: 4px;
+            color: var(--text);
+            font-size: 12px;
+        }
+
+        .mode-card small {
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        #controlChooser {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+        }
+
+        .improvement-panel {
+            display: grid;
+            gap: 19px;
+        }
+
+        .improvement-focus {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .improvement-chips {
+            justify-content: flex-start;
+        }
+
+        .target-status {
+            min-height: 18px;
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .target-status.attention {
+            color: var(--danger);
+        }
+
+        .control-request-card {
+            padding: 18px;
+            border: 1px solid rgba(140, 160, 141, 0.3);
+            border-radius: 16px;
+            background: rgba(125, 146, 127, 0.08);
+        }
+
+        .control-request-card > strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .control-request-card > p {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .parameter-groups {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .parameter-group {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .parameter-group::before {
+            display: grid;
+            width: 30px;
+            height: 30px;
+            margin-bottom: 10px;
+            place-items: center;
+            border-radius: 10px;
+            color: #edc7b9;
+            background: rgba(207, 125, 99, 0.12);
+            font-size: 13px;
+        }
+
+        .parameter-group[data-group="appearance"]::before { content: "◐"; }
+        .parameter-group[data-group="geometry"]::before { content: "◇"; }
+        .parameter-group[data-group="timing"]::before { content: "◷"; }
+        .parameter-group[data-group="media"]::before { content: "▣"; }
+        .parameter-group[data-group="motion"]::before { content: "↝"; }
+        .parameter-group[data-group="reveal"]::before { content: "◫"; }
+
+        .parameter-group h3 {
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 730;
+        }
+
+        .parameter-group > p {
+            min-height: 34px;
+            margin-bottom: 13px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .chip input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .chip span {
+            display: inline-flex;
+            min-height: 34px;
+            align-items: center;
+            padding: 7px 11px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            background: #24201e;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 650;
+            transition: all 140ms ease;
+        }
+
+        .chip:hover span {
+            border-color: var(--line-strong);
+            color: var(--text);
+        }
+
+        .chip input:checked + span {
+            border-color: rgba(140, 160, 141, 0.72);
+            color: #eff8f0;
+            background: rgba(125, 146, 127, 0.23);
+        }
+
+        .chip input:checked + span::before {
+            content: "✓";
+            margin-right: 6px;
+            color: var(--success);
+            font-weight: 850;
+        }
+
+        .selected-controls {
+            display: grid;
+            gap: 10px;
+            margin-top: 19px;
+        }
+
+        .selected-empty {
+            padding: 16px;
+            border: 1px dashed var(--line-strong);
+            border-radius: 14px;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .control-detail {
+            display: grid;
+            grid-template-columns: minmax(150px, 0.8fr) 1fr 1fr 1.4fr;
+            gap: 11px;
+            align-items: end;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface-soft);
+        }
+
+        .control-intro strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .control-intro small {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.35;
+        }
+
+        .mini-field {
+            display: grid;
+            gap: 5px;
+            color: var(--muted);
+            font-size: 9px;
+            font-weight: 720;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .mini-field input {
+            min-height: 37px;
+            padding: 8px 9px;
+            font-size: 11px;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .registry-state {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .registry-state::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #8d8279;
+        }
+
+        .registry-state.ready::before {
+            background: var(--success);
+            box-shadow: 0 0 0 5px rgba(147, 186, 155, 0.1);
+        }
+
+        .advanced-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            padding-top: 18px;
+        }
+
+        .ready-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 17px 19px;
+            border: 1px solid rgba(147, 186, 155, 0.26);
+            border-radius: 16px;
+            background: rgba(125, 146, 127, 0.1);
+        }
+
+        .ready-icon {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 50%;
+            color: #e4f1e6;
+            background: rgba(125, 146, 127, 0.4);
+            font-weight: 850;
+        }
+
+        .ready-card strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .ready-card p {
+            margin-bottom: 0;
+            color: #aebdaf;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        .organization-details {
+            margin-top: 17px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .organization-details > summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 17px 19px;
+            cursor: pointer;
+            list-style-position: inside;
+        }
+
+        .organization-details > summary strong,
+        .organization-details > summary small {
+            display: block;
+        }
+
+        .organization-details > summary strong {
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .organization-details > summary small {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .organization-details .advanced-grid {
+            padding: 0 19px 19px;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .toggle input {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 auto;
+            accent-color: var(--sage);
+        }
+
+        .validation {
+            min-height: 19px;
+            margin: 10px 0 0;
+            color: var(--danger);
+            font-size: 11px;
+        }
+
+        .result {
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(147, 186, 155, 0.35);
+            border-radius: 22px;
+            background: rgba(34, 42, 35, 0.74);
+            box-shadow: var(--shadow);
+        }
+
+        .prepare-actions {
+            justify-content: flex-end;
+        }
+
+        .prepare-actions .btn:first-child {
+            margin-right: auto;
+        }
+
+        .prepare-button {
+            min-width: 240px;
+        }
+
+        .result-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px 24px;
+            border-bottom: 1px solid rgba(147, 186, 155, 0.18);
+        }
+
+        .result-head h2 {
+            margin-bottom: 5px;
+            font-size: 19px;
+        }
+
+        .result-head p {
+            margin-bottom: 0;
+            color: #b9c9bc;
+            font-size: 11px;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: rgba(147, 186, 155, 0.13);
+        }
+
+        .summary-item {
+            padding: 17px 20px;
+            background: #252c26;
+        }
+
+        .summary-item span {
+            display: block;
+            margin-bottom: 5px;
+            color: #92a696;
+            font-size: 9px;
+            font-weight: 760;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .summary-item strong {
+            display: block;
+            overflow: hidden;
+            color: #edf4ee;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .prompt-reveal {
+            border-top: 1px solid rgba(147, 186, 155, 0.15);
+        }
+
+        .prompt-reveal summary {
+            padding: 15px 22px;
+            color: #b9c9bc;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .prompt-output {
+            display: block;
+            width: calc(100% - 44px);
+            min-height: 420px;
+            margin: 0 22px 22px;
+            border-color: rgba(147, 186, 155, 0.25);
+            color: #dce8de;
+            background: #171b18;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 11px;
+            line-height: 1.55;
+            white-space: pre;
+        }
+
+        .toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 20;
+            max-width: min(410px, calc(100vw - 44px));
+            padding: 12px 16px;
+            border: 1px solid var(--line-strong);
+            border-radius: 12px;
+            color: var(--text);
+            background: #34302d;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+            font-size: 12px;
+        }
+
+        .toast.error {
+            border-color: rgba(230, 155, 143, 0.55);
+            color: #ffe4df;
+        }
+
+        @media (max-width: 900px) {
+            .parameter-groups,
+            .field-grid,
+            .advanced-grid,
+            .mode-options {
+                grid-template-columns: 1fr;
+            }
+
+            .field-wide {
+                grid-column: auto;
+            }
+
+            .control-detail {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .control-intro {
+                grid-column: 1 / -1;
+            }
+
+            .creative-orbit {
+                right: 38px;
+                opacity: 0.36;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .shell {
+                width: min(100% - 24px, 1160px);
+                padding-top: 18px;
+            }
+
+            .topbar,
+            .result-head {
+                flex-direction: column;
+            }
+
+            .topbar {
+                min-height: 0;
+                padding: 22px;
+            }
+
+            .steps {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .step-marker {
+                justify-content: center;
+                gap: 7px;
+                padding: 10px 7px;
+            }
+
+            .step-marker small {
+                display: none;
+            }
+
+            .step-marker span {
+                width: 23px;
+                height: 23px;
+            }
+
+            .step-marker strong {
+                font-size: 11px;
+            }
+
+            .section {
+                padding: 22px 18px;
+            }
+
+            .inspiration {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .inspiration-chips {
+                justify-content: flex-start;
+            }
+
+            .wizard-actions,
+            .prepare-actions {
+                flex-wrap: wrap;
+                margin: 24px -18px -22px;
+                padding: 15px 18px;
+            }
+
+            .wizard-hint {
+                width: 100%;
+            }
+
+            .creative-orbit {
+                display: none;
+            }
+
+            .result-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .control-detail {
+                grid-template-columns: 1fr;
+            }
+
+            .result-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .result-actions .btn {
+                flex: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .orbit,
+            .spark {
+                animation: none;
+            }
+
+            * {
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body class="prompt-builder-page">
+    <header class="app-site-header">
+        <div class="wrap app-site-header__inner">
+            <a class="app-brand" id="builderHomeLink" href="../../" aria-label="Early Formation home">Early Formation</a>
+            <nav class="app-nav" aria-label="Designer navigation">
+                <a class="app-nav__link app-nav__back" id="builderLibraryLink" href="../../dashboard.php">My Library</a>
+                <button class="app-nav__button app-nav__button--quiet" id="closeBtn" type="button" hidden>Close</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="shell">
+        <header class="topbar">
+            <div class="hero-copy">
+                <p class="eyebrow" id="designerEyebrow">Effect designer</p>
+                <h1 id="designerTitle">Imagine a new effect</h1>
+                <p class="lede" id="designerLede">Tell us what you want to see. Movement will turn your idea into a complete development prompt for any coding assistant that can work with project folders.</p>
+                <p class="compatibility-note"><span aria-hidden="true">✓</span> Provider-neutral · Offline-friendly · Your technical details stay hidden</p>
+            </div>
+            <div class="creative-orbit" aria-hidden="true">
+                <span class="orbit orbit-one"></span>
+                <span class="orbit orbit-two"></span>
+                <span class="spark spark-one"></span>
+                <span class="spark spark-two"></span>
+                <span class="spark spark-three"></span>
+            </div>
+        </header>
+
+        <nav class="steps" aria-label="Effect design steps">
+            <button class="step-marker active" type="button" data-step-target="1" aria-current="step">
+                <span>1</span><strong>Imagine</strong><small>Your visible idea</small>
+            </button>
+            <button class="step-marker" type="button" data-step-target="2" disabled>
+                <span>2</span><strong>Adjust</strong><small>Useful controls</small>
+            </button>
+            <button class="step-marker" type="button" data-step-target="3" disabled>
+                <span>3</span><strong>Prepare</strong><small>Ready for development</small>
+            </button>
+        </nav>
+
+        <form class="builder-card" id="builderForm" novalidate>
+            <section class="section wizard-panel" data-step-panel="1" aria-labelledby="briefHeading">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-kicker" id="briefKicker">Start with the experience</p>
+                        <h2 id="briefHeading">What do you want to bring to life?</h2>
+                        <p id="briefHelp">Describe the visible result in your own words. There is no technical language required.</p>
+                    </div>
+                </div>
+
+                <fieldset class="task-mode">
+                    <legend class="field-label">What would you like to do?</legend>
+                    <div class="mode-options">
+                        <label class="mode-card">
+                            <input type="radio" name="taskMode" value="create" checked>
+                            <span class="mode-icon" aria-hidden="true">+</span>
+                            <span><strong>Create something new</strong><small>Describe a new idea and prepare everything needed to build it.</small></span>
+                        </label>
+                        <label class="mode-card">
+                            <input type="radio" name="taskMode" value="improve">
+                            <span class="mode-icon" aria-hidden="true">&#8593;</span>
+                            <span><strong>Improve something existing</strong><small>Refine its behavior, controls, performance, or repair a problem.</small></span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="field-grid creative-fields" id="createCreativeFields">
+                    <label class="field">
+                        <span id="nameLabel">Give your effect a name</span>
+                        <input id="effectName" name="effectName" type="text" maxlength="90" placeholder="For example: Floating embers" required>
+                    </label>
+
+                    <label class="field field-wide">
+                        <span id="descriptionLabel">What should happen on the image?</span>
+                        <textarea id="description" name="description" maxlength="1800" placeholder="For example: Small glowing embers rise slowly from the bottom, drift sideways, and fade before reaching the top." required></textarea>
+                    </label>
+                </div>
+
+                <div class="inspiration" id="createInspiration">
+                    <div>
+                        <strong>Choose a feeling <span class="optional">Optional</span></strong>
+                        <p>A little inspiration can help shape the result.</p>
+                    </div>
+                    <div class="inspiration-chips" aria-label="Creative feeling">
+                        <button type="button" data-inspiration="Calm">Calm</button>
+                        <button type="button" data-inspiration="Dreamy">Dreamy</button>
+                        <button type="button" data-inspiration="Energetic">Energetic</button>
+                        <button type="button" data-inspiration="Cinematic">Cinematic</button>
+                        <button type="button" data-inspiration="Organic">Organic</button>
+                    </div>
+                </div>
+
+                <details class="creative-details" id="createCreativeDetails">
+                    <summary>Add more creative direction</summary>
+                    <div class="field-grid details-grid">
+                        <label class="field">
+                            <span>Visual style <span class="optional">Optional</span></span>
+                            <input id="visualStyle" name="visualStyle" type="text" maxlength="240" placeholder="Soft light, hand-drawn, bold geometry…">
+                        </label>
+
+                        <label class="field">
+                            <span>What should it express? <span class="optional">Optional</span></span>
+                            <textarea id="mood" name="mood" maxlength="700" placeholder="Warmth and memory, playful energy, quiet mystery…"></textarea>
+                        </label>
+                    </div>
+                </details>
+
+                <div class="improvement-panel" id="improveBriefFields" hidden>
+                    <label class="field">
+                        <span id="targetLabel">Choose the effect to improve</span>
+                        <select id="targetEngine">
+                            <option value="">Reading your effects...</option>
+                        </select>
+                        <small class="help">This changes the reusable maker and engine, not only one slideshow.</small>
+                        <small class="target-status" id="targetStatus" aria-live="polite"></small>
+                    </label>
+                    <label class="field">
+                        <span id="improvementDescriptionLabel">What should be better?</span>
+                        <textarea id="improvementDescription" maxlength="1800" placeholder="Describe the visible result or behavior you want. You do not need technical language."></textarea>
+                    </label>
+                </div>
+
+                <p class="validation" id="validationMessage" role="alert"></p>
+                <div class="wizard-actions">
+                    <span class="wizard-hint">You can return and change this later.</span>
+                    <button class="btn btn-primary" type="button" data-next-step="2">Choose useful controls <span aria-hidden="true">→</span></button>
+                </div>
+            </section>
+
+            <section class="section wizard-panel" data-step-panel="2" aria-labelledby="controlsHeading" hidden>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-kicker" id="controlsKicker">Keep it simple or shape it yourself</p>
+                        <h2 id="controlsHeading">What would you like to adjust?</h2>
+                        <p id="controlsHelp">You can let the coding assistant choose sensible controls, or select the creative choices that matter to you.</p>
+                    </div>
+                    <button class="btn btn-quiet" id="clearControlsBtn" type="button">Clear selections</button>
+                </div>
+
+                <div id="createControlsPanel">
+                <fieldset class="control-mode">
+                    <legend class="field-label">How much control do you want?</legend>
+                    <div class="mode-options">
+                        <label class="mode-card">
+                            <input type="radio" name="controlMode" value="automatic" checked>
+                            <span class="mode-icon" aria-hidden="true">✦</span>
+                            <span><strong>Keep it simple</strong><small>Let the coding assistant choose only the essential controls.</small></span>
+                        </label>
+                        <label class="mode-card">
+                            <input type="radio" name="controlMode" value="custom">
+                            <span class="mode-icon" aria-hidden="true">⌁</span>
+                            <span><strong>I want to choose</strong><small>Select colors, timing, movement, media, and more.</small></span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div id="controlChooser" hidden>
+                    <div class="parameter-groups" id="parameterGroups"></div>
+                    <div class="selected-controls" id="selectedControls" aria-live="polite"></div>
+
+                    <label class="field" style="margin-top:18px">
+                        <span>Something else? <span class="optional">Optional</span></span>
+                        <input id="customParameters" type="text" maxlength="500" placeholder="For example: wind strength, glow pulse, edge softness">
+                        <small class="help">Write it naturally. The coding assistant can choose the technical name and control type.</small>
+                    </label>
+                </div>
+                </div>
+
+                <div class="improvement-panel" id="improveControlsPanel" hidden>
+                    <fieldset class="improvement-focus">
+                        <legend class="field-label">What kind of improvement is this?</legend>
+                        <div class="chips improvement-chips" id="improvementAreas">
+                            <label class="chip"><input type="checkbox" name="improvementArea" value="appearance" checked><span id="appearanceAreaLabel">Appearance or movement</span></label>
+                            <label class="chip"><input type="checkbox" name="improvementArea" value="controls"><span>Controls</span></label>
+                            <label class="chip"><input type="checkbox" name="improvementArea" value="performance"><span>Performance</span></label>
+                            <label class="chip"><input type="checkbox" name="improvementArea" value="repair"><span>Fix a problem</span></label>
+                            <label class="chip"><input type="checkbox" name="improvementArea" value="accessibility"><span>Accessibility</span></label>
+                        </div>
+                    </fieldset>
+                    <section class="control-request-card" id="controlRequestFields" hidden>
+                        <strong>Describe the control change</strong>
+                        <p>Only add the details you care about. The coding assistant can learn the technical convention from the project.</p>
+                        <div class="field-grid">
+                            <label class="field">
+                                <span>Control name or change</span>
+                                <input id="controlRequestName" type="text" maxlength="160" placeholder="For example: Opacity">
+                            </label>
+                            <label class="field">
+                                <span>How should it behave?</span>
+                                <input id="controlRequestBehavior" type="text" maxlength="500" placeholder="For example: Change the transparency of the whole zoomed image">
+                            </label>
+                            <label class="field">
+                                <span>Preferred default <span class="optional">Optional</span></span>
+                                <input id="controlRequestDefault" type="text" maxlength="180" placeholder="For example: 100%">
+                            </label>
+                            <label class="field">
+                                <span>Range or choices <span class="optional">Optional</span></span>
+                                <input id="controlRequestRange" type="text" maxlength="240" placeholder="For example: 0-100%">
+                            </label>
+                        </div>
+                    </section>
+                    <label class="field">
+                        <span>What should remain unchanged? <span class="optional">Optional</span></span>
+                        <textarea id="preserveBehavior" maxlength="900" placeholder="For example: Keep the current colors, name, and gentle timing."></textarea>
+                    </label>
+                    <label class="field" id="reproductionField" hidden>
+                        <span>How can the problem be seen? <span class="optional">Optional</span></span>
+                        <textarea id="reproductionSteps" maxlength="1200" placeholder="Describe where it happens and what you see. For example: replay it three times in the player and the outgoing slide remains hidden."></textarea>
+                    </label>
+                </div>
+
+                <div class="wizard-actions">
+                    <button class="btn" type="button" data-previous-step="1"><span aria-hidden="true">←</span> Back</button>
+                    <button class="btn btn-primary" type="button" data-next-step="3">Prepare my request <span aria-hidden="true">→</span></button>
+                </div>
+            </section>
+
+            <section class="section wizard-panel" data-step-panel="3" aria-labelledby="prepareHeading" hidden>
+                <div class="section-heading">
+                    <div>
+                        <p class="section-kicker">Everything technical is handled for you</p>
+                        <h2 id="prepareHeading">Prepare your development prompt</h2>
+                        <p>Movement will add the maker and engine rules, offline requirements, integration steps, safety checks, tests, and handoff instructions.</p>
+                    </div>
+                </div>
+
+                <div class="ready-card">
+                    <span class="ready-icon" aria-hidden="true">✓</span>
+                    <div>
+                        <strong>Ready for a repository-aware coding assistant</strong>
+                        <p>The prompt works with systems that can read and edit project folders. It contains no provider-specific commands.</p>
+                    </div>
+                </div>
+
+                <details class="organization-details">
+                    <summary>
+                        <span><strong id="organizationTitle">Organization and optional guidance</strong><small id="organizationHelp">Experimental is selected automatically. Change it only if you want to.</small></span>
+                        <span class="registry-state" id="registryState">Reading categories…</span>
+                    </summary>
+                    <div class="advanced-grid">
+                        <label class="field" id="categoryField">
+                            <span>Category</span>
+                            <select id="categorySelect">
+                                <option value="Experimental">Experimental</option>
+                            </select>
+                        </label>
+
+                        <label class="field" id="customCategoryField" hidden>
+                            <span>New category name</span>
+                            <input id="customCategory" type="text" maxlength="80" placeholder="For example: Organic motion">
+                        </label>
+
+                        <label class="field" id="referenceField">
+                            <span id="referenceLabel">Existing effect to examine <span class="optional">Optional</span></span>
+                            <select id="referenceEffect">
+                                <option value="">Let the coding assistant choose</option>
+                            </select>
+                            <small class="help">Usually it is best to let the assistant inspect the project and choose.</small>
+                        </label>
+
+                        <label class="field">
+                            <span>Other creative requirements <span class="optional">Optional</span></span>
+                            <textarea id="specialRequirements" maxlength="900" placeholder="Anything important that did not fit above"></textarea>
+                        </label>
+
+                        <label class="toggle field-wide">
+                            <input id="reducedMotion" type="checkbox" checked>
+                            <span>Request a calmer reduced-motion version when practical.</span>
+                        </label>
+                    </div>
+                </details>
+
+                <div class="prepare-actions">
+                    <button class="btn" type="button" data-previous-step="2"><span aria-hidden="true">←</span> Back</button>
+                    <button class="btn btn-primary prepare-button" id="generateBtn" type="submit">Prepare development prompt <span aria-hidden="true">✦</span></button>
+                </div>
+            </section>
+        </form>
+
+        <section class="result" id="result" hidden aria-labelledby="resultHeading">
+            <div class="result-head">
+                <div>
+                    <p class="section-kicker">Ready to use</p>
+                    <h2 id="resultHeading">Your effect request is ready</h2>
+                    <p>Open your project with a repository-aware coding assistant, then paste this prompt.</p>
+                </div>
+                <div class="result-actions">
+                    <button class="btn btn-primary" id="copyBtn" type="button">Copy prompt</button>
+                    <button class="btn" id="saveBtn" type="button">Save Markdown</button>
+                    <button class="btn" id="editBtn" type="button">Edit answers</button>
+                </div>
+            </div>
+            <div class="result-summary">
+                <div class="summary-item"><span id="summaryTypeLabel">Effect</span><strong id="summaryName"></strong></div>
+                <div class="summary-item"><span>Category</span><strong id="summaryCategory"></strong></div>
+                <div class="summary-item"><span id="summaryDetailLabel">Controls</span><strong id="summaryControls"></strong></div>
+            </div>
+            <details class="prompt-reveal">
+                <summary>View technical details</summary>
+                <textarea class="prompt-output" id="promptOutput" readonly spellcheck="false"></textarea>
+            </details>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" hidden role="status"></div>
+
+    <script src="../../shared/frontend/platform-adapter.js"></script>
+    <script src="effect-prompt-template.js"></script>
+    <script src="transition-prompt-template.js"></script>
+    <script>
+        (() => {
+            'use strict';
+
+            const pageParams = new URLSearchParams(window.location.search);
+            const builderKind = pageParams.get('kind') === 'transition'
+                ? 'transition'
+                : 'effect';
+            const isTransition = builderKind === 'transition';
+            const initialTaskMode = pageParams.get('task') === 'improve' ? 'improve' : 'create';
+            const template = isTransition
+                ? window.MovementTransitionPrompt
+                : window.MovementEffectPrompt;
+            const builderCopy = isTransition
+                ? {
+                    title: 'Design a New Transition — Movement',
+                    eyebrow: 'Transition designer',
+                    heading: 'Imagine a new transition',
+                    lede: 'Describe how one slide should give way to the next. Movement will turn your idea into a complete development prompt for any coding assistant that can work with project folders.',
+                    nameLabel: 'Give your transition a name',
+                    namePlaceholder: 'For example: Paper fold reveal',
+                    descriptionLabel: 'What should happen between the two slides?',
+                    descriptionPlaceholder: 'For example: The outgoing slide folds toward the left while the incoming slide appears softly from behind it.',
+                    referenceLabel: 'Existing transition to examine',
+                    resultHeading: 'Your transition request is ready',
+                    summaryLabel: 'Transition',
+                    registryType: 'transitions',
+                    noun: 'transition'
+                }
+                : {
+                    title: 'Design a New Effect — Movement',
+                    eyebrow: 'Effect designer',
+                    heading: 'Imagine a new effect',
+                    lede: 'Tell us what you want to see. Movement will turn your idea into a complete development prompt for any coding assistant that can work with project folders.',
+                    nameLabel: 'Give your effect a name',
+                    namePlaceholder: 'For example: Floating embers',
+                    descriptionLabel: 'What should happen on the image?',
+                    descriptionPlaceholder: 'For example: Small glowing embers rise slowly from the bottom, drift sideways, and fade before reaching the top.',
+                    referenceLabel: 'Existing effect to examine',
+                    resultHeading: 'Your effect request is ready',
+                    summaryLabel: 'Effect',
+                    registryType: 'effects',
+                    noun: 'effect'
+                };
+            const api = typeof window.createMovementPlatformApi === 'function'
+                ? window.createMovementPlatformApi()
+                : null;
+            const state = {
+                registriesLoaded: false,
+                registryItems: [],
+                selectedParameters: new Map(),
+                inspirations: new Set(),
+                taskMode: initialTaskMode,
+                activeStep: 1,
+                maxStep: 1,
+                generatedPrompt: ''
+            };
+            let toastTimer = null;
+
+            const elements = {
+                form: document.getElementById('builderForm'),
+                homeLink: document.getElementById('builderHomeLink'),
+                libraryLink: document.getElementById('builderLibraryLink'),
+                designerEyebrow: document.getElementById('designerEyebrow'),
+                designerTitle: document.getElementById('designerTitle'),
+                designerLede: document.getElementById('designerLede'),
+                briefKicker: document.getElementById('briefKicker'),
+                briefHeading: document.getElementById('briefHeading'),
+                briefHelp: document.getElementById('briefHelp'),
+                controlsKicker: document.getElementById('controlsKicker'),
+                controlsHeading: document.getElementById('controlsHeading'),
+                controlsHelp: document.getElementById('controlsHelp'),
+                nameLabel: document.getElementById('nameLabel'),
+                descriptionLabel: document.getElementById('descriptionLabel'),
+                referenceLabel: document.getElementById('referenceLabel'),
+                summaryTypeLabel: document.getElementById('summaryTypeLabel'),
+                summaryDetailLabel: document.getElementById('summaryDetailLabel'),
+                taskModes: [...document.querySelectorAll('input[name="taskMode"]')],
+                createCreativeFields: document.getElementById('createCreativeFields'),
+                createInspiration: document.getElementById('createInspiration'),
+                createCreativeDetails: document.getElementById('createCreativeDetails'),
+                improveBriefFields: document.getElementById('improveBriefFields'),
+                targetLabel: document.getElementById('targetLabel'),
+                targetEngine: document.getElementById('targetEngine'),
+                targetStatus: document.getElementById('targetStatus'),
+                improvementDescriptionLabel: document.getElementById('improvementDescriptionLabel'),
+                improvementDescription: document.getElementById('improvementDescription'),
+                effectName: document.getElementById('effectName'),
+                visualStyle: document.getElementById('visualStyle'),
+                description: document.getElementById('description'),
+                mood: document.getElementById('mood'),
+                parameterGroups: document.getElementById('parameterGroups'),
+                selectedControls: document.getElementById('selectedControls'),
+                clearControlsBtn: document.getElementById('clearControlsBtn'),
+                createControlsPanel: document.getElementById('createControlsPanel'),
+                improveControlsPanel: document.getElementById('improveControlsPanel'),
+                controlChooser: document.getElementById('controlChooser'),
+                controlModes: [...document.querySelectorAll('input[name="controlMode"]')],
+                inspirationButtons: [...document.querySelectorAll('[data-inspiration]')],
+                stepButtons: [...document.querySelectorAll('[data-step-target]')],
+                stepPanels: [...document.querySelectorAll('[data-step-panel]')],
+                customParameters: document.getElementById('customParameters'),
+                improvementAreaInputs: [...document.querySelectorAll('input[name="improvementArea"]')],
+                appearanceAreaLabel: document.getElementById('appearanceAreaLabel'),
+                controlRequestFields: document.getElementById('controlRequestFields'),
+                controlRequestName: document.getElementById('controlRequestName'),
+                controlRequestBehavior: document.getElementById('controlRequestBehavior'),
+                controlRequestDefault: document.getElementById('controlRequestDefault'),
+                controlRequestRange: document.getElementById('controlRequestRange'),
+                preserveBehavior: document.getElementById('preserveBehavior'),
+                reproductionField: document.getElementById('reproductionField'),
+                reproductionSteps: document.getElementById('reproductionSteps'),
+                categorySelect: document.getElementById('categorySelect'),
+                categoryField: document.getElementById('categoryField'),
+                customCategoryField: document.getElementById('customCategoryField'),
+                customCategory: document.getElementById('customCategory'),
+                organizationDetails: document.querySelector('.organization-details'),
+                organizationTitle: document.getElementById('organizationTitle'),
+                organizationHelp: document.getElementById('organizationHelp'),
+                referenceField: document.getElementById('referenceField'),
+                referenceEffect: document.getElementById('referenceEffect'),
+                specialRequirements: document.getElementById('specialRequirements'),
+                reducedMotion: document.getElementById('reducedMotion'),
+                registryState: document.getElementById('registryState'),
+                validationMessage: document.getElementById('validationMessage'),
+                generateBtn: document.getElementById('generateBtn'),
+                result: document.getElementById('result'),
+                promptReveal: document.querySelector('.prompt-reveal'),
+                promptOutput: document.getElementById('promptOutput'),
+                resultHeading: document.getElementById('resultHeading'),
+                summaryName: document.getElementById('summaryName'),
+                summaryCategory: document.getElementById('summaryCategory'),
+                summaryControls: document.getElementById('summaryControls'),
+                copyBtn: document.getElementById('copyBtn'),
+                saveBtn: document.getElementById('saveBtn'),
+                editBtn: document.getElementById('editBtn'),
+                closeBtn: document.getElementById('closeBtn'),
+                toast: document.getElementById('toast')
+            };
+
+            elements.libraryLink.hidden = Boolean(api);
+            elements.closeBtn.hidden = !api;
+
+            function applyBuilderCopy() {
+                document.title = builderCopy.title;
+                elements.designerEyebrow.textContent = builderCopy.eyebrow;
+                elements.designerTitle.textContent = builderCopy.heading;
+                elements.designerLede.textContent = builderCopy.lede;
+                elements.nameLabel.textContent = builderCopy.nameLabel;
+                elements.effectName.placeholder = builderCopy.namePlaceholder;
+                elements.descriptionLabel.textContent = builderCopy.descriptionLabel;
+                elements.description.placeholder = builderCopy.descriptionPlaceholder;
+                elements.referenceLabel.replaceChildren(
+                    document.createTextNode(`${builderCopy.referenceLabel} `)
+                );
+                const optional = document.createElement('span');
+                optional.className = 'optional';
+                optional.textContent = 'Optional';
+                elements.referenceLabel.appendChild(optional);
+                elements.resultHeading.textContent = builderCopy.resultHeading;
+                elements.summaryTypeLabel.textContent = builderCopy.summaryLabel;
+                elements.targetLabel.textContent = `Choose the ${builderCopy.noun} to improve`;
+                elements.appearanceAreaLabel.textContent = isTransition
+                    ? 'Choreography or appearance'
+                    : 'Appearance or movement';
+            }
+
+            function selectedTaskMode() {
+                const selected = elements.taskModes.find(input => input.checked);
+                return selected ? selected.value : 'create';
+            }
+
+            function selectedImprovementAreas() {
+                return elements.improvementAreaInputs
+                    .filter(input => input.checked)
+                    .map(input => input.value);
+            }
+
+            function updateImprovementDetails() {
+                const areas = selectedImprovementAreas();
+                const improving = state.taskMode === 'improve';
+                elements.controlRequestFields.hidden = !improving || !areas.includes('controls');
+                elements.reproductionField.hidden = !improving || !areas.includes('repair');
+            }
+
+            function humanizeEngine(engine) {
+                return String(engine || '')
+                    .split('-')
+                    .filter(Boolean)
+                    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                    .join(' ');
+            }
+
+            function selectedTarget() {
+                return state.registryItems.find(item => item.engine === elements.targetEngine.value) || null;
+            }
+
+            function updateTargetStatus() {
+                const target = selectedTarget();
+                elements.targetStatus.classList.remove('attention');
+                if (!target) {
+                    elements.targetStatus.textContent = state.registriesLoaded
+                        ? `Choose one existing ${builderCopy.noun}.`
+                        : `Reading your ${builderCopy.registryType}...`;
+                    return;
+                }
+                if (target.status === 'needs-attention') {
+                    elements.targetStatus.textContent = target.warnings.length
+                        ? `Needs attention: ${target.warnings.join(' ')}`
+                        : 'Needs attention: one or more expected files are missing.';
+                    elements.targetStatus.classList.add('attention');
+                    return;
+                }
+                elements.targetStatus.textContent = `${target.category} - maker and engine are available.`;
+            }
+
+            function applyTaskMode() {
+                state.taskMode = selectedTaskMode();
+                const improve = state.taskMode === 'improve';
+                elements.createCreativeFields.hidden = improve;
+                elements.createInspiration.hidden = improve;
+                elements.createCreativeDetails.hidden = improve;
+                elements.improveBriefFields.hidden = !improve;
+                elements.createControlsPanel.hidden = improve;
+                elements.improveControlsPanel.hidden = !improve;
+                elements.clearControlsBtn.hidden = improve || selectedControlMode() !== 'custom';
+                elements.categoryField.hidden = improve;
+                elements.referenceField.hidden = improve;
+                elements.customCategoryField.hidden = improve || elements.categorySelect.value !== '__new__';
+                elements.effectName.required = !improve;
+                elements.description.required = !improve;
+                elements.improvementDescription.required = improve;
+                elements.organizationTitle.textContent = improve
+                    ? 'Optional guidance'
+                    : 'Organization and optional guidance';
+                elements.organizationHelp.textContent = improve
+                    ? `The existing ${builderCopy.noun} identity and category will be preserved.`
+                    : 'Experimental is selected automatically. Change it only if you want to.';
+                elements.briefKicker.textContent = improve
+                    ? `Start with the existing ${builderCopy.noun}`
+                    : 'Start with the experience';
+                elements.briefHeading.textContent = improve
+                    ? `Which ${builderCopy.noun} would you like to improve?`
+                    : 'What do you want to bring to life?';
+                elements.briefHelp.textContent = improve
+                    ? 'Choose it, then describe the result you want in your own words.'
+                    : 'Describe the visible result in your own words. There is no technical language required.';
+                elements.controlsKicker.textContent = improve
+                    ? 'Focus the improvement'
+                    : 'Keep it simple or shape it yourself';
+                elements.controlsHeading.textContent = improve
+                    ? 'What kind of improvement is this?'
+                    : 'What would you like to adjust?';
+                elements.controlsHelp.textContent = improve
+                    ? 'Choose one or more areas. Repair details appear only when they are useful.'
+                    : 'You can let the coding assistant choose sensible controls, or select the creative choices that matter to you.';
+                elements.designerTitle.textContent = improve
+                    ? `Improve an existing ${builderCopy.noun}`
+                    : builderCopy.heading;
+                elements.designerLede.textContent = improve
+                    ? `Choose a ${builderCopy.noun} and describe what should be better. Movement will preserve its identity and saved configurations while preparing the technical work.`
+                    : builderCopy.lede;
+                document.title = improve
+                    ? `Improve an Existing ${isTransition ? 'Transition' : 'Effect'} - Movement`
+                    : builderCopy.title;
+                elements.resultHeading.textContent = improve
+                    ? `Your ${builderCopy.noun} improvement request is ready`
+                    : builderCopy.resultHeading;
+                elements.summaryTypeLabel.textContent = improve
+                    ? `${builderCopy.summaryLabel} improvement`
+                    : builderCopy.summaryLabel;
+                elements.summaryDetailLabel.textContent = improve ? 'Focus' : 'Controls';
+                elements.generateBtn.textContent = improve
+                    ? 'Prepare improvement prompt'
+                    : 'Prepare development prompt';
+                const firstStep = elements.stepButtons[0];
+                const secondStep = elements.stepButtons[1];
+                if (firstStep) {
+                    firstStep.querySelector('strong').textContent = improve ? 'Choose' : 'Imagine';
+                    firstStep.querySelector('small').textContent = improve ? `Existing ${builderCopy.noun}` : 'Your visible idea';
+                }
+                if (secondStep) {
+                    secondStep.querySelector('strong').textContent = improve ? 'Focus' : 'Adjust';
+                    secondStep.querySelector('small').textContent = improve ? 'What should change' : 'Useful controls';
+                }
+                const nextButton = document.querySelector('[data-next-step="2"]');
+                if (nextButton) nextButton.textContent = improve ? 'Choose improvement focus ->' : 'Choose useful controls ->';
+                elements.result.hidden = true;
+                updateTargetStatus();
+                updateImprovementDetails();
+            }
+
+            function showToast(message, isError = false) {
+                window.clearTimeout(toastTimer);
+                elements.toast.textContent = message;
+                elements.toast.className = `toast${isError ? ' error' : ''}`;
+                elements.toast.hidden = false;
+                toastTimer = window.setTimeout(() => {
+                    elements.toast.hidden = true;
+                }, 3200);
+            }
+
+            function renderParameterGroups() {
+                elements.parameterGroups.replaceChildren();
+                template.PARAMETER_GROUPS.forEach(group => {
+                    const section = document.createElement('section');
+                    section.className = 'parameter-group';
+                    section.dataset.group = group.id;
+                    const heading = document.createElement('h3');
+                    heading.textContent = group.label;
+                    const description = document.createElement('p');
+                    description.textContent = group.description;
+                    const chips = document.createElement('div');
+                    chips.className = 'chips';
+
+                    group.parameters.forEach(parameter => {
+                        const label = document.createElement('label');
+                        label.className = 'chip';
+                        label.title = parameter.hint;
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.value = parameter.id;
+                        input.dataset.parameter = parameter.id;
+                        input.addEventListener('change', () => {
+                            if (input.checked) {
+                                state.selectedParameters.set(parameter.id, {
+                                    id: parameter.id,
+                                    defaultValue: '',
+                                    range: '',
+                                    notes: ''
+                                });
+                            } else {
+                                state.selectedParameters.delete(parameter.id);
+                            }
+                            renderSelectedControls();
+                        });
+                        const text = document.createElement('span');
+                        text.textContent = parameter.label;
+                        label.append(input, text);
+                        chips.appendChild(label);
+                    });
+
+                    section.append(heading, description, chips);
+                    elements.parameterGroups.appendChild(section);
+                });
+            }
+
+            function updateParameterValue(id, key, value) {
+                const selection = state.selectedParameters.get(id);
+                if (!selection) return;
+                selection[key] = value;
+            }
+
+            function makeMiniField(labelText, placeholder, value, onInput) {
+                const label = document.createElement('label');
+                label.className = 'mini-field';
+                label.append(document.createTextNode(labelText));
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 180;
+                input.placeholder = placeholder;
+                input.value = value;
+                input.addEventListener('input', event => onInput(event.target.value));
+                label.appendChild(input);
+                return label;
+            }
+
+            function renderSelectedControls() {
+                elements.selectedControls.replaceChildren();
+                const selections = [...state.selectedParameters.values()];
+                const customMode = selectedControlMode() === 'custom';
+                elements.clearControlsBtn.hidden = !customMode || selections.length === 0;
+                if (!selections.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'selected-empty';
+                    empty.textContent = 'No controls selected. That is fine — the coding assistant can expose only the essentials.';
+                    elements.selectedControls.appendChild(empty);
+                    return;
+                }
+
+                selections.forEach(selection => {
+                    const definition = template.PARAMETER_INDEX[selection.id];
+                    const card = document.createElement('div');
+                    card.className = 'control-detail';
+                    const intro = document.createElement('div');
+                    intro.className = 'control-intro';
+                    const name = document.createElement('strong');
+                    name.textContent = definition.label;
+                    const hint = document.createElement('small');
+                    hint.textContent = definition.hint;
+                    intro.append(name, hint);
+
+                    card.append(
+                        intro,
+                        makeMiniField(
+                            'Preferred default',
+                            'Let the assistant decide',
+                            selection.defaultValue,
+                            value => updateParameterValue(selection.id, 'defaultValue', value)
+                        ),
+                        makeMiniField(
+                            'Range or choices',
+                            'Let the assistant decide',
+                            selection.range,
+                            value => updateParameterValue(selection.id, 'range', value)
+                        ),
+                        makeMiniField(
+                            'How should it behave?',
+                            'Optional note',
+                            selection.notes,
+                            value => updateParameterValue(selection.id, 'notes', value)
+                        )
+                    );
+                    elements.selectedControls.appendChild(card);
+                });
+            }
+
+            function uniqueCategories(registry) {
+                const seen = new Set();
+                const categories = [];
+                registry.forEach(group => {
+                    const category = String(group && group.Category || '').trim();
+                    const key = category.toLowerCase();
+                    if (category && !seen.has(key)) {
+                        seen.add(key);
+                        categories.push(category);
+                    }
+                });
+                if (!seen.has('experimental')) categories.push('Experimental');
+                return categories;
+            }
+
+            function fillRegistry(payload) {
+                const activeRegistry = payload && payload[builderCopy.registryType]
+                    ? payload[builderCopy.registryType]
+                    : {};
+                const registry = Array.isArray(activeRegistry.registry) ? activeRegistry.registry : [];
+                const categories = uniqueCategories(registry);
+                categories.sort((a, b) => {
+                    if (a.toLowerCase() === 'experimental') return -1;
+                    if (b.toLowerCase() === 'experimental') return 1;
+                    return a.localeCompare(b, undefined, { sensitivity: 'base' });
+                });
+
+                elements.categorySelect.replaceChildren();
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    elements.categorySelect.appendChild(option);
+                });
+                const newCategory = document.createElement('option');
+                newCategory.value = '__new__';
+                newCategory.textContent = 'Create a new personal category…';
+                elements.categorySelect.appendChild(newCategory);
+                elements.categorySelect.value = categories.find(category => (
+                    category.toLowerCase() === 'experimental'
+                )) || categories[0] || 'Experimental';
+
+                const categoryByEngine = new Map();
+                registry.forEach(group => {
+                    const category = String(group && group.Category || '').trim() || 'Uncategorized';
+                    String(group && group.engines || '')
+                        .split(',')
+                        .map(engine => engine.trim())
+                        .filter(Boolean)
+                        .forEach(engine => categoryByEngine.set(engine, category));
+                });
+                const allItems = Array.isArray(activeRegistry.available)
+                    ? activeRegistry.available.map(item => ({
+                        engine: item.engine,
+                        maker: item.maker,
+                        engineFile: item.engineFile,
+                        status: item.status,
+                        warnings: Array.isArray(item.warnings) ? item.warnings : [],
+                        category: categoryByEngine.get(item.engine) || 'Unregistered'
+                    }))
+                    : [];
+                state.registryItems = allItems
+                    .filter(item => item.engine)
+                    .sort((a, b) => a.engine.localeCompare(b.engine));
+                elements.targetEngine.replaceChildren();
+                const targetPlaceholder = document.createElement('option');
+                targetPlaceholder.value = '';
+                targetPlaceholder.textContent = `Choose an existing ${builderCopy.noun}...`;
+                elements.targetEngine.appendChild(targetPlaceholder);
+                state.registryItems.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.engine;
+                    option.textContent = `${humanizeEngine(item.engine)} - ${item.category}${
+                        item.status === 'needs-attention' ? ' (Needs attention)' : ''
+                    }`;
+                    elements.targetEngine.appendChild(option);
+                });
+                const requestedEngine = pageParams.get('engine');
+                if (requestedEngine && state.registryItems.some(item => item.engine === requestedEngine)) {
+                    elements.targetEngine.value = requestedEngine;
+                }
+
+                const available = allItems.filter(item => item.status === 'available');
+                elements.referenceEffect.replaceChildren();
+                const automatic = document.createElement('option');
+                automatic.value = '';
+                automatic.textContent = 'Let the coding assistant choose';
+                elements.referenceEffect.appendChild(automatic);
+                available
+                    .sort((a, b) => a.engine.localeCompare(b.engine))
+                    .forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.engine;
+                        option.textContent = item.engine
+                            .split('-')
+                            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                            .join(' ');
+                        elements.referenceEffect.appendChild(option);
+                    });
+
+                state.registriesLoaded = true;
+                elements.registryState.textContent = `${categories.length} ${builderCopy.noun} categories available`;
+                elements.registryState.classList.add('ready');
+                updateTargetStatus();
+            }
+
+            async function loadRegistries() {
+                if (!api || typeof api.listRegistries !== 'function') {
+                    elements.registryState.textContent = 'Desktop registry is unavailable';
+                    return;
+                }
+                try {
+                    fillRegistry(await api.listRegistries());
+                } catch (error) {
+                    console.error(error);
+                    elements.registryState.textContent = 'Could not read categories — using Experimental';
+                }
+            }
+
+            function selectedCategory() {
+                if (elements.categorySelect.value !== '__new__') {
+                    return elements.categorySelect.value || 'Experimental';
+                }
+                return elements.customCategory.value.trim() || 'Experimental';
+            }
+
+            function selectedControlMode() {
+                const selected = elements.controlModes.find(input => input.checked);
+                return selected ? selected.value : 'automatic';
+            }
+
+            function collectInput() {
+                const special = elements.specialRequirements.value.trim();
+                if (state.taskMode === 'improve') {
+                    const target = selectedTarget();
+                    const improvementAreas = selectedImprovementAreas();
+                    return {
+                        name: target ? humanizeEngine(target.engine) : '',
+                        engine: target ? target.engine : '',
+                        maker: target ? target.maker : '',
+                        engineFile: target ? target.engineFile : '',
+                        status: target ? target.status : '',
+                        warnings: target ? target.warnings : [],
+                        category: target ? target.category : 'Unknown',
+                        description: elements.improvementDescription.value.trim(),
+                        improvementAreas,
+                        controlRequest: improvementAreas.includes('controls') ? {
+                            name: elements.controlRequestName.value.trim(),
+                            behavior: elements.controlRequestBehavior.value.trim(),
+                            defaultValue: elements.controlRequestDefault.value.trim(),
+                            range: elements.controlRequestRange.value.trim()
+                        } : null,
+                        preserve: elements.preserveBehavior.value.trim(),
+                        reproduction: elements.reproductionSteps.value.trim(),
+                        specialRequirements: special,
+                        reducedMotion: elements.reducedMotion.checked,
+                        taskMode: 'improve'
+                    };
+                }
+                const customMode = selectedControlMode() === 'custom';
+                const custom = customMode ? elements.customParameters.value.trim() : '';
+                const inspiration = [...state.inspirations].join(', ');
+                return {
+                    name: elements.effectName.value,
+                    description: [
+                        elements.description.value.trim(),
+                        special ? `Additional creative requirement: ${special}` : ''
+                    ].filter(Boolean).join('\n'),
+                    mood: [elements.mood.value.trim(), inspiration].filter(Boolean).join('. '),
+                    visualStyle: elements.visualStyle.value,
+                    category: selectedCategory(),
+                    parameters: customMode ? [...state.selectedParameters.values()] : [],
+                    customParameters: custom,
+                    referenceEffect: elements.referenceEffect.value,
+                    reducedMotion: elements.reducedMotion.checked,
+                    controlMode: selectedControlMode()
+                };
+            }
+
+            function validateCreativeBrief() {
+                if (state.taskMode === 'improve') {
+                    if (!selectedTarget()) {
+                        elements.validationMessage.textContent = `Choose the ${builderCopy.noun} you want to improve.`;
+                        elements.targetEngine.focus();
+                        return false;
+                    }
+                    if (!elements.improvementDescription.value.trim()) {
+                        elements.validationMessage.textContent = 'Describe what should be better before continuing.';
+                        elements.improvementDescription.focus();
+                        return false;
+                    }
+                    if (!selectedImprovementAreas().length) {
+                        elements.validationMessage.textContent = 'Choose at least one area to improve.';
+                        elements.improvementAreaInputs[0].focus();
+                        return false;
+                    }
+                    elements.validationMessage.textContent = '';
+                    return true;
+                }
+                if (!elements.effectName.value.trim()) {
+                    elements.validationMessage.textContent = `Give your ${builderCopy.noun} a name before continuing.`;
+                    elements.effectName.focus();
+                    return false;
+                }
+                if (!elements.description.value.trim()) {
+                    elements.validationMessage.textContent = `Describe what the ${builderCopy.noun} should visibly do.`;
+                    elements.description.focus();
+                    return false;
+                }
+                elements.validationMessage.textContent = '';
+                return true;
+            }
+
+            function validate() {
+                if (!validateCreativeBrief()) {
+                    goToStep(1, { skipValidation: true });
+                    return false;
+                }
+                if (
+                    state.taskMode === 'create'
+                    &&
+                    elements.categorySelect.value === '__new__'
+                    && !elements.customCategory.value.trim()
+                ) {
+                    elements.validationMessage.textContent = 'Enter the name of the new personal category.';
+                    elements.organizationDetails.open = true;
+                    elements.customCategory.focus();
+                    return false;
+                }
+                elements.validationMessage.textContent = '';
+                return true;
+            }
+
+            function goToStep(targetStep, { skipValidation = false, scroll = true } = {}) {
+                const target = Math.max(1, Math.min(3, Number(targetStep) || 1));
+                if (target > 1 && !skipValidation && !validateCreativeBrief()) return false;
+                state.activeStep = target;
+                state.maxStep = Math.max(state.maxStep, target);
+
+                elements.stepPanels.forEach(panel => {
+                    panel.hidden = Number(panel.dataset.stepPanel) !== target;
+                });
+                elements.stepButtons.forEach(button => {
+                    const step = Number(button.dataset.stepTarget);
+                    button.disabled = step > state.maxStep;
+                    button.classList.toggle('active', step === target);
+                    button.classList.toggle('completed', step < target);
+                    if (step === target) button.setAttribute('aria-current', 'step');
+                    else button.removeAttribute('aria-current');
+                });
+                if (scroll) {
+                    elements.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                return true;
+            }
+
+            function generatePrompt({ smoke = false } = {}) {
+                if (!smoke && !validate()) return false;
+                const input = smoke
+                    ? {
+                        name: isTransition ? 'Smoke Test Transition' : 'Smoke Test Effect',
+                        description: isTransition
+                            ? 'Reveal the incoming slide with one calm diagonal sweep.'
+                            : 'Render a small calm light that moves across the image.',
+                        mood: 'calm',
+                        visualStyle: 'minimal',
+                        category: selectedCategory(),
+                        parameters: [{ id: 'duration', defaultValue: '2 seconds', range: '', notes: '' }],
+                        customParameters: '',
+                        referenceEffect: '',
+                        reducedMotion: true,
+                        controlMode: 'custom',
+                        taskMode: 'create'
+                    }
+                    : collectInput();
+                const improve = input.taskMode === 'improve';
+                state.generatedPrompt = isTransition
+                    ? improve
+                        ? template.buildTransitionImprovementPrompt(input)
+                        : template.buildTransitionPrompt(input)
+                    : improve
+                        ? template.buildEffectImprovementPrompt(input)
+                        : template.buildEffectPrompt(input);
+                elements.promptOutput.value = state.generatedPrompt;
+                elements.summaryName.textContent = input.name.trim();
+                elements.summaryCategory.textContent = input.category;
+                if (improve) {
+                    const areaCount = input.improvementAreas.length;
+                    elements.summaryControls.textContent = `${areaCount} area${areaCount === 1 ? '' : 's'}`;
+                } else {
+                    const controlCount = input.parameters.length + (input.customParameters ? 1 : 0);
+                    elements.summaryControls.textContent = controlCount
+                        ? `${controlCount} requested`
+                        : 'Assistant will choose essentials';
+                }
+                elements.result.hidden = false;
+                if (!smoke) {
+                    elements.result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                return true;
+            }
+
+            function copyPromptWithLegacyCommand(prompt) {
+                const helper = document.createElement('textarea');
+                helper.value = prompt;
+                helper.readOnly = true;
+                helper.setAttribute('aria-hidden', 'true');
+                helper.style.position = 'fixed';
+                helper.style.inset = '0 auto auto 0';
+                helper.style.width = '1px';
+                helper.style.height = '1px';
+                helper.style.opacity = '0';
+                document.body.appendChild(helper);
+                helper.focus({ preventScroll: true });
+                helper.select();
+
+                try {
+                    return typeof document.execCommand === 'function' && document.execCommand('copy');
+                } catch (_error) {
+                    return false;
+                } finally {
+                    helper.remove();
+                }
+            }
+
+            function preparePromptForManualCopy() {
+                elements.promptReveal.open = true;
+                elements.promptOutput.focus({ preventScroll: true });
+                elements.promptOutput.select();
+                elements.promptOutput.setSelectionRange(0, elements.promptOutput.value.length);
+                elements.promptOutput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            async function copyPrompt() {
+                if (!state.generatedPrompt) return;
+                if (api && typeof api.copyGeneratedPrompt === 'function') {
+                    try {
+                        await api.copyGeneratedPrompt(state.generatedPrompt);
+                        showToast('Complete prompt copied.');
+                    } catch (error) {
+                        showToast(error && error.message ? error.message : 'Could not copy the prompt.', true);
+                    }
+                    return;
+                }
+
+                let copied = false;
+                if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                    try {
+                        await navigator.clipboard.writeText(state.generatedPrompt);
+                        copied = true;
+                    } catch (_error) {
+                        copied = false;
+                    }
+                }
+                if (!copied) copied = copyPromptWithLegacyCommand(state.generatedPrompt);
+
+                if (copied) {
+                    showToast('Complete prompt copied.');
+                    return;
+                }
+
+                preparePromptForManualCopy();
+                showToast('Browser clipboard access is blocked. The complete prompt is selected—press Ctrl+C.', true);
+            }
+
+            async function savePrompt() {
+                if (!state.generatedPrompt) return;
+                if (!api || typeof api.saveGeneratedPrompt !== 'function') {
+                    showToast('Saving is available through the desktop app.', true);
+                    return;
+                }
+                elements.saveBtn.disabled = true;
+                try {
+                    const filename = `${
+                        template.slugify(elements.summaryName.textContent)
+                    }-${state.taskMode === 'improve' ? 'improve-' : ''}${builderCopy.noun}-prompt`;
+                    const result = await api.saveGeneratedPrompt(state.generatedPrompt, filename);
+                    if (result && !result.cancelled) {
+                        showToast(`Saved ${result.filename}.`);
+                    }
+                } catch (error) {
+                    showToast(error && error.message ? error.message : 'Could not save the prompt.', true);
+                } finally {
+                    elements.saveBtn.disabled = false;
+                }
+            }
+
+            async function reportSmokeReady() {
+                if (!api || typeof api.reportReady !== 'function') return;
+                const smokeMode = pageParams.get('smoke') === '1';
+                if (!smokeMode) return;
+                const promptGenerated = generatePrompt({ smoke: true });
+                api.reportReady({
+                    surface: isTransition ? 'transition-prompt-builder' : 'prompt-builder',
+                    builderKind,
+                    workspaceCount: 0,
+                    projectCount: 0,
+                    registryLoaded: state.registriesLoaded,
+                    experimentalCategory: [...elements.categorySelect.options].some(option => (
+                        option.value.toLowerCase() === 'experimental'
+                    )),
+                    parameterCount: Object.keys(template.PARAMETER_INDEX).length,
+                    improvementInterface: (
+                        elements.taskModes.length === 2
+                        && typeof template[
+                            isTransition
+                                ? 'buildTransitionImprovementPrompt'
+                                : 'buildEffectImprovementPrompt'
+                        ] === 'function'
+                    ),
+                    promptGenerated: promptGenerated && state.generatedPrompt.includes('Implementation requirements'),
+                    copyInterface: typeof api.copyGeneratedPrompt === 'function',
+                    saveInterface: typeof api.saveGeneratedPrompt === 'function'
+                });
+            }
+
+            elements.form.addEventListener('submit', event => {
+                event.preventDefault();
+                generatePrompt();
+            });
+            document.querySelectorAll('[data-next-step]').forEach(button => {
+                button.addEventListener('click', () => goToStep(button.dataset.nextStep));
+            });
+            document.querySelectorAll('[data-previous-step]').forEach(button => {
+                button.addEventListener('click', () => goToStep(button.dataset.previousStep, {
+                    skipValidation: true
+                }));
+            });
+            elements.stepButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!button.disabled) goToStep(button.dataset.stepTarget);
+                });
+            });
+            elements.inspirationButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const inspiration = button.dataset.inspiration;
+                    if (state.inspirations.has(inspiration)) state.inspirations.delete(inspiration);
+                    else state.inspirations.add(inspiration);
+                    const selected = state.inspirations.has(inspiration);
+                    button.classList.toggle('selected', selected);
+                    button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                });
+            });
+            elements.controlModes.forEach(input => {
+                input.addEventListener('change', () => {
+                    elements.controlChooser.hidden = selectedControlMode() !== 'custom';
+                    renderSelectedControls();
+                });
+            });
+            elements.taskModes.forEach(input => {
+                input.addEventListener('change', () => {
+                    applyTaskMode();
+                    goToStep(1, { skipValidation: true, scroll: false });
+                });
+            });
+            elements.targetEngine.addEventListener('change', updateTargetStatus);
+            elements.improvementAreaInputs.forEach(input => {
+                input.addEventListener('change', updateImprovementDetails);
+            });
+            elements.clearControlsBtn.addEventListener('click', () => {
+                state.selectedParameters.clear();
+                elements.parameterGroups.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                    input.checked = false;
+                });
+                renderSelectedControls();
+            });
+            elements.categorySelect.addEventListener('change', () => {
+                elements.customCategoryField.hidden = elements.categorySelect.value !== '__new__';
+                if (!elements.customCategoryField.hidden) elements.customCategory.focus();
+            });
+            elements.copyBtn.addEventListener('click', () => void copyPrompt());
+            elements.saveBtn.addEventListener('click', () => void savePrompt());
+            elements.editBtn.addEventListener('click', () => {
+                elements.result.hidden = true;
+                goToStep(1, { skipValidation: true });
+                if (state.taskMode === 'improve') elements.targetEngine.focus();
+                else elements.effectName.focus();
+            });
+            elements.closeBtn.addEventListener('click', () => {
+                if (api && typeof api.closeCurrentWindow === 'function') api.closeCurrentWindow();
+                else window.close();
+            });
+            elements.homeLink.addEventListener('click', event => {
+                if (!api || typeof api.closeCurrentWindow !== 'function') return;
+                event.preventDefault();
+                api.closeCurrentWindow();
+            });
+
+            renderParameterGroups();
+            renderSelectedControls();
+            applyBuilderCopy();
+            elements.taskModes.forEach(input => {
+                input.checked = input.value === initialTaskMode;
+            });
+            applyTaskMode();
+            goToStep(1, { skipValidation: true, scroll: false });
+            loadRegistries().finally(() => void reportSmokeReady());
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pulses Maker</title>
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .control-value {
+            float: right;
+            color: #fda4af;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .control-help {
+            margin: 4px 0 8px;
+            color: #94a3b8;
+            font-size: 0.76rem;
+            line-height: 1.4;
+        }
+
+        .preview {
+            background:
+                radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.22), transparent 38%),
+                linear-gradient(145deg, #1f0a13, #05070d 60%, #111827);
+        }
+
+        details.group summary {
+            cursor: pointer;
+            color: #e2e8f0;
+            font-weight: 700;
+        }
+
+        details.group[open] summary {
+            margin-bottom: 14px;
+        }
+
+        .preview-note {
+            position: absolute;
+            right: 18px;
+            bottom: 16px;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            background: rgba(3, 7, 18, 0.72);
+            color: #cbd5e1;
+            font-size: 0.76rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Pulses Studio</h2>
+
+        <div class="group">
+            <h4>1. Image</h4>
+            <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width:150px;">
+                <button class="small" type="button" onclick="window.openMediaLibrary('img')" style="margin:0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run" type="button">Play Pulses</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Timing</h4>
+
+            <label for="startDelay">Start time <span id="val-startDelay" class="control-value"></span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.4">
+
+            <label for="duration">Duration <span id="val-duration" class="control-value"></span></label>
+            <input type="range" id="duration" min="1" max="20" step="0.1" value="6">
+
+            <label for="pulseCount">Number of pulses <span id="val-pulseCount" class="control-value"></span></label>
+            <input type="range" id="pulseCount" min="1" max="12" step="1" value="4">
+        </div>
+
+        <div class="group">
+            <h4>3. Pulse Design</h4>
+
+            <label for="pulseSpeed">Pulse speed <span id="val-pulseSpeed" class="control-value"></span></label>
+            <div class="control-help">Higher values make each beat rise to its peak sooner.</div>
+            <input type="range" id="pulseSpeed" min="20" max="100" step="1" value="70">
+
+            <label for="spacing">Spacing between pulses <span id="val-spacing" class="control-value"></span></label>
+            <div class="control-help">Sets the quiet rest between one beat and the next.</div>
+            <input type="range" id="spacing" min="0" max="70" step="1" value="28">
+
+            <label for="intensity">Visual intensity <span id="val-intensity" class="control-value"></span></label>
+            <input type="range" id="intensity" min="0" max="25" step="1" value="8">
+        </div>
+
+        <details class="group" id="advancedControls">
+            <summary>Advanced energy</summary>
+
+            <label for="brightnessBoost">Brightness boost <span id="val-brightnessBoost" class="control-value"></span></label>
+            <input type="range" id="brightnessBoost" min="0" max="40" step="1" value="12">
+
+            <label for="opacityBoost">Opacity boost <span id="val-opacityBoost" class="control-value"></span></label>
+            <div class="control-help">Adds a light image echo at the top of each pulse. Set to 0% to disable it.</div>
+            <input type="range" id="opacityBoost" min="0" max="30" step="1" value="8">
+        </details>
+
+        <div class="group">
+            <h4>4. Export</h4>
+            <input type="text" id="filename" value="pulses-effect.json">
+            <button id="downloadBtn" type="button">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+        <div class="preview-note">Centered pulse preview</div>
+    </div>
+
+    <script type="module">
+        import {
+            DEFAULTS,
+            MAX_ANIMATED_PIXELS,
+            mount,
+            normalizeConfig
+        } from '/effects/pulses-engine.js';
+
+        const ENGINE = 'pulses';
+        const PREVIEW_DEBOUNCE_MS = 140;
+        const CONTROL_KEYS = [
+            'startDelay', 'duration', 'pulseCount', 'pulseSpeed',
+            'spacing', 'intensity', 'brightnessBoost', 'opacityBoost'
+        ];
+        const units = {
+            startDelay: 's',
+            duration: 's',
+            pulseCount: '',
+            pulseSpeed: '%',
+            spacing: '%',
+            intensity: '%',
+            brightnessBoost: '%',
+            opacityBoost: '%'
+        };
+        const DEMO_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 1600 900">'
+            + '<defs><radialGradient id="g"><stop stop-color="#fb7185"/><stop offset=".48" stop-color="#9f1239"/><stop offset="1" stop-color="#19060d"/></radialGradient>'
+            + '<linearGradient id="b" x2="1" y2="1"><stop stop-color="#111827"/><stop offset="1" stop-color="#020617"/></linearGradient></defs>'
+            + '<rect width="1600" height="900" fill="url(#b)"/><circle cx="800" cy="450" r="300" fill="url(#g)" opacity=".94"/>'
+            + '<circle cx="800" cy="450" r="220" fill="none" stroke="#fecdd3" stroke-width="8" opacity=".62"/>'
+            + '<circle cx="800" cy="450" r="96" fill="#fff1f2" opacity=".9"/></svg>'
+        );
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const cfg = normalizeConfig(DEFAULTS);
+        let controller = null;
+        let previewTimer = null;
+        let previewRequest = 0;
+        let savedImageRef = '';
+
+        function projectImageRef(source) {
+            if (!source || typeof source !== 'string') return '';
+            if (source.startsWith('data:') || source.startsWith('blob:')) return savedImageRef;
+            if (source.startsWith('img/')) return source;
+            if (/^[a-z][a-z0-9+.-]*:/i.test(source) || source.startsWith('/')) return source;
+            return `img/${source.replace(/^\/+/, '')}`;
+        }
+
+        function updateValueLabel(key) {
+            const label = document.getElementById('val-' + key);
+            if (!label) return;
+            const value = key === 'startDelay' || key === 'duration'
+                ? Number(cfg[key]).toFixed(1)
+                : String(Math.round(cfg[key]));
+            label.textContent = value + units[key];
+        }
+
+        function previewConfig(overrides) {
+            return {
+                ...cfg,
+                ...(overrides || {}),
+                imgSrc: window.img1Data || window.imgData || savedImageRef || DEMO_IMAGE
+            };
+        }
+
+        function restartPreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            if (!controller) controller = mount(canvas, ctx, previewConfig());
+            else if (typeof controller.restart === 'function') controller.restart(previewConfig());
+        }
+
+        function schedulePreview() {
+            const request = ++previewRequest;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                previewTimer = null;
+                if (request !== previewRequest) return;
+                restartPreview();
+            }, PREVIEW_DEBOUNCE_MS);
+        }
+
+        function setControlValue(key, value) {
+            const normalized = normalizeConfig({ ...cfg, [key]: value });
+            cfg[key] = normalized[key];
+            const input = document.getElementById(key);
+            if (input) input.value = String(cfg[key]);
+            updateValueLabel(key);
+        }
+
+        CONTROL_KEYS.forEach(key => {
+            document.getElementById(key).addEventListener('input', event => {
+                setControlValue(key, event.target.value);
+                schedulePreview();
+            });
+        });
+        document.getElementById('runBtn').addEventListener('click', restartPreview);
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            const normalized = normalizeConfig(config);
+            CONTROL_KEYS.forEach(key => setControlValue(key, normalized[key]));
+            savedImageRef = projectImageRef(config.imgSrc || '');
+            restartPreview();
+        }
+
+        function getExportJSON() {
+            const selectedName = window.imgName
+                ? projectImageRef(String(window.imgName).split(/[\\/]/).pop())
+                : '';
+            return {
+                enabled: true,
+                name: 'Pulses',
+                engine: ENGINE,
+                maker: 'effects/pulses-maker.html',
+                config: {
+                    imgSrc: selectedName || savedImageRef,
+                    startDelay: cfg.startDelay,
+                    duration: cfg.duration,
+                    pulseCount: cfg.pulseCount,
+                    pulseSpeed: cfg.pulseSpeed,
+                    spacing: cfg.spacing,
+                    intensity: cfg.intensity,
+                    brightnessBoost: cfg.brightnessBoost,
+                    opacityBoost: cfg.opacityBoost
+                }
+            };
+        }
+
+        async function runStressCheck() {
+            const host = document.createElement('div');
+            host.style.cssText =
+                'position:fixed;left:0;top:0;width:4px;height:4px;overflow:hidden;opacity:0.01;pointer-events:none;';
+            const canvases = [document.createElement('canvas'), document.createElement('canvas')];
+            const controllers = [];
+            document.body.appendChild(host);
+
+            try {
+                canvases.forEach(stressCanvas => {
+                    stressCanvas.width = 3840;
+                    stressCanvas.height = 2160;
+                    stressCanvas.style.width = '1280px';
+                    stressCanvas.style.height = '720px';
+                    host.appendChild(stressCanvas);
+                    controllers.push(mount(stressCanvas, stressCanvas.getContext('2d'), previewConfig({
+                        startDelay: 0,
+                        duration: 1,
+                        pulseCount: 12,
+                        pulseSpeed: 100,
+                        spacing: 0,
+                        intensity: 25,
+                        brightnessBoost: 40,
+                        opacityBoost: 30
+                    })));
+                });
+
+                for (let index = 0; index < 30; index += 1) {
+                    controllers[index % controllers.length].restart(previewConfig({
+                        startDelay: 0,
+                        duration: 1,
+                        pulseCount: 12,
+                        pulseSpeed: 100,
+                        spacing: index % 2 ? 0 : 70,
+                        intensity: 25,
+                        brightnessBoost: 40,
+                        opacityBoost: 30
+                    }));
+                }
+
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                await new Promise(resolve => setTimeout(resolve, 450));
+                const snapshots = controllers.map(item => item.inspect());
+                const surfacePixels = snapshots.map(item => item.surfacePixels);
+                const safe = surfacePixels.every(pixels => pixels <= MAX_ANIMATED_PIXELS)
+                    && snapshots.every(item => item.active);
+                if (!safe) throw new Error('Pulses exceeded its surface or lifecycle budget.');
+                return { safe, instances: controllers.length, surfacePixels };
+            } finally {
+                controllers.forEach(stop => stop());
+                host.remove();
+            }
+        }
+
+        window.MakerAPI = {
+            onImageLoaded: restartPreview,
+            run: restartPreview,
+            getExportJSON,
+            loadEditConfig,
+            runStressCheck
+        };
+        window.run = restartPreview;
+
+        function disposePreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            if (controller) controller();
+            controller = null;
+        }
+
+        window.addEventListener('pagehide', disposePreview, { once: true });
+        CONTROL_KEYS.forEach(updateValueLabel);
+        restartPreview();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

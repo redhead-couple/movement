@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Symbol Tunnel Maker</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Symbol Tunnel</h2>
+
+        <div class="group">
+            <h4>1. Background</h4>
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Restart Animation</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Symbol</h4>
+            <label>Character</label>
+            <input type="text" id="symbol" maxlength="1" value="!" style="text-align:center; font-size:1.2rem;">
+
+            <label>Color</label>
+            <input type="color" id="color" value="#ffffff">
+
+            <label>Opacity <span id="val-opacity"></span></label>
+            <input type="range" id="opacity" min="0.1" max="1" step="0.05" value="0.85">
+
+            <label>Size <span id="val-size"></span></label>
+            <input type="range" id="size" min="12" max="160" value="64">
+        </div>
+
+        <div class="group">
+            <h4>3. Motion</h4>
+            <label>Count <span id="val-count"></span></label>
+            <input type="range" id="count" min="10" max="250" value="90">
+
+            <label>Speed <span id="val-speed"></span></label>
+            <input type="range" id="speed" min="0.2" max="4" step="0.1" value="1.2">
+
+            <label>Spread <span id="val-spread"></span></label>
+            <input type="range" id="spread" min="0.3" max="1.8" step="0.1" value="1.0">
+
+            <label>Start Delay (Seconds) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="10" step="0.1" value="0">
+
+            <label>Duration (Seconds) <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.5" max="10" step="0.1" value="4">
+
+            <label>Group Shape</label>
+            <select id="shape">
+                <option value="cloud">Random Cloud</option>
+                <option value="tunnel" selected>Cone / Tunnel</option>
+                <option value="spiral">Spiral</option>
+                <option value="ring">Ring</option>
+                <option value="stream">Left / Right Stream</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <h4>4. Export</h4>
+            <input type="text" id="filename" value="symbol-tunnel.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/route-engine.js';
+        const ENGINE = 'route';
+        import { mount } from '/effects/route-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        const cfg = {
+            symbol: '!',
+            color: '#ffffff',
+            opacity: 0.85,
+            size: 64,
+            count: 90,
+            speed: 1.2,
+            spread: 1.0,
+            shape: 'tunnel',
+            startDelay: 0,
+            duration: 4
+        };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            Object.keys(cfg).forEach((k) => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: window.imgData
+            });
+        }
+
+        // Image preloading and upload wiring are handled centrally by maker-engine.js.
+        ['opacity', 'size', 'count', 'speed', 'spread', 'startDelay', 'duration'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', (e) => {
+                cfg[id] = parseFloat(e.target.value);
+                run();
+            });
+        });
+
+        document.getElementById('color').addEventListener('input', (e) => {
+            cfg.color = e.target.value;
+            run();
+        });
+
+        document.getElementById('shape').addEventListener('change', (e) => {
+            cfg.shape = e.target.value;
+            run();
+        });
+
+        document.getElementById('symbol').addEventListener('input', (e) => {
+            const value = String(e.target.value || '!').slice(0, 1);
+            e.target.value = value;
+            cfg.symbol = value || '!';
+            run();
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        run();
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if (typeof run === 'function') run(); },
+            run: () => { if (typeof run === 'function') run(); },
+            getExportJSON: () => {
+                const code = `
+import { mount as runRoute } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runRoute(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.imgName}',
+        symbol: '${String(cfg.symbol).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}',
+        color: '${cfg.color}',
+        opacity: ${cfg.opacity},
+        size: ${cfg.size},
+        count: ${cfg.count},
+        speed: ${cfg.speed},
+        spread: ${cfg.spread},
+        startDelay: ${cfg.startDelay},
+        duration: ${cfg.duration},
+        shape: '${cfg.shape}'
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

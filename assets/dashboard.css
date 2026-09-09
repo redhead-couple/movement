@@ -1,0 +1,119 @@
+.dashboard-page .notice-stack {
+  display: flex;
+  margin-top: var(--app-space-5);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-page .notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--app-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-page .notice-banner--success {
+  border-color: rgba(114, 179, 138, 0.28);
+  background: rgba(114, 179, 138, 0.1);
+}
+
+.dashboard-page .notice-banner--warning {
+  border-color: rgba(203, 139, 115, 0.28);
+  background: rgba(203, 139, 115, 0.1);
+}
+
+.dashboard-page .notice-banner--error {
+  border-color: rgba(181, 106, 90, 0.28);
+  background: rgba(181, 106, 90, 0.12);
+}
+
+.dashboard-page .notice-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dashboard-page .notice-copy p {
+  margin: 0;
+}
+
+.dashboard-page .notice-label {
+  color: var(--app-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dashboard-page .dashboard-library {
+  display: grid;
+  padding-top: var(--app-space-6);
+  gap: var(--app-space-5);
+}
+
+.dashboard-page .dashboard-import-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.dashboard-page .dashboard-import-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  transform: none;
+}
+
+.dashboard-page .status-banner--success {
+  border-color: rgba(114, 179, 138, 0.3);
+  background: rgba(114, 179, 138, 0.1);
+}
+
+.dashboard-page .status-banner {
+  padding: var(--app-space-4);
+  border: 1px solid rgba(180, 106, 85, 0.24);
+  border-radius: var(--app-radius-md);
+  background: rgba(185, 99, 79, 0.1);
+}
+
+.dashboard-page .status-banner strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.dashboard-page .status-banner p {
+  margin: 0;
+}
+
+.dashboard-page .dashboard-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--app-space-4);
+  padding-top: var(--app-space-3);
+  border-top: 1px solid var(--app-line);
+  color: var(--app-text-muted);
+  font-size: 12px;
+}
+
+.dashboard-page .dashboard-footer a:hover {
+  color: var(--app-text);
+}
+
+@media (max-width: 860px) {
+  .dashboard-page .notice-stack {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .dashboard-page .notice-banner {
+    width: 100%;
+    border-radius: var(--app-radius-md);
+  }
+
+  .dashboard-page .notice-copy {
+    display: grid;
+    gap: 4px;
+  }
+}

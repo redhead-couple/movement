@@ -1,0 +1,97 @@
+{
+  "name": "movement-timeline-studio-desktop",
+  "productName": "Movement Timeline Studio",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "description": "Offline desktop edition of Movement Timeline Studio.",
+  "author": "Redhead Couple",
+  "homepage": "https://redhead-couple.org/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redhead-couple/movement.git"
+  },
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "desktop": "node tools/start-electron.cjs",
+    "desktop:smoke": "node tools/start-electron.cjs --smoke",
+    "desktop:smoke:editor": "node tools/start-electron.cjs --smoke-editor",
+    "desktop:smoke:player": "node tools/start-electron.cjs --smoke-player",
+    "desktop:smoke:preview": "node tools/start-electron.cjs --smoke-preview",
+    "desktop:smoke:effects": "node tools/start-electron.cjs --smoke-effects",
+    "desktop:smoke:registry": "node tools/start-electron.cjs --smoke-registry",
+    "desktop:smoke:prompt-builder": "node tools/start-electron.cjs --smoke-prompt-builder",
+    "desktop:smoke:transition-prompt-builder": "node tools/start-electron.cjs --smoke-transition-prompt-builder",
+    "desktop:smoke:packaged": "node tools/smoke-packaged.cjs",
+    "desktop:smoke:packaged:registry": "node tools/smoke-packaged.cjs --registry",
+    "desktop:smoke:authoring-kit": "node tools/smoke-authoring-kit.cjs",
+    "desktop:smoke:authoring-kit:registry": "node tools/smoke-authoring-kit.cjs --registry",
+    "dist:authoring-kit": "node tools/build-authoring-kit.cjs",
+    "verify:authoring-kit": "node tools/verify-authoring-kit.cjs",
+    "verify:media-provenance": "node tools/verify-media-provenance.cjs",
+    "build:windows-icon": "node tools/build-windows-icon.cjs",
+    "dist:windows": "electron-builder --win nsis --x64",
+    "test": "node --test tests/*.test.cjs",
+    "test:workspaces": "node --test tests/workspace-service.test.cjs"
+  },
+  "devDependencies": {
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "org.movement.timelinestudio",
+    "productName": "Movement Timeline Studio",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "package.json",
+      "MEDIA_ATTRIBUTION.md",
+      "distribution/media-provenance.json",
+      "desktop/**/*",
+      "shared/frontend/**/*",
+      "assets/app.css",
+      "img/bg_wanaka.webp",
+      "examples/**/*",
+      "!examples/**/backups/**/*",
+      "!examples/**/*.save.lock",
+      "!examples/**/.movement-media-trash/**/*",
+      "effects/*-engine.js",
+      "effects/effect-media.js",
+      "effects/*-maker.html",
+      "transitions/*-engine.js",
+      "transitions/*-maker.html",
+      "studio/authoring/**/*",
+      "studio/editor/**/*",
+      "studio/hubs/**/*",
+      "studio/player/**/*",
+      "docs/EFFECT_AUTHORING_CONTRACT.md",
+      "docs/ANIMATION_PERFORMANCE_BUDGET.md",
+      "docs/TRANSITION_AUTHORING_CONTRACT.md",
+      "effects/registry.json",
+      "transitions/registry.json",
+      "studio/maker/**/*"
+    ],
+    "win": {
+      "icon": "desktop/assets/movement-icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Movement Timeline Studio",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Wave Lines Generator v2</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Vertical Waves</h2>
+
+        <div class="group">
+            <h4>1. Target Image</h4>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+            <div style="font-size:0.75rem; color:#64748b; margin-top:6px;">
+                * Ensure file is in <b>img/</b> folder.
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>2. Controls</h4>
+            <button class="play" id="previewBtn">▶ Run Preview</button>
+        </div>
+
+        <div class="group">
+            <h4>3. Style & Position</h4>
+
+            <div class="param-row">
+                <label>Color</label>
+                <input type="color" id="color" value="#ffffff">
+            </div>
+
+            <div class="param-row">
+                <label>Opacity</label>
+                <input type="number" id="n-opacity" class="num-input" step="0.1" value="1.0">
+            </div>
+            <input type="range" id="opacity" min="0" max="1" step="0.05" value="1.0">
+
+            <div class="param-row">
+                <label>Position X (0=L, 1=R)</label>
+                <input type="number" id="n-originX" class="num-input" step="0.01" value="0.5">
+            </div>
+            <input type="range" id="originX" min="0" max="1" step="0.01" value="0.5">
+
+            <div class="param-row">
+                <label>Lines per side</label>
+                <input type="number" id="n-count" class="num-input" value="5">
+            </div>
+            <input type="range" id="count" min="0" max="20" value="5">
+
+            <div class="param-row">
+                <label>Thickness</label>
+                <input type="number" id="n-thickness" class="num-input" value="2">
+            </div>
+            <input type="range" id="thickness" min="1" max="10" value="2">
+
+            <div class="param-row">
+                <label>Spacing (Gap)</label>
+                <input type="number" id="n-spacing" class="num-input" value="40">
+            </div>
+            <input type="range" id="spacing" min="5" max="200" value="40">
+        </div>
+
+        <div class="group">
+            <h4>4. Wave Physics</h4>
+
+            <div class="param-row">
+                <label>Frequency (Tightness)</label>
+                <input type="number" id="n-freq" class="num-input" step="0.001" value="0.02">
+            </div>
+            <input type="range" id="freq" min="0.001" max="0.1" step="0.001" value="0.02">
+
+            <div class="param-row">
+                <label>Amplitude (Swing)</label>
+                <input type="number" id="n-amp" class="num-input" value="20">
+            </div>
+            <input type="range" id="amp" min="0" max="100" value="20">
+
+            <div class="param-row">
+                <label>Speed</label>
+                <input type="number" id="n-speed" class="num-input" value="10">
+            </div>
+            <input type="range" id="speed" min="1" max="50" value="10">
+        </div>
+
+        <div class="group">
+            <h4>5. Timing</h4>
+            <div class="param-row">
+                <label>Start Delay (ms)</label>
+                <input type="number" id="n-startTime" class="num-input" step="100" value="0">
+            </div>
+            <input type="range" id="startTime" min="0" max="5000" step="100" value="0">
+
+            <div class="param-row">
+                <label>Duration (ms)</label>
+                <input type="number" id="n-duration" class="num-input" step="500" value="5000">
+            </div>
+            <input type="range" id="duration" min="1000" max="20000" step="500" value="5000">
+        </div>
+
+        <div class="group">
+            <h4>6. Export</h4>
+            <label>Filename</label>
+            <input type="text" id="filename" value="signal-waves.json">
+            <button id="downloadBtn">Download Effect File</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/wave-engine.js';
+        const ENGINE = 'wave';
+        import { runWave } from '/effects/wave-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanupFunc = null;
+
+        const config = {
+            startTime: 0, duration: 5000,
+            count: 5, thickness: 2, spacing: 40,
+            freq: 0.02, amp: 20, speed: 10,
+            color: '#ffffff', originX: 0.5, opacity: 1.0
+        };
+
+        // Image preloading and upload wiring are handled centrally by maker-engine.js.
+        /*
+        } else if (prefilledImg) {
+            currentImageName = prefilledImg;
+            currentImageDataUrl = '/img/' + prefilledImg;
+
+            const overrideContainer = document.getElementById('overrideContainer');
+            if (overrideContainer) overrideContainer.innerHTML = '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>';
+            else { const inputGroup = document.getElementById('imgInput').parentNode;
+            inputGroup.insertAdjacentHTML('beforeend', '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>'); }
+            document.getElementById('imgInput').addEventListener('change', handleImageUpload);
+
+            fetch(currentImageDataUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        currentImageDataUrl = ev.target.result;
+                        if (typeof loadImage !== 'undefined') {
+                            loadImage(currentImageDataUrl, currentImageName);
+                        } else if (typeof runPreview !== 'undefined') {
+                            runPreview();
+                        } else {
+                            run();
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+                })
+                .catch(err => {
+                    console.error("Failed to preload image:", err);
+                    if (typeof runPreview !== 'undefined') { runPreview(); } else if (typeof run !== 'undefined') { run(); }
+                });
+        } else {
+            document.getElementById('imgInput').addEventListener('change', handleImageUpload);
+        }
+        */
+        window.runPreview = runPreview;
+        function runPreview() {
+            if (cleanupFunc) cleanupFunc();
+            cleanupFunc = runWave(canvas, ctx, {
+                ...config,
+                imgSrc: window.imgData
+            });
+        }
+
+        // --- 2. Bindings ---
+        function bind(id, key, isFloat = false) {
+            const range = document.getElementById(id);
+            const num = document.getElementById('n-' + id);
+
+            if (range) {
+                range.addEventListener('input', () => {
+                    let val = isFloat ? parseFloat(range.value) : parseInt(range.value);
+                    config[key] = val;
+                    if (num) num.value = val;
+                    runPreview();
+                });
+            }
+            if (num) {
+                num.addEventListener('input', () => {
+                    let val = isFloat ? parseFloat(num.value) : parseInt(num.value);
+                    if (isNaN(val)) return;
+                    config[key] = val;
+                    if (range) range.value = val;
+                    runPreview();
+                });
+            }
+        }
+
+        bind('originX', 'originX', true);
+        bind('opacity', 'opacity', true);
+        bind('count', 'count');
+        bind('thickness', 'thickness');
+        bind('spacing', 'spacing');
+        bind('freq', 'freq', true);
+        bind('amp', 'amp');
+        bind('speed', 'speed');
+        bind('startTime', 'startTime');
+        bind('duration', 'duration');
+
+        document.getElementById('color').addEventListener('input', (e) => {
+            config.color = e.target.value;
+            runPreview();
+        });
+
+        document.getElementById('previewBtn').addEventListener('click', runPreview);
+        window.addEventListener('resize', runPreview);
+
+        // --- 4. Download ---
+        // Rename the download button if running inside the Hub Iframe
+
+
+
+
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
+            run: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
+            getExportJSON: () => {
+                const code = `
+import { runWave } from '${ENGINE_PATH}';
+
+export function mount(canvas, ctx, config) {
+    return runWave(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.imgName}',
+        startTime: ${config.startTime},
+        duration: ${config.duration},
+        originX: ${config.originX},
+        opacity: ${config.opacity},
+        count: ${config.count},
+        thickness: ${config.thickness},
+        spacing: ${config.spacing},
+        freq: ${config.freq},
+        amp: ${config.amp},
+        speed: ${config.speed},
+        color: '${config.color}'
+    });
+}`;
+                // Look aggressively for an object return signature
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                let configObj = {};
+                if (match) {
+                    const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                    configObj = (new Function("return (" + objExpr + ");"))();
+                } else {
+                     console.error("Could not parse exported config!");
+                }
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

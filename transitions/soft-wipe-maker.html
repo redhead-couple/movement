@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Wipe Transition Maker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .sidebar {
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        h2 {
+            margin: 0 0 18px;
+            font-size: 1.1rem;
+        }
+
+        .group {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            font: inherit;
+        }
+
+        input,
+        select {
+            color: var(--text);
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 9px 10px;
+        }
+
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .run {
+            background: var(--accent);
+            color: white;
+        }
+
+        #downloadBtn {
+            background: var(--success);
+            color: white;
+            margin-top: 10px;
+        }
+
+        .preview {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(59, 130, 246, 0.16), transparent 45%),
+                linear-gradient(315deg, rgba(16, 185, 129, 0.14), transparent 50%),
+                #020617;
+            display: grid;
+            place-items: center;
+        }
+
+        .stage {
+            position: relative;
+            width: min(74vw, 960px);
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #111827;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            font-size: clamp(1.4rem, 4vw, 3.4rem);
+            font-weight: 900;
+            letter-spacing: 0;
+        }
+
+        .from {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(251, 146, 60, 0.45), transparent 32%),
+                linear-gradient(135deg, #7f1d1d, #292524);
+        }
+
+        .to {
+            background:
+                radial-gradient(circle at 80% 20%, rgba(125, 211, 252, 0.42), transparent 32%),
+                linear-gradient(135deg, #064e3b, #172554);
+            clip-path: inset(0 100% 0 0);
+        }
+
+        .stage.is-playing .to {
+            animation-name: wipe-left;
+            animation-fill-mode: forwards;
+            animation-timing-function: var(--ease, ease);
+            animation-duration: var(--duration, 1s);
+        }
+
+        .stage.is-playing[data-direction="right"] .to {
+            animation-name: wipe-right;
+        }
+
+        .stage.is-playing[data-direction="up"] .to {
+            animation-name: wipe-up;
+        }
+
+        .stage.is-playing[data-direction="down"] .to {
+            animation-name: wipe-down;
+        }
+
+        @keyframes wipe-left {
+            from {
+                clip-path: inset(0 100% 0 0);
+                filter: blur(var(--blur, 10px));
+            }
+
+            to {
+                clip-path: inset(0 0 0 0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes wipe-right {
+            from {
+                clip-path: inset(0 0 0 100%);
+                filter: blur(var(--blur, 10px));
+            }
+
+            to {
+                clip-path: inset(0 0 0 0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes wipe-up {
+            from {
+                clip-path: inset(100% 0 0 0);
+                filter: blur(var(--blur, 10px));
+            }
+
+            to {
+                clip-path: inset(0 0 0 0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes wipe-down {
+            from {
+                clip-path: inset(0 0 100% 0);
+                filter: blur(var(--blur, 10px));
+            }
+
+            to {
+                clip-path: inset(0 0 0 0);
+                filter: blur(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2>Soft Wipe Maker</h2>
+
+        <div class="group">
+            <button id="runBtn" class="run">Play Transition</button>
+        </div>
+
+        <div class="group">
+            <label>Duration <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.2" max="5" step="0.1" value="1">
+
+            <label>Direction</label>
+            <select id="direction">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="up">Up</option>
+                <option value="down">Down</option>
+            </select>
+
+            <label>Blur Edge <span id="val-blur"></span></label>
+            <input type="range" id="blur" min="0" max="28" step="1" value="10">
+
+            <label>Easing</label>
+            <select id="easing">
+                <option value="ease">Ease</option>
+                <option value="ease-in">Ease In</option>
+                <option value="ease-out">Ease Out</option>
+                <option value="ease-in-out">Ease In Out</option>
+                <option value="linear">Linear</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Transition Name</label>
+            <input type="text" id="transitionName" value="Soft Wipe Transition">
+            <button id="downloadBtn">Use Transition</button>
+        </div>
+    </aside>
+
+    <main class="preview">
+        <div class="stage" id="stage" data-direction="left">
+            <div class="slide from">Outgoing Slide</div>
+            <div class="slide to">Incoming Slide</div>
+        </div>
+    </main>
+
+    <script>
+        const ENGINE = 'soft-wipe';
+        const MAKER = 'transitions/soft-wipe-maker.html';
+        const cfg = {
+            duration: 1,
+            direction: 'left',
+            blur: 10,
+            easing: 'ease'
+        };
+
+        const stage = document.getElementById('stage');
+
+        function applyValues() {
+            cfg.duration = Number(document.getElementById('duration').value) || 1;
+            cfg.direction = document.getElementById('direction').value;
+            cfg.blur = Number(document.getElementById('blur').value) || 0;
+            cfg.easing = document.getElementById('easing').value;
+
+            document.getElementById('val-duration').textContent = `${cfg.duration.toFixed(1)}s`;
+            document.getElementById('val-blur').textContent = `${cfg.blur}px`;
+
+            stage.dataset.direction = cfg.direction;
+            stage.style.setProperty('--duration', `${cfg.duration}s`);
+            stage.style.setProperty('--blur', `${cfg.blur}px`);
+            stage.style.setProperty('--ease', cfg.easing);
+        }
+
+        function runPreview() {
+            applyValues();
+            stage.classList.remove('is-playing');
+            void stage.offsetWidth;
+            stage.classList.add('is-playing');
+        }
+
+        function getExportJSON() {
+            applyValues();
+            return {
+                version: 1,
+                name: document.getElementById('transitionName').value.trim() || 'Soft Wipe Transition',
+                engine: ENGINE,
+                maker: MAKER,
+                config: { ...cfg }
+            };
+        }
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            if (config.duration != null) document.getElementById('duration').value = config.duration;
+            if (config.direction) document.getElementById('direction').value = config.direction;
+            if (config.blur != null) document.getElementById('blur').value = config.blur;
+            if (config.easing) document.getElementById('easing').value = config.easing;
+            applyValues();
+        }
+
+        document.getElementById('runBtn').addEventListener('click', runPreview);
+        ['duration', 'direction', 'blur', 'easing'].forEach(id => {
+            document.getElementById(id).addEventListener('input', runPreview);
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const payload = getExportJSON();
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(payload, '*');
+            } else {
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'soft-wipe-transition.json';
+                a.click();
+            }
+        });
+
+        window.addEventListener('message', event => {
+            if (event.data === 'trigger_apply') {
+                document.getElementById('downloadBtn').click();
+            }
+        });
+
+        const storedJson = sessionStorage.getItem('transitionEditData');
+        if (storedJson) {
+            try {
+                const transitionData = JSON.parse(storedJson);
+                if (transitionData.name) document.getElementById('transitionName').value = transitionData.name;
+                loadEditConfig(transitionData.config);
+            } catch (error) { }
+        }
+
+        applyValues();
+        runPreview();
+    </script>
+</body>
+
+</html>

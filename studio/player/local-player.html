@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Timeline Player</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="/assets/app.css">
+    <style>
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            background: #0f0d0c;
+            color: #f3eee8;
+            font-family: var(--app-font-body, system-ui, sans-serif);
+        }
+
+        .player-shell {
+            min-height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 1.6% 10% 3%;
+            background: #0f0d0c;
+        }
+
+        .intro-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: none;
+            background: #050505;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .intro-screen.vanish {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .layer-opener {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .startOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 15, 13, 0.4);
+        }
+
+        .visual {
+            position: relative;
+            overflow: hidden;
+            min-height: 80vh;
+            max-height: 100vh;
+            background: #050505;
+            border-radius: var(--app-radius-lg, 28px);
+        }
+
+        .layer,
+        .layer-bg,
+        .layer-fg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+        }
+
+        .layer-fg {
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        canvas.layer-bg,
+        canvas.layer-fg {
+            display: block;
+        }
+
+        .slideLayer {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            display: block;
+            will-change: transform, opacity;
+        }
+
+        .t-push-up-enter-active,
+        .t-push-up-exit-active,
+        .t-push-left-enter-active,
+        .t-push-left-exit-active,
+        .t-push-right-enter-active,
+        .t-push-right-exit-active,
+        .t-fade-enter-active,
+        .t-fade-exit-active,
+        .t-zoom-enter-active,
+        .t-zoom-exit-active {
+            transition: transform 0.6s ease, opacity 0.6s ease;
+        }
+
+        .t-dissolve-enter-active,
+        .t-dissolve-exit-active {
+            transition: opacity 1.1s ease-in-out;
+        }
+
+        .t-push-up-enter { transform: translateY(100%); z-index: 2; }
+        .t-push-up-enter-active { transform: translateY(0); }
+        .t-push-up-exit { transform: translateY(0); z-index: 1; }
+        .t-push-up-exit-active { transform: translateY(-100%); }
+        .t-push-left-enter { transform: translateX(100%); z-index: 2; }
+        .t-push-left-enter-active { transform: translateX(0); }
+        .t-push-left-exit { transform: translateX(0); z-index: 1; }
+        .t-push-left-exit-active { transform: translateX(-100%); }
+        .t-push-right-enter { transform: translateX(-100%); z-index: 2; }
+        .t-push-right-enter-active { transform: translateX(0); }
+        .t-push-right-exit { transform: translateX(0); z-index: 1; }
+        .t-push-right-exit-active { transform: translateX(100%); }
+        .t-zoom-enter { transform: scale(0.5); opacity: 0; z-index: 2; }
+        .t-zoom-enter-active { transform: scale(1); opacity: 1; }
+        .t-zoom-exit { transform: scale(1); opacity: 1; z-index: 1; }
+        .t-zoom-exit-active { transform: scale(1.5); opacity: 0; }
+        .t-fade-enter { opacity: 0; z-index: 2; }
+        .t-fade-enter-active { opacity: 1; }
+        .t-fade-exit { opacity: 1; z-index: 1; }
+        .t-fade-exit-active { opacity: 0; }
+        .t-dissolve-enter { opacity: 0; z-index: 2; }
+        .t-dissolve-enter-active { opacity: 1; }
+        .t-dissolve-exit { opacity: 1; z-index: 1; }
+        .t-dissolve-exit-active { opacity: 1; }
+
+        #captionsOverlay {
+            position: absolute;
+            left: 50%;
+            bottom: 20px;
+            z-index: 10;
+            width: 80%;
+            padding: 0;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #captionsOverlay.cc-hidden {
+            display: none;
+        }
+
+        #captionText {
+            display: inline-block;
+            border-radius: 4px;
+            padding: 4px 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-family: sans-serif;
+            font-size: 18px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            display: none;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 12px;
+            background: transparent;
+        }
+
+        .controls button,
+        .bigBtn {
+            width: auto;
+            border: 1px solid rgba(243, 238, 232, 0.12);
+            border-radius: var(--app-radius-sm, 14px);
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #f3eee8;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .bigBtn {
+            border: none;
+            border-radius: 999px;
+            padding: 14px 18px;
+            background: #b9634f;
+            color: #180f0c;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+            font-size: clamp(16px, 1.8vw, 22px);
+        }
+
+        #playPauseBtn {
+            background: #b9634f;
+            border-color: #d18a70;
+            color: #180f0c;
+        }
+
+        #scrub {
+            flex: 1 1 200px;
+            min-width: 160px;
+        }
+
+        #posLabel,
+        #maxLabel,
+        #status {
+            color: rgba(215, 205, 194, 0.72);
+            font-size: 0.9rem;
+        }
+
+        #status {
+            position: fixed;
+            left: 16px;
+            top: 16px;
+            z-index: 30;
+            color: #fffdf8;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+        }
+
+        body.is-fullscreen .player-shell {
+            padding: 0;
+        }
+
+        body.is-fullscreen .visual {
+            min-height: 100vh;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        body.is-fullscreen .controls {
+            padding: 12px 16px 16px;
+        }
+
+        @media (max-width: 768px) {
+            .player-shell {
+                padding: 16px 16px 16px;
+            }
+
+            .visual {
+                min-height: 62vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="status"></div>
+    <main id="player" class="player-shell">
+        <section id="visual" class="visual">
+            <div id="introScreen" class="intro-screen">
+                <div id="title" class="visually-hidden">Local Timeline</div>
+                <img id="opener" class="layer-opener" alt="">
+                <div class="startOverlay">
+                    <button id="startBtn" class="bigBtn" type="button">Start</button>
+                </div>
+            </div>
+            <div id="layerA" class="slideLayer" style="z-index:2;"></div>
+            <div id="layerB" class="slideLayer" style="z-index:1; transform: translateX(100%);"></div>
+            <div id="captionsOverlay" class="cc-hidden">
+                <div id="captionText"></div>
+            </div>
+        </section>
+
+        <nav id="controlsBar" class="controls" aria-label="Player controls">
+            <button id="backBtn" type="button">Back</button>
+            <button id="prevBtn" type="button">Prev</button>
+            <button id="playPauseBtn" type="button">Play</button>
+            <button id="nextBtn" type="button">Next</button>
+            <button id="ccBtn" type="button">CC</button>
+            <button id="fullscreenBtn" type="button">Fullscreen</button>
+            <span id="posLabel">0</span>
+            <input id="scrub" type="range" min="1" max="1" value="1">
+            <span id="maxLabel">0</span>
+            <button id="exitFullscreenBtn" type="button" hidden>Exit</button>
+        </nav>
+    </main>
+
+    <audio id="speech" class="visually-hidden" preload="auto"></audio>
+
+    <script>
+        (function () {
+            var started = false;
+            var assetUrls = new Map();
+
+            function normalizeKey(value) {
+                return String(value || '').replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+            }
+
+            function rememberAsset(key, file) {
+                var cleanKey = normalizeKey(key);
+                if (!cleanKey || !file) return;
+                var url = URL.createObjectURL(file);
+                assetUrls.set(cleanKey, url);
+                assetUrls.set(cleanKey.toLowerCase(), url);
+
+                var parts = cleanKey.split('/');
+                var basename = parts[parts.length - 1];
+                if (basename) {
+                    assetUrls.set(basename, url);
+                    assetUrls.set(basename.toLowerCase(), url);
+                }
+            }
+
+            function isDirectAssetUrl(value) {
+                return /^[a-z][a-z0-9+.-]*:/i.test(value) || value.startsWith('/') || value.startsWith('//');
+            }
+
+            function guessFolder(value) {
+                var val = String(value || '').toLowerCase();
+                if (val.startsWith('audio/')) return 'audio';
+                if (val.startsWith('speech/')) return 'speech';
+                if (/\.(mp3|wav|ogg|m4a|aac|flac)(?:[?#].*)?$/i.test(val)) return 'speech';
+                return 'img';
+            }
+
+            function resolveAsset(value, folder) {
+                if (typeof value !== 'string') return value;
+                var val = normalizeKey(value.trim());
+                if (!val || isDirectAssetUrl(val)) return value;
+
+                var candidates = [val];
+                if (!val.startsWith('img/') && !val.startsWith('speech/') && !val.startsWith('audio/')) {
+                    candidates.push((folder || guessFolder(val)) + '/' + val);
+                }
+
+                for (var i = 0; i < candidates.length; i++) {
+                    var key = normalizeKey(candidates[i]);
+                    var found = assetUrls.get(key) || assetUrls.get(key.toLowerCase());
+                    if (found) return found;
+                }
+
+                return value;
+            }
+
+            function normalizeEffectAssets(input) {
+                if (Array.isArray(input)) return input.map(normalizeEffectAssets);
+                if (input && typeof input === 'object') {
+                    var out = {};
+                    Object.keys(input).forEach(function (key) {
+                        out[key] = normalizeEffectAssets(input[key]);
+                    });
+                    return out;
+                }
+
+                if (typeof input === 'string' && /\.(png|jpe?g|webp|gif|avif|bmp|svg|mp3|wav|ogg|m4a|aac|flac)(?:[?#].*)?$/i.test(input.trim())) {
+                    return resolveAsset(input, guessFolder(input));
+                }
+
+                return input;
+            }
+
+            function normalizeEffect(effect) {
+                if (!effect || typeof effect !== 'object') return effect || null;
+                var out = Object.assign({}, effect);
+                if (out.config && typeof out.config === 'object') {
+                    out.config = normalizeEffectAssets(out.config);
+                }
+                return out;
+            }
+
+            function normalizeFlow(flowData) {
+                if (!flowData || typeof flowData !== 'object') return flowData;
+                var flow = JSON.parse(JSON.stringify(flowData));
+
+                if (flow.openingImage) {
+                    flow.openingImage = resolveAsset(flow.openingImage, 'img');
+                }
+
+                if (Array.isArray(flow.globalAudioLayers)) {
+                    flow.globalAudioLayers.forEach(function (layer) {
+                        if (layer && layer.src) layer.src = resolveAsset(layer.src, 'audio');
+                    });
+                }
+
+                if (Array.isArray(flow.slides)) {
+                    flow.slides.forEach(function (slide) {
+                        if (slide.background) {
+                            if (slide.background.src) slide.background.src = resolveAsset(slide.background.src, 'img');
+                            slide.background.effect = normalizeEffect(slide.background.effect);
+                        }
+
+                        if (Array.isArray(slide.foregroundLayers)) {
+                            slide.foregroundLayers.forEach(function (layer) {
+                                if (layer && layer.src) layer.src = resolveAsset(layer.src, 'img');
+                                if (layer) layer.effect = normalizeEffect(layer.effect);
+                            });
+                        }
+
+                        if (Array.isArray(slide.audioLayers)) {
+                            slide.audioLayers.forEach(function (layer, index) {
+                                if (layer && layer.src) layer.src = resolveAsset(layer.src, index === 0 ? 'speech' : 'audio');
+                            });
+                        }
+                    });
+                }
+
+                return flow;
+            }
+
+            function startPlayer(flowData, desktopAssetBase) {
+                if (started) return;
+                started = true;
+
+                window.PLAYER_BOOTSTRAP = {
+                    flowData: normalizeFlow(flowData),
+                    imgBase: desktopAssetBase ? desktopAssetBase + 'img/' : '',
+                    speechBase: desktopAssetBase ? desktopAssetBase + 'speech/' : '',
+                    audioBase: desktopAssetBase ? desktopAssetBase + 'audio/' : '',
+                    engineBase: new URL('../../effects/', window.location.href).href,
+                    transitionEngineBase: new URL('../../transitions/', window.location.href).href,
+                    cacheBustSpeech: false,
+                    desktopMode: !!desktopAssetBase
+                };
+
+                var script = document.createElement('script');
+                script.src = 'player-runtime.js';
+                document.body.appendChild(script);
+            }
+
+            window.addEventListener('message', function (event) {
+                var data = event.data;
+                if (!data || data.type !== 'local-player-data') return;
+
+                (data.assets || []).forEach(function (entry) {
+                    rememberAsset(entry.key, entry.file);
+                });
+
+                startPlayer(data.flowData);
+            });
+
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('desktop') === '1' && window.movementDesktop) {
+                var workspaceId = params.get('workspaceId') || '';
+                var projectId = params.get('projectId') || '';
+                Promise.all([
+                    window.movementDesktop.loadProjectFlow(workspaceId, projectId),
+                    window.movementDesktop.getProjectAssetBase(workspaceId, projectId)
+                ]).then(function (results) {
+                    startPlayer(results[0].flow, results[1]);
+                }).catch(function (error) {
+                    document.getElementById('title').textContent = 'Error loading slideshow';
+                    document.getElementById('status').textContent = error && error.message
+                        ? error.message
+                        : 'Could not load this desktop project.';
+                });
+            } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'local-player-ready' }, '*');
+            } else {
+                document.getElementById('status').textContent = 'Open playback from Movement Timeline Studio.';
+            }
+        })();
+    </script>
+</body>
+</html>

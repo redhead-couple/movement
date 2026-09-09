@@ -1,0 +1,214 @@
+{
+  "title": "A New Form of Expression",
+  "schemaVersion": 2,
+  "defaultBeatSeconds": 5,
+  "slides": [
+    {
+      "text": "For the first time, rich creation is reaching people on a much wider scale.",
+      "background": {
+        "src": "wide1.webp",
+        "effect": {
+          "name": "zoom-effect-1776051379178",
+          "engine": "zoom",
+          "config": {
+            "imgSrc": "img/wide1.webp",
+            "zoomStart": 1.5,
+            "xStart": 0.5,
+            "yStart": 0.5,
+            "brightStart": 1,
+            "zoomEnd": 1,
+            "xEnd": 0.5,
+            "yEnd": 0.5,
+            "brightEnd": 1,
+            "duration": 6,
+            "startDelay": 0,
+            "easing": "smooth"
+          }
+        }
+      },
+      "foregroundLayers": [
+        {
+          "name": "Foreground",
+          "src": "",
+          "effect": {
+            "name": "slide-effect-1787014867009",
+            "engine": "slide",
+            "config": {
+              "imgSrc": "img/blank.png",
+              "imgSrc2": "img/foreground1.png",
+              "startDelay": 0,
+              "duration": 1,
+              "direction": "up"
+            }
+          }
+        }
+      ],
+      "audioLayers": [
+        {
+          "name": "Speech",
+          "src": "speech/slide1.mp3",
+          "volume": 1
+        }
+      ]
+    },
+    {
+      "text": "The richness of AI creation is immense.\nBut abundance alone does not give us direction.",
+      "background": {
+        "src": "wide3.webp",
+        "effect": {
+          "name": "zoom-effect-1776051823590",
+          "engine": "zoom",
+          "config": {
+            "imgSrc": "img/wide3.webp",
+            "zoomStart": 1,
+            "xStart": 0.5,
+            "yStart": 0.5,
+            "brightStart": 1,
+            "zoomEnd": 1.5,
+            "xEnd": 0.5,
+            "yEnd": 0.63,
+            "brightEnd": 1,
+            "duration": 7,
+            "startDelay": 0,
+            "easing": "smooth"
+          }
+        }
+      },
+      "foregroundLayers": [
+        {
+          "name": "Foreground",
+          "src": "",
+          "effect": {
+            "name": "slide-effect-1787014958070",
+            "engine": "slide",
+            "config": {
+              "imgSrc": "img/blank.png",
+              "imgSrc2": "img/foreground3.png",
+              "startDelay": 0,
+              "duration": 0.5,
+              "direction": "left"
+            }
+          }
+        }
+      ],
+      "audioLayers": [
+        {
+          "name": "Speech",
+          "src": "speech/slide2.mp3",
+          "volume": 1
+        }
+      ]
+    },
+    {
+      "text": "When everything becomes possible, it also becomes easier to lose ourselves.\nWe begin repeating what surrounds us, instead of expressing what is truly ours.",
+      "background": {
+        "src": "market1.webp",
+        "effect": {
+          "name": "zoom-effect-1776052311123",
+          "engine": "zoom",
+          "config": {
+            "imgSrc": "img/market1.webp",
+            "zoomStart": 2.3,
+            "xStart": 0.5,
+            "yStart": 0.64,
+            "brightStart": 1,
+            "zoomEnd": 1,
+            "xEnd": 0.5,
+            "yEnd": 0.5,
+            "brightEnd": 1,
+            "duration": 11,
+            "startDelay": 0,
+            "easing": "smooth"
+          }
+        }
+      },
+      "foregroundLayers": [
+        {
+          "name": "Foreground",
+          "src": "foreground2.png",
+          "effect": null
+        }
+      ],
+      "audioLayers": [
+        {
+          "name": "Speech",
+          "src": "speech/slide3.mp3",
+          "volume": 1
+        }
+      ]
+    },
+    {
+      "text": "So the challenge is to give intention a structure.\nTo let meaning unfold over time, slide by slide, shaped with care.",
+      "background": {
+        "src": "wide5.png",
+        "effect": {
+          "name": "zoom-effect-1776053278694",
+          "engine": "zoom",
+          "config": {
+            "imgSrc": "img/wide5.png",
+            "zoomStart": 2,
+            "xStart": 0.63,
+            "yStart": 0.68,
+            "brightStart": 1,
+            "zoomEnd": 1,
+            "xEnd": 0.5,
+            "yEnd": 0.5,
+            "brightEnd": 1,
+            "duration": 9,
+            "startDelay": 0,
+            "easing": "smooth"
+          }
+        }
+      },
+      "foregroundLayers": [
+        {
+          "name": "Foreground",
+          "src": "foreground1.png",
+          "effect": null
+        }
+      ],
+      "audioLayers": [
+        {
+          "name": "Speech",
+          "src": "speech/slide4.mp3",
+          "volume": 1
+        }
+      ]
+    },
+    {
+      "text": "This platform invites you to explore that new form.\nTo build slideshows that unfold through time.",
+      "background": {
+        "src": "",
+        "effect": null
+      },
+      "foregroundLayers": [
+        {
+          "name": "Foreground",
+          "src": "",
+          "effect": {
+            "name": "morph-effect-1776054727590",
+            "engine": "morph",
+            "config": {
+              "imgSrc": "img/wide6.webp",
+              "imgSrc2": "img/wide7.webp",
+              "duration": 3,
+              "startDelay": 2.5,
+              "zoomAmount": 0
+            }
+          }
+        }
+      ],
+      "audioLayers": [
+        {
+          "name": "Speech",
+          "src": "speech/slide5.mp3",
+          "volume": 1
+        }
+      ]
+    }
+  ],
+  "description": "A short cinematic slideshow about shaping meaning in the age of AI, where rich creation becomes guided expression.",
+  "openingImage": "wide3.webp",
+  "isPublished": true,
+  "publishedAt": 1784879680
+}

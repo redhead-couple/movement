@@ -1,0 +1,2080 @@
+{
+    "title": "Getting to Know the System",
+    "schemaVersion": 2,
+    "defaultBeatSeconds": 5,
+    "slides": [
+        {
+            "background": {
+                "src": "computer7.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/computer7.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 5,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 2",
+                    "src": "aera4.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/presenter1.png",
+                            "zoomStart": 0.90000000000000002,
+                            "xStart": 0.5,
+                            "yStart": 0.28999999999999998,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.90000000000000002,
+                            "xEnd": 0.44,
+                            "yEnd": 0.33000000000000002,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 7.0999999999999996,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide1.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When you open the app, you arrive at the homepage.\nFrom here, enter the library—this is where your slideshows will live.",
+            "transition": "zoom",
+            "background": {
+                "src": "screen1.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 3,
+                        "movementDuration": 2,
+                        "highlightColor": "#ebf83a",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.83999999999999997,
+                            "y": 0.246
+                        },
+                        "clickPosition": {
+                            "x": 0.217,
+                            "y": 0.86299999999999999
+                        },
+                        "imgSrc": "screen1.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide2.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The first time you enter the library, you’ll be taken to the Examples page because you don’t have a workspace yet.",
+            "transition": "push-left",
+            "background": {
+                "src": "blank.png",
+                "effect": {
+                    "name": "frame-animation-effect-1787108821648",
+                    "engine": "frame-animation",
+                    "config": {
+                        "imgSrc": "img/blank.png",
+                        "frames": [
+                            "img/screen2.webp"
+                        ],
+                        "startDelay": 0,
+                        "travelDuration": 8,
+                        "sequenceDuration": 1,
+                        "loops": 1,
+                        "startX": 0.5,
+                        "startY": 0.076200000000000004,
+                        "endX": 0.5,
+                        "endY": 0.81589999999999996,
+                        "startSize": 1,
+                        "endSize": 1,
+                        "startOpacity": 1,
+                        "endOpacity": 1
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide3.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Click “Create your workspace” to begin.",
+            "transition": "push-right",
+            "background": {
+                "src": "screen4.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.54400000000000004,
+                            "y": 0.80700000000000005
+                        },
+                        "clickPosition": {
+                            "x": 0.82399999999999995,
+                            "y": 0.57399999999999995
+                        },
+                        "imgSrc": "screen4.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide4.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Your workspace is your own section of the library, where your slideshows will live. You can create as many workspaces as you need.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen3.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/screen3.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 10,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide5.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When you enter your workspace, you can click New Slideshow to start a project from scratch.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen5.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 2,
+                        "movementDuration": 2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.23599999999999999,
+                            "y": 0.74099999999999999
+                        },
+                        "clickPosition": {
+                            "x": 0.85199999999999998,
+                            "y": 0.33100000000000002
+                        },
+                        "imgSrc": "screen5.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide6.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "But if this is your first time, the easiest way to learn is to begin with one of the example slideshows.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen6.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 3,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.17199999999999999,
+                            "y": 0.51200000000000001
+                        },
+                        "clickPosition": {
+                            "x": 0.23599999999999999,
+                            "y": 0.58099999999999996
+                        },
+                        "imgSrc": "screen6.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide7.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The Examples workspace is read-only, so the original slideshows cannot be changed.",
+            "transition": "push-right",
+            "background": {
+                "src": "screen7.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/screen7.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera1.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/aera1.png",
+                            "zoomStart": 0.69999999999999996,
+                            "xStart": 0.13,
+                            "yStart": 0.26000000000000001,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.80000000000000004,
+                            "xEnd": 0.28000000000000003,
+                            "yEnd": 0.34999999999999998,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 7,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide8.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Choose an example you like and copy it into your own workspace. Now you can experiment with it freely.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen7.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 2,
+                        "movementDuration": 2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.14000000000000001,
+                            "y": 0.32200000000000001
+                        },
+                        "clickPosition": {
+                            "x": 0.54900000000000004,
+                            "y": 0.88800000000000001
+                        },
+                        "imgSrc": "screen7.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide9.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Open the copied slideshow and start experimenting.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen8.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.53400000000000003,
+                            "y": 0.54600000000000004
+                        },
+                        "clickPosition": {
+                            "x": 0.191,
+                            "y": 0.95699999999999996
+                        },
+                        "imgSrc": "screen8.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide10.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Try changing an effect or transition, adjust some of its parameters, and press Play to see what happens.",
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "frame-animation-effect-1787198202929",
+                    "engine": "frame-animation",
+                    "config": {
+                        "imgSrc": "img/blank.png",
+                        "frames": [
+                            "img/screen9.webp"
+                        ],
+                        "startDelay": 0,
+                        "travelDuration": 8,
+                        "sequenceDuration": 1,
+                        "loops": 1,
+                        "startX": 0.5,
+                        "startY": 0.47049999999999997,
+                        "endX": 0.5,
+                        "endY": 0.59019999999999995,
+                        "startSize": 1,
+                        "endSize": 1,
+                        "startOpacity": 1,
+                        "endOpacity": 1
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "Cursor Move and Click",
+                        "enabled": true,
+                        "engine": "cursor-move-and-click",
+                        "maker": "effects/cursor-move-and-click-maker.html",
+                        "config": {
+                            "startDelay": 0,
+                            "movementDuration": 4,
+                            "highlightColor": "#38bdf8",
+                            "highlightSize": 96,
+                            "disappearAfterClick": true,
+                            "startPosition": {
+                                "x": 0.14000000000000001,
+                                "y": 0.81999999999999995
+                            },
+                            "clickPosition": {
+                                "x": 0.38600000000000001,
+                                "y": 0.253
+                            },
+                            "imgSrc": ""
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide11.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Changing something and immediately seeing the result is one of the easiest ways to become familiar with the system.",
+            "transition": "push-right",
+            "background": {
+                "src": "screen10.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 2,
+                        "movementDuration": 2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.36899999999999999,
+                            "y": 0.25
+                        },
+                        "clickPosition": {
+                            "x": 0.82299999999999995,
+                            "y": 0.69099999999999995
+                        },
+                        "imgSrc": "screen10.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide12.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Think of each slide as being built from layers.",
+            "transition": "push-right",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Alternating Panels",
+                "engine": "alternating-panels",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/alternating-panels-maker.html",
+                "config": {
+                    "segments": 8,
+                    "stagger": 0.059999999999999998,
+                    "duration": 1.3999999999999999,
+                    "easing": "natural",
+                    "shadow": 35
+                }
+            },
+            "background": {
+                "src": "layers1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/layers1.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.69999999999999996,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 4,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera5.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide13.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "You can add images, sounds, and other elements on separate layers, then adjust each one independently.",
+            "transition": "push-left",
+            "background": {
+                "src": "layers2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/layers2.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide14.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Let’s begin with one of the most useful kinds of layers: a foreground image.",
+            "background": {
+                "src": "layers3.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "layers4.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/layers4.png",
+                            "zoomStart": 0.90000000000000002,
+                            "xStart": 0,
+                            "yStart": 0.87,
+                            "brightStart": 1,
+                            "startOpacity": 0,
+                            "zoomEnd": 1,
+                            "xEnd": 0.5,
+                            "yEnd": 0.5,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 2,
+                            "startDelay": 3,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide15.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "To begin adding a foreground image, click + Add Foreground Layer.",
+            "transition": "zoom",
+            "background": {
+                "src": "screen11.webp",
+                "effect": {
+                    "name": "frame-animation-effect-1787295400135",
+                    "engine": "frame-animation",
+                    "config": {
+                        "imgSrc": "img/screen11.webp",
+                        "frames": [
+                            "img/button1.webp"
+                        ],
+                        "startDelay": 2.7000000000000002,
+                        "travelDuration": 0.90000000000000002,
+                        "sequenceDuration": 1,
+                        "loops": 1,
+                        "startX": 0.75529999999999997,
+                        "startY": 0.51880000000000004,
+                        "endX": 0.755,
+                        "endY": 0.51900000000000002,
+                        "startSize": 0.44,
+                        "endSize": 0.44,
+                        "startOpacity": 1,
+                        "endOpacity": 1
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "Cursor Move and Click",
+                        "enabled": true,
+                        "engine": "cursor-move-and-click",
+                        "maker": "effects/cursor-move-and-click-maker.html",
+                        "config": {
+                            "startDelay": 1.5,
+                            "movementDuration": 1.2,
+                            "highlightColor": "#38bdf8",
+                            "highlightSize": 96,
+                            "highlightDuration": 0.90000000000000002,
+                            "disappearAfterClick": true,
+                            "startPosition": {
+                                "x": 0.29899999999999999,
+                                "y": 0.29199999999999998
+                            },
+                            "clickPosition": {
+                                "x": 0.76300000000000001,
+                                "y": 0.50900000000000001
+                            },
+                            "imgSrc": "blank.png"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide16.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "For most foreground images, it is useful to use an image with a transparent background. This allows the layers behind it to remain visible.",
+            "transition": "zoom",
+            "background": {
+                "src": "layers3.webp",
+                "effect": {
+                    "name": "wipe-effect-1787378360375",
+                    "engine": "wipe",
+                    "config": {
+                        "imgSrc": "img/layers5.webp",
+                        "imgSrc2": "img/layers3.webp",
+                        "startDelay": 3,
+                        "duration": 2.5,
+                        "direction": "left"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "layers4.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide17.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "You can also use several foreground layers to build a scene from separate elements.",
+            "transition": "push-right",
+            "background": {
+                "src": "layers2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/layers2.webp",
+                        "zoomStart": 0.69999999999999996,
+                        "xStart": 1,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide18.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "You can apply an effect to a visual layer to change how it appears or behaves.",
+            "transition": "push-up",
+            "background": {
+                "src": "layers3.webp",
+                "effect": {
+                    "name": "ripple-effect-1787369386620",
+                    "engine": "ripple",
+                    "config": {
+                        "imgSrc": "img/layers3.webp",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "startTime": 0,
+                        "count": 1,
+                        "interval": 800,
+                        "freq": 0.065000000000000002,
+                        "speed": 50,
+                        "amp": 65,
+                        "decay": 0.029999999999999999
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "Image1.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide19.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "To add an effect, open the Effects Hub.",
+            "background": {
+                "src": "screen12.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.156,
+                            "y": 0.23999999999999999
+                        },
+                        "clickPosition": {
+                            "x": 0.94599999999999995,
+                            "y": 0.66100000000000003
+                        },
+                        "imgSrc": "screen12.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide20.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "This is where you can explore the different visual effects available in the system.",
+            "transition": "push-up",
+            "background": {
+                "src": "screen13.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 1.5,
+                        "movementDuration": 4,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.063,
+                            "y": 0.058999999999999997
+                        },
+                        "clickPosition": {
+                            "x": 0.10000000000000001,
+                            "y": 0.98999999999999999
+                        },
+                        "imgSrc": "screen13.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide21.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Select an effect that interests you to open its controls.",
+            "transition": "push-left",
+            "background": {
+                "src": "screen13.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.58099999999999996,
+                            "y": 0.70299999999999996
+                        },
+                        "clickPosition": {
+                            "x": 0.037999999999999999,
+                            "y": 0.85299999999999998
+                        },
+                        "imgSrc": "screen13.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide22.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Each effect has its own parameters, allowing you to change how it behaves.",
+            "transition": "push-up",
+            "background": {
+                "src": "screen14.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 4,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.29699999999999999,
+                            "y": 0.060999999999999999
+                        },
+                        "clickPosition": {
+                            "x": 0.33200000000000002,
+                            "y": 0.98999999999999999
+                        },
+                        "imgSrc": "screen14.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide23.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The easiest way to understand an effect is to experiment with it.",
+            "background": {
+                "src": "effectslide1.webp",
+                "effect": {
+                    "name": "slideshow-effect-1787528176983",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/effectslide1.webp",
+                            "img/effectslide2.webp"
+                        ],
+                        "interval": 2,
+                        "transDuration": 0.5,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide24.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Change a parameter, add the effect to your slide, and press Play to see the result.",
+            "seconds": 2,
+            "background": {
+                "src": "effectslide3.webp",
+                "effect": null
+            },
+            "foregroundLayers": [],
+            "audioLayers": []
+        },
+        {
+            "text": "Change a parameter, add the effect to your slide,",
+            "transition": "zoom",
+            "background": {
+                "src": "effectslide3.webp",
+                "effect": {
+                    "name": "slideshow-effect-1787528132822",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/effectslide3.webp",
+                            "img/effectslide4.webp",
+                            "img/effectslide5.webp"
+                        ],
+                        "interval": 2,
+                        "transDuration": 0.5,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide26.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "and press Play to see the result.",
+            "seconds": 2,
+            "background": {
+                "src": "screen9.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 2,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.94099999999999995,
+                            "y": 0.033000000000000002
+                        },
+                        "clickPosition": {
+                            "x": 0.30399999999999999,
+                            "y": 0.037999999999999999
+                        },
+                        "imgSrc": "screen9.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide27.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Transitions work in a similar way, but they control what happens when one slide ends and the next begins.",
+            "transition": "zoom",
+            "background": {
+                "src": "view7.png",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/view7.png",
+                        "zoomStart": 1,
+                        "xStart": 0.31,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.71999999999999997,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 3.2000000000000002,
+                        "startDelay": 3,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "view6.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide28.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "You can choose a basic transition directly,",
+            "transition": "push-left",
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "slideshow-effect-1787535694364",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/transition1.webp",
+                            "img/transition2.webp"
+                        ],
+                        "interval": 1,
+                        "transDuration": 1.5,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "blank.png",
+                    "effect": {
+                        "name": "Cursor Move and Click",
+                        "enabled": true,
+                        "engine": "cursor-move-and-click",
+                        "maker": "effects/cursor-move-and-click-maker.html",
+                        "config": {
+                            "startDelay": 0.40000000000000002,
+                            "movementDuration": 1.2,
+                            "highlightColor": "#38bdf8",
+                            "highlightSize": 96,
+                            "highlightDuration": 0.69999999999999996,
+                            "disappearAfterClick": true,
+                            "startPosition": {
+                                "x": 0.26600000000000001,
+                                "y": 0.49099999999999999
+                            },
+                            "clickPosition": {
+                                "x": 0.97199999999999998,
+                                "y": 0.65600000000000003
+                            },
+                            "imgSrc": "blank.png"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide29.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "or open the Transitions Hub for more advanced options.",
+            "transition": "push-left",
+            "background": {
+                "src": "transition1.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#c5f83a",
+                        "highlightSize": 96,
+                        "highlightDuration": 2.2999999999999998,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.372,
+                            "y": 0.65000000000000002
+                        },
+                        "clickPosition": {
+                            "x": 0.95199999999999996,
+                            "y": 0.77800000000000002
+                        },
+                        "imgSrc": "transition1.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide30.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Choose a transition",
+            "transition": "zoom",
+            "background": {
+                "src": "transition3.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.079000000000000001,
+                            "y": 0.01
+                        },
+                        "clickPosition": {
+                            "x": 0.081000000000000003,
+                            "y": 0.98999999999999999
+                        },
+                        "imgSrc": "transition3.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide31.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "adjust its parameters,",
+            "transition": "push-right",
+            "background": {
+                "src": "transition2.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.32800000000000001,
+                            "y": 0.14599999999999999
+                        },
+                        "clickPosition": {
+                            "x": 0.248,
+                            "y": 0.46400000000000002
+                        },
+                        "imgSrc": "transition4.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide32.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "and press Play to see how it changes the movement from one slide to the next.",
+            "transition": "zoom",
+            "background": {
+                "src": "screen9.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.40000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 2,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.94099999999999995,
+                            "y": 0.033000000000000002
+                        },
+                        "clickPosition": {
+                            "x": 0.30399999999999999,
+                            "y": 0.037999999999999999
+                        },
+                        "imgSrc": "screen9.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide33.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The system is open-source, so you are not limited to the effects and transitions that already exist.",
+            "background": {
+                "src": "library1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/library1.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide34.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "If you need something different, you can create your own custom effect or transition and add it to the system.",
+            "background": {
+                "src": "library2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/library2.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.5,
+                        "yEnd": 0.56999999999999995,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide35.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Because the project is open-source, you can open it in an AI coding environment and extend it yourself.",
+            "background": {
+                "src": "computer1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/computer1.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide36.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The system helps you describe what you want to create and generate a prompt.",
+            "background": {
+                "src": "custom1.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 1.3,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 1.3999999999999999,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.83799999999999997,
+                            "y": 0.39600000000000002
+                        },
+                        "clickPosition": {
+                            "x": 0.72399999999999998,
+                            "y": 0.71699999999999997
+                        },
+                        "imgSrc": "custom2.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide37.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "All you have to do is bring that prompt into an AI coding environment, where your idea can be turned into a new form of expression.",
+            "background": {
+                "src": "computer3.webp",
+                "effect": {
+                    "name": "Cursor Move and Click",
+                    "enabled": true,
+                    "engine": "cursor-move-and-click",
+                    "maker": "effects/cursor-move-and-click-maker.html",
+                    "config": {
+                        "startDelay": 0.90000000000000002,
+                        "movementDuration": 1.2,
+                        "highlightColor": "#38bdf8",
+                        "highlightSize": 96,
+                        "highlightDuration": 0.69999999999999996,
+                        "disappearAfterClick": true,
+                        "startPosition": {
+                            "x": 0.36199999999999999,
+                            "y": 0.68799999999999994
+                        },
+                        "clickPosition": {
+                            "x": 0.78900000000000003,
+                            "y": 0.68400000000000005
+                        },
+                        "imgSrc": "computer3.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide38.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "This gives you the freedom to create new effects, transitions, and other tools when the existing ones do not express what you need.",
+            "background": {
+                "src": "possibilities2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities2.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide39.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When your slideshow is ready, you can export it together with its player.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "vertical",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "export1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/export1.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.57999999999999996,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide40.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The export creates a webpage and its supporting folder, so the slideshow can be viewed outside the application.",
+            "transition": "push-left",
+            "background": {
+                "src": "export2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/export2.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide41.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "In addition to running independently, the exported slideshow also serves as a portable backup.",
+            "transition": "zoom",
+            "background": {
+                "src": "export3.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/export3.webp",
+                        "zoomStart": 1.3,
+                        "xStart": 0.37,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3,
+                        "xEnd": 0.64000000000000001,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 13,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide42.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "After experimenting with an example slideshow, begin creating a simple slideshow of your own.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Blur Crossfade Transition",
+                "engine": "blur-crossfade",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/blur-crossfade-maker.html",
+                "config": {
+                    "duration": 1.2,
+                    "blur": 18,
+                    "scale": 1.04,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "screen5.webp",
+                "effect": {
+                    "name": "slide-effect-1787633685831",
+                    "engine": "slide",
+                    "config": {
+                        "imgSrc": "img/screen8.webp",
+                        "imgSrc2": "img/screen5.webp",
+                        "startDelay": 2,
+                        "duration": 2,
+                        "direction": "left"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "Cursor Move and Click",
+                        "enabled": true,
+                        "engine": "cursor-move-and-click",
+                        "maker": "effects/cursor-move-and-click-maker.html",
+                        "config": {
+                            "startDelay": 3,
+                            "movementDuration": 2.2000000000000002,
+                            "highlightColor": "#38bdf8",
+                            "highlightSize": 96,
+                            "highlightDuration": 0.69999999999999996,
+                            "disappearAfterClick": true,
+                            "startPosition": {
+                                "x": 0.01,
+                                "y": 0.98999999999999999
+                            },
+                            "clickPosition": {
+                                "x": 0.879,
+                                "y": 0.32800000000000001
+                            },
+                            "imgSrc": "screen5.webp"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide43.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Explore the available options, make changes, and press Play to see how your choices affect the result.",
+            "background": {
+                "src": "computer6.webp",
+                "effect": {
+                    "name": "slide-effect-1787634454104",
+                    "engine": "slide",
+                    "config": {
+                        "imgSrc": "img/computer6.webp",
+                        "imgSrc2": "img/screen9.webp",
+                        "startDelay": 3,
+                        "duration": 0.5,
+                        "direction": "left"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "Cursor Move and Click",
+                        "enabled": true,
+                        "engine": "cursor-move-and-click",
+                        "maker": "effects/cursor-move-and-click-maker.html",
+                        "config": {
+                            "startDelay": 3,
+                            "movementDuration": 1.2,
+                            "highlightColor": "#38bdf8",
+                            "highlightSize": 96,
+                            "highlightDuration": 2,
+                            "disappearAfterClick": true,
+                            "startPosition": {
+                                "x": 0.98999999999999999,
+                                "y": 0.036999999999999998
+                            },
+                            "clickPosition": {
+                                "x": 0.31,
+                                "y": 0.078
+                            },
+                            "imgSrc": "screen9.webp"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide44.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The tools already in the system are only a starting point.",
+            "transition": "zoom",
+            "background": {
+                "src": "library3.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/library3.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.63,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 5,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide45.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The medium is designed to grow through the people who use it.",
+            "transition": "zoom",
+            "background": {
+                "src": "library5.webp",
+                "effect": {
+                    "name": "slide-effect-1787636408869",
+                    "engine": "slide",
+                    "config": {
+                        "imgSrc": "img/library4.webp",
+                        "imgSrc2": "img/library5.webp",
+                        "startDelay": 1,
+                        "duration": 2,
+                        "direction": "left"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide46.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Use the tools already available. Combine them, experiment with them, and discover what they can express.",
+            "transition": "zoom",
+            "background": {
+                "src": "already1.webp",
+                "effect": {
+                    "name": "slideshow-effect-1787708894900",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/already1.webp",
+                            "img/already2.webp",
+                            "img/already3.webp"
+                        ],
+                        "interval": 2,
+                        "transDuration": 1,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide47.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When the existing tools are not enough, create new ways to express what you want to communicate.",
+            "transition": "zoom",
+            "background": {
+                "src": "already6.webp",
+                "effect": {
+                    "name": "slideshow-effect-1787711961136",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/already6.webp",
+                            "img/already5.webp"
+                        ],
+                        "interval": 3,
+                        "transDuration": 1,
+                        "transition": "zoom",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide48.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "As more people create and share these new forms of expression, together we can develop a richer language.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "vertical",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "library5.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/library5.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide49.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A language for communicating ideas, feelings, and intentions.",
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "slideshow-effect-1787713008283",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/hall1.webp",
+                            "img/hall2.webp",
+                            "img/hall3.webp"
+                        ],
+                        "interval": 1.5,
+                        "transDuration": 0.5,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide50.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "One that can express meaning beyond what words alone can carry.",
+            "transition": "dissolve",
+            "background": {
+                "src": "end3.webp",
+                "effect": {
+                    "name": "slideshow-effect-1787798228356",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/end1.webp",
+                            "img/end2.webp",
+                            "img/end3.webp",
+                            "img/end4.webp"
+                        ],
+                        "interval": 1,
+                        "transDuration": 1,
+                        "transition": "fade",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide51.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "seconds": 5,
+            "transition": "dissolve",
+            "background": {
+                "src": "end5.webp",
+                "effect": null
+            },
+            "foregroundLayers": [],
+            "audioLayers": []
+        }
+    ],
+    "description": "Learn the system step by step by exploring examples, editing slides, and seeing how image, sound, timing, effects, and transitions work.",
+    "openingImage": "computer7.webp",
+    "isPublished": true,
+    "publishedAt": 1787804883
+}

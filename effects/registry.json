@@ -1,0 +1,42 @@
+[
+    {
+        "Category": "Camera & Image",
+        "engines": "transform, zoom, blur"
+    },
+    {
+        "Category": "Color & Light",
+        "engines": "darken, sequencer, flash, color-spread"
+    },
+    {
+        "Category": "Sequences",
+        "engines": "slideshow, frame-animation"
+    },
+    {
+        "Category": "Reveals & Transitions",
+        "engines": "wipe, slide, morph"
+    },
+    {
+        "Category": "Atmosphere & Emotion",
+        "engines": "rain, affection, ghost"
+    },
+    {
+        "Category": "Focus & Emphasis",
+        "engines": "highlight, pulses, focus-formation"
+    },
+    {
+        "Category": "Particles & Dispersion",
+        "engines": "scattered-idea, scattered-orbs"
+    },
+    {
+        "Category": "Paths & Guided Motion",
+        "engines": "diverge, route, cursor-move-and-click"
+    },
+    {
+        "Category": "Flow & Distortion",
+        "engines": "ripple, wave"
+    },
+    {
+        "Category": "Experimental",
+        "engines": ""
+    }
+]

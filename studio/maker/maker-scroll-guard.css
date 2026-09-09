@@ -1,0 +1,15 @@
+/* Structural scrolling shared by every Effect and Transition maker iframe. */
+.movement-maker-scroll-panel,
+.sidebar,
+#controls,
+[data-maker-controls],
+.maker-controls,
+.controls-panel,
+.control-panel {
+    min-height: 0 !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    box-sizing: border-box;
+}

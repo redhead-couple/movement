@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Slideshow Maker</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .upload-panel {
+            border: 1px dashed #475569;
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.45);
+            margin-bottom: 10px;
+        }
+        .upload-panel p {
+            margin: 0 0 10px;
+            color: #cbd5e1;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+        .upload-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .upload-button {
+            margin: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-actions input[type="file"] {
+            display: none;
+        }
+        .upload-note {
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 0.78rem;
+        }
+        .sequence-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 6px;
+            color: #94a3b8;
+            font-size: 0.78rem;
+        }
+        .img-item {
+            display: grid;
+            grid-template-columns: 48px minmax(0, 1fr);
+            gap: 10px 12px;
+            padding: 8px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.75);
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .img-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #0f172a;
+            border: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        .img-name {
+            min-width: 0;
+            color: #e2e8f0;
+            font-size: 0.84rem;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+        .img-item-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            grid-column: 2;
+        }
+        .img-item-actions button {
+            margin: 0;
+            padding: 6px 8px;
+            min-width: 34px;
+        }
+        .seq-btn {
+            background: #1d4ed8;
+        }
+        .seq-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .remove-btn {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Slideshow Maker</h2>
+
+        <div class="group">
+            <h4>1. Select Images</h4>
+            <div class="upload-panel">
+                <p>Choose one or more images, then choose more anytime to add to the slideshow.</p>
+                <div class="upload-actions">
+                    <label class="small upload-button" for="slideshowFilesInput">Choose Images</label>
+                    <input type="file" id="slideshowFilesInput" accept="image/*" multiple>
+                    <button class="small" type="button" onclick="document.getElementById('slideshowFilesInput').click()" style="margin: 0;">Add More</button>
+                    <button class="small" type="button" onclick="window.openMediaLibrary('img', 'slideshow')" style="margin: 0;">Browse Lib</button>
+                </div>
+                <div class="upload-note">Every chosen image adds to the sequence below. Use the Up and Down buttons to reorder the slideshow.</div>
+            </div>
+            <div id="overrideContainer"></div>
+            <div class="sequence-meta">
+                <span id="imageCountLabel">0 images in sequence</span>
+                <span>First image plays first</span>
+            </div>
+            <div class="img-list" id="imgList">
+                <div style="color:#64748b; font-size:0.8rem; padding:5px;">No images selected</div>
+            </div>
+            <button id="clearBtn" style="background:#b91c1c; margin-top:8px;">Clear All</button>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">Play Slideshow</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Transition</h4>
+            <label>Style</label>
+            <select id="transition">
+                <option value="fade">Fade / Dissolve</option>
+                <option value="push-left">Push Left</option>
+                <option value="push-right">Push Right</option>
+                <option value="push-up">Push Up</option>
+                <option value="push-down">Push Down</option>
+                <option value="wipe-left">Wipe Left</option>
+                <option value="wipe-right">Wipe Right</option>
+                <option value="wipe-up">Wipe Up</option>
+                <option value="wipe-down">Wipe Down</option>
+                <option value="zoom">Zoom Crossfade</option>
+            </select>
+
+            <label>Duration (Sec) <span id="val-transDuration"></span></label>
+            <input type="range" id="transDuration" min="0.5" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="group">
+            <h4>3. Timing</h4>
+            <label>Display Time (Sec) <span id="val-interval"></span></label>
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">How long to show each image</div>
+            <input type="range" id="interval" min="1.0" max="10.0" step="0.5" value="3.0">
+        </div>
+
+        <div class="group">
+            <h4>4. Export</h4>
+            <input type="text" id="filename" value="slideshow.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = 'effects/slideshow-engine.js';
+        const ENGINE = 'slideshow';
+        import { mount } from './effects/slideshow-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+
+        let cleanup = null;
+        window.localImages = window.localImages || [];
+        window.fileNames = window.fileNames || [];
+
+        const cfg = {
+            interval: 3.0,
+            transDuration: 1.0,
+            transition: 'fade'
+        };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                images: window.localImages
+            });
+        }
+
+        const imgInput = document.getElementById('slideshowFilesInput');
+        const imgList = document.getElementById('imgList');
+        const imageCountLabel = document.getElementById('imageCountLabel');
+
+        function syncImageCount() {
+            const count = window.fileNames.length;
+            imageCountLabel.textContent = `${count} image${count === 1 ? '' : 's'} in sequence`;
+        }
+
+        function moveImage(fromIndex, toIndex) {
+            if (toIndex < 0 || toIndex >= window.fileNames.length) return;
+
+            const movedName = window.fileNames.splice(fromIndex, 1)[0];
+            const movedImage = window.localImages.splice(fromIndex, 1)[0];
+            window.fileNames.splice(toIndex, 0, movedName);
+            window.localImages.splice(toIndex, 0, movedImage);
+            renderList();
+        }
+
+        function removeImage(index) {
+            window.fileNames.splice(index, 1);
+            window.localImages.splice(index, 1);
+            renderList();
+            run();
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        imgInput.addEventListener('change', async (e) => {
+            if (!e.target.files) return;
+
+            const files = Array.from(e.target.files);
+            const endpoint = (window.top && window.top.MAKER_ENDPOINT) || '/json-maker.php';
+            const useLocalFiles = window.location.protocol === 'file:' || !endpoint || endpoint === '/json-maker.php';
+
+            for (const file of files) {
+                const readLocalFile = (savedName) => {
+                    const r = new FileReader();
+                    r.onload = (ev) => {
+                        window.fileNames.push(savedName);
+                        window.localImages.push(ev.target.result);
+                        renderList();
+                    };
+                    r.readAsDataURL(file);
+                };
+
+                if (useLocalFiles) {
+                    readLocalFile(file.name);
+                    continue;
+                }
+
+                const formData = new FormData();
+                formData.append('action', 'upload_media');
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch(endpoint, { method: 'POST', body: formData });
+                    const data = await response.json();
+                    if (data.status !== 'success' || !data.filename) {
+                        alert(data.message || `Could not read the selected file for ${file.name}`);
+                        continue;
+                    }
+
+                    const savedName = data.filename;
+                    readLocalFile(savedName);
+                } catch (err) {
+                    console.error('File selection error', err);
+                    alert(`Could not read the selected file for ${file.name}`);
+                }
+            }
+
+            e.target.value = '';
+        });
+
+        window.renderList = renderList;
+        function renderList() {
+            imgList.innerHTML = '';
+            syncImageCount();
+
+            if (window.fileNames.length === 0) {
+                imgList.innerHTML = '<div style="color:#64748b; font-size:0.8rem; padding:5px;">No images</div>';
+                return;
+            }
+
+            window.fileNames.forEach((name, i) => {
+                const div = document.createElement('div');
+                const thumbSrc = window.localImages[i] || '';
+                div.className = 'img-item';
+                div.innerHTML = `
+                    <img class="img-thumb" src="${thumbSrc}" alt="">
+                    <div class="img-name">${i + 1}. ${escapeHtml(name)}</div>
+                    <div class="img-item-actions">
+                        <button type="button" class="seq-btn" data-action="up" data-idx="${i}" ${i === 0 ? 'disabled' : ''}>Up</button>
+                        <button type="button" class="seq-btn" data-action="down" data-idx="${i}" ${i === window.fileNames.length - 1 ? 'disabled' : ''}>Down</button>
+                        <button type="button" class="remove-btn" data-action="remove" data-idx="${i}">x</button>
+                    </div>
+                `;
+                imgList.appendChild(div);
+            });
+
+            imgList.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(e.currentTarget.dataset.idx, 10);
+                    const action = e.currentTarget.dataset.action;
+                    if (action === 'up') moveImage(idx, idx - 1);
+                    if (action === 'down') moveImage(idx, idx + 1);
+                    if (action === 'remove') removeImage(idx);
+                });
+            });
+
+            run();
+        }
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            window.fileNames.length = 0;
+            window.localImages.length = 0;
+            renderList();
+            if (cleanup) cleanup();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        const bind = (id, k) => {
+            document.getElementById(id).addEventListener('input', e => {
+                cfg[k] = parseFloat(e.target.value);
+                run();
+            });
+        };
+
+        bind('interval', 'interval');
+        bind('transDuration', 'transDuration');
+
+        document.getElementById('transition').addEventListener('change', e => {
+            cfg.transition = e.target.value;
+            run();
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        window.buildList = renderList;
+        window.MakerAPI = {
+            onImageLoaded: () => { if (typeof run === 'function') run(); },
+            run: () => { if (typeof run === 'function') run(); },
+            getExportJSON: () => {
+                const pathArray = window.fileNames.map(name => `img/${name}`);
+                const jsonImages = JSON.stringify(pathArray);
+
+                const code = `
+import { mount as runSlide } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runSlide(canvas, ctx, {
+        ...config,
+        images: ${jsonImages},
+        interval: ${cfg.interval},
+        transDuration: ${cfg.transDuration},
+        transition: '${cfg.transition}',
+        fit: 'cover'
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return {
+                    engine: ENGINE,
+                    config: configObj,
+                    rawData1: window.localImages[0] ? window.localImages[0] : null,
+                    rawData2: window.localImages[1] ? window.localImages[1] : null
+                };
+            }
+        };
+
+        syncImageCount();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

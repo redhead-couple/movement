@@ -1,0 +1,1105 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline JSON Studio</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="/assets/app.css">
+    <style>
+        /* Base Styles embedded for quick development, will be moved later if needed */
+        :root {
+            --bg-color: var(--app-bg);
+            --header-bg: rgba(24, 22, 21, 0.90);
+            --panel-bg: var(--app-surface-strong);
+            --border-color: var(--app-line);
+            --button-text: var(--app-text);
+            --text-main: var(--app-text);
+            --text-muted: var(--app-text-muted);
+            --primary: var(--app-accent);
+            --primary-hover: var(--app-accent-strong);
+            --danger: var(--app-danger);
+            --danger-hover: #ce625d;
+            --tab-active: rgba(255, 255, 255, 0.10);
+            --tab-inactive: rgba(255, 255, 255, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: var(--app-font-body);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .page-studio {
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Top Header Navigation */
+        .app-header {
+            background: linear-gradient(to bottom, rgba(24, 22, 21, 0.94), rgba(24, 22, 21, 0.72));
+            padding: 10px 20px 0 20px;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            /* Prevent header from shrinking */
+            border-bottom: 1px solid var(--border-color);
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background-color: var(--tab-inactive);
+            color: var(--text-main);
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.local-primary {
+            background-color: #7d927f;
+            color: #fffdf8;
+        }
+
+        .tab.local-blue {
+            background-color: #465766;
+            color: #fffdf8;
+        }
+
+        .tab.local-accent {
+            background-color: #b9634f;
+            color: #fff8f1;
+        }
+
+        .tab.active {
+            background-color: var(--tab-active);
+            color: var(--text-main);
+            border-color: var(--border-color);
+            border-bottom-color: transparent;
+        }
+
+        /* Main 3-Column Workspace */
+        .workspace {
+            display: grid;
+            grid-template-columns: 380px 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+            min-height: 0;
+            align-items: stretch;
+            /* Stretch to fill exactly the remaining space from body */
+            overflow: hidden;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-lg);
+            box-shadow: var(--app-shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .workspace>.panel {
+            margin-top: 0;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .panel-content {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .project-settings-content {
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .project-settings-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .project-settings-footer {
+            flex: 0 0 auto;
+            padding: 14px 16px 16px;
+            border-top: 1px solid var(--border-color);
+            background:
+                linear-gradient(180deg, rgba(43, 39, 35, 0.92), rgba(35, 31, 28, 0.98)),
+                var(--panel-bg);
+            box-shadow: 0 -12px 24px rgba(0, 0, 0, 0.18);
+        }
+
+        .project-settings-footer .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Forms & Inputs */
+        .field {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .field input[type="text"],
+        .field input[type="number"],
+        .field select,
+        .field textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(185, 99, 79, 0.14);
+        }
+
+        #editTransition {
+            color: var(--text-main);
+        }
+
+        #editTransition option {
+            color: var(--text-main);
+            background: #25211e;
+        }
+
+        .advanced-transition-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .advanced-transition-row input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: #32150f;
+            border: 1px solid transparent;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn.secondary {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
+        .btn.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.09);
+        }
+
+        .btn.outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--button-text);
+        }
+
+        .btn.outline:hover {
+            background-color: rgba(255, 255, 255, 0.07);
+        }
+
+        /* Timeline Items */
+        .slide-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .slide-item:hover {
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        .slide-item.active {
+            background-color: rgba(185, 99, 79, 0.14);
+            border-right: 3px solid var(--primary);
+        }
+
+        .slide-thumb {
+            width: 80px;
+            height: 45px;
+            background-color: var(--app-surface-soft);
+            border-radius: 6px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .slide-info {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-index {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 6px;
+        }
+
+        .slide-text-preview {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .slide-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+
+        /* Preview Area */
+        .preview-box {
+            width: 100%;
+            height: 250px;
+            /* Fixed maximum height so it doesn't push the form away */
+            background-color: rgba(14, 10, 9, 0.92);
+            border-radius: var(--app-radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            /* Ensure the image fits nicely without stretching the box */
+            position: absolute;
+        }
+
+        .preview-btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preview-btn-row .btn {
+            margin-bottom: 0;
+        }
+
+        /* Flex rows */
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .row>* {
+            flex: 1;
+        }
+
+        /* File input wrapper styling */
+        .file-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-wrapper input[type="text"] {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Hub Modals */
+        #effects-modal,
+        #transitions-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 7, 6, 0.86);
+            z-index: 1000;
+            padding: 40px;
+        }
+
+        #effects-modal.open,
+        #transitions-modal.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #effects-iframe,
+        #transitions-iframe {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            background: #120d0c;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .creation-banner {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border: 1px solid rgba(180, 106, 85, 0.24);
+            border-radius: 999px;
+            background:
+                linear-gradient(180deg, rgba(185, 99, 79, 0.14), rgba(255, 255, 255, 0)),
+                rgba(255, 255, 255, 0.04);
+            box-shadow: var(--app-shadow-soft);
+        }
+
+        .creation-banner p {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .project-media-manager-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2750;
+            padding: 22px;
+            background: rgba(10, 7, 6, 0.96);
+        }
+
+        .project-media-manager-modal.open {
+            display: flex;
+        }
+
+        .project-media-manager-panel {
+            width: min(1480px, 100%);
+            height: 100%;
+            margin: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-lg);
+            box-shadow: var(--app-shadow);
+        }
+
+        .project-media-manager-header {
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .project-media-manager-header h2 {
+            margin: 0 0 4px;
+        }
+
+        .project-media-manager-header p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+        }
+
+        .media-manager-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .media-manager-actions .btn {
+            width: auto;
+            white-space: nowrap;
+            min-height: 42px;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+            box-sizing: border-box;
+        }
+
+        .media-manager-actions .media-manager-close {
+            background: rgba(185, 99, 79, 0.16);
+            color: #fff8f1;
+            border-color: rgba(185, 99, 79, 0.42);
+        }
+
+        .media-manager-actions .media-manager-close:hover {
+            background: rgba(185, 99, 79, 0.28);
+        }
+
+        .project-media-manager-body {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .media-manager-status {
+            min-height: 22px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .media-manager-status.warning {
+            padding: 10px 12px;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: var(--app-radius-sm);
+            color: #f4c26b;
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .media-manager-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .media-summary-card {
+            padding: 13px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-sm);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .media-summary-card strong {
+            display: block;
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .media-summary-card span {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .media-manager-section {
+            margin-bottom: 22px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-lg);
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .media-manager-section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 13px;
+        }
+
+        .media-manager-section h3,
+        .media-manager-section h4 {
+            margin: 0;
+        }
+
+        .media-manager-section-head span,
+        .media-empty {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .media-unused-columns {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .media-folder-column {
+            min-width: 0;
+            padding: 12px;
+            border-radius: var(--app-radius-sm);
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .media-folder-column h4 {
+            margin-bottom: 10px;
+        }
+
+        .media-file-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .media-file-card {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: 78px minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 9px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-sm);
+            background: rgba(0, 0, 0, 0.14);
+        }
+
+        .media-file-card.missing {
+            border-color: rgba(239, 68, 68, 0.48);
+            background: rgba(239, 68, 68, 0.07);
+        }
+
+        .media-file-preview {
+            width: 78px;
+            height: 54px;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 0.74rem;
+        }
+
+        .media-file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-file-preview audio {
+            width: 76px;
+            height: 32px;
+        }
+
+        .media-file-name {
+            overflow: hidden;
+            color: var(--text-main);
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .media-file-detail {
+            margin-top: 3px;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            line-height: 1.35;
+        }
+
+        .media-file-remove {
+            width: auto;
+            padding: 7px 9px;
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .media-usage-rows {
+            display: grid;
+            gap: 12px;
+        }
+
+        .media-usage-row {
+            display: grid;
+            grid-template-columns: 130px repeat(3, minmax(0, 1fr));
+            border: 1px solid var(--border-color);
+            border-radius: var(--app-radius-sm);
+            overflow: hidden;
+        }
+
+        .media-usage-row-title,
+        .media-usage-column {
+            min-width: 0;
+            padding: 12px;
+        }
+
+        .media-usage-row-title {
+            background: rgba(185, 99, 79, 0.12);
+        }
+
+        .media-usage-column {
+            border-left: 1px solid var(--border-color);
+        }
+
+        .media-usage-column h4 {
+            margin-bottom: 9px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 760px) {
+            .project-create-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .project-media-manager-modal {
+                padding: 8px;
+            }
+
+            .media-manager-summary,
+            .media-unused-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .media-usage-row {
+                grid-template-columns: 1fr;
+            }
+
+            .media-usage-column {
+                border-top: 1px solid var(--border-color);
+                border-left: 0;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="/studio/editor/editor-layout.css">
+</head>
+
+<body class="page page-studio">
+
+    <!-- Header Navigation -->
+    <div class="app-header" id="editorToolbar">
+        <button class="app-return-link app-return-link--back" id="openProjectDashboardBtn" type="button">Open Project</button>
+        <button class="tab local-primary" id="playSlideshowBtn" title="Play the slideshow from the beginning">Play
+            Slideshow</button>
+        <button class="tab local-blue" id="playFromCurrentBtn"
+            title="Play the slideshow starting from the current slide">Play from Current Slide</button>
+        <button class="tab local-accent" id="openProjectMediaManagerBtn" type="button"
+            style="display:none;">Media</button>
+        <div class="editor-save-group">
+            <span class="editor-save-status" id="saveStatus" role="status" aria-live="polite"></span>
+            <button class="tab editor-save" id="saveProjectBtn" type="button">Save Slideshow</button>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace" id="editorWorkspace">
+
+        <!-- Left Panel: Project Settings -->
+        <div class="panel project-settings-panel" id="projectSettingsPanel">
+            <div class="panel-header project-settings-header">
+                <span class="project-settings-title">Project Settings</span>
+                <button
+                    class="project-settings-toggle"
+                    id="projectSettingsToggle"
+                    type="button"
+                    aria-controls="projectSettingsContent"
+                    aria-expanded="true"
+                    aria-label="Collapse Project Settings"
+                    title="Collapse Project Settings"
+                ></button>
+            </div>
+            <div class="panel-content project-settings-content" id="projectSettingsContent">
+                <div class="project-settings-scroll">
+                    <div class="field">
+                        <label>Title <span style="color:var(--danger)">*</span>:</label>
+                        <input type="text" id="projectTitle" placeholder="Ending the Most Harmful Industry...">
+                    </div>
+
+                    <div class="field">
+                        <label>Description:</label>
+                        <textarea id="projectDescription" name="description" rows="3" maxlength="300"
+                            placeholder="Short description of this slideshow..."></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label>Opening Image <span style="color:var(--danger)">*</span>:</label>
+                        <div style="display: flex; gap: 12px; align-items: stretch; height: 80px;">
+                            <div
+                                style="flex: 1; background: rgba(255,255,255,0.04); border: 1px dashed var(--border-color); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                <img id="openingImagePreview" src=""
+                                    style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                <span id="openingImagePlaceholder"
+                                    style="color: var(--text-muted); font-size: 0.85rem;">No Image</span>
+                            </div>
+                            <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+                                <button class="btn outline" style="width: auto;"
+                                    onclick="chooseMediaForTarget('img', 'openingImageName', 'openingImageInput')">Choose Image</button>
+                                <button class="btn outline" style="width: auto;"
+                                    onclick="openMediaLibrary('img', 'openingImageName')">Browse Lib</button>
+                            </div>
+                            <input type="hidden" id="openingImageName">
+                            <input type="file" id="openingImageInput" accept="image/*" style="display:none">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Default Slide Duration:</label>
+                        <div class="row">
+                            <input type="number" id="defaultDuration" value="5" min="1" step="1">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">seconds</span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Global Audio:</label>
+                        <div id="globalAudioLayersList" style="display: grid; gap: 8px; min-width: 0; max-width: 100%;">
+                        </div>
+                        <button class="btn outline" type="button" id="addGlobalAudioLayerBtn"
+                            style="width: auto; margin-top: 8px;">+ Add Global Audio</button>
+                    </div>
+                </div>
+
+                <div class="project-settings-footer">
+                    <div style="display: flex; gap: 8px; margin-top: 8px; text-align: center ;">
+                        <button class="btn secondary" id="exportJsonBtn" style="flex: 1;" type="button"
+                            title="Download flow.json">Download flow.json</button>
+                    </div>
+                    <div id="editorSaveModeNote"
+                        style="font-size: 0.82rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
+                        Save writes <code>flow.json</code> safely. Export creates a browser-playable ZIP with project media.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Timeline -->
+        <div class="panel" id="slidesTimelinePanel">
+            <div class="panel-header">Slides Timeline</div>
+            <div class="panel-content" style="padding: 0; display: flex; flex-direction: column;">
+                <div id="timelineContainer"
+                    style="flex:1; overflow-y:auto; border-bottom: 1px solid var(--border-color);">
+                    <!-- Slides injected here -->
+                </div>
+                <div style="padding: 16px; text-align: center;">
+                    <button class="btn outline" style="width: auto;" id="addSlideBtn">+ Add Slide</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Preview & Editor -->
+        <div class="panel">
+            <div class="panel-header" id="editorHeader">Edit Slide 1</div>
+            <div class="panel-content" style="padding: 20px;">
+                <!-- Preview Sub-pane seamlessly integrated -->
+                <div class="preview-box">
+                    <img id="previewBg" src="" style="display: none; object-fit: cover; width: 100%; height: 100%;">
+                    <img id="previewFg" src=""
+                        style="display: none; object-fit: contain; width: 100%; height: 100%; z-index: 2;">
+                    <span id="previewPlaceholder" style="color: var(--text-muted); font-size: 0.9rem;">No image
+                        selected</span>
+                </div>
+                <!--
+                <div class="preview-btn-row">
+                    <button class="btn">Play Slide</button>
+                    <button class="btn">Play From Here</button>
+                </div>
+                -->
+
+                <!-- Editor Form -->
+                <div id="editorContent">
+
+                    <div class="field">
+                        <label>Slide Text:</label>
+                        <textarea id="editSlideText" rows="3" placeholder="Look at these images..."></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Narration (Audio):</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="editAudioName" placeholder="No file selected" style="flex: 1;">
+                            <button class="btn outline" style="width: auto;"
+                                onclick="chooseMediaForTarget('speech', 'editAudioName', 'editAudioInput')">Choose Audio</button>
+                            <button class="btn outline" style="width: auto;"
+                                onclick="openMediaLibrary('speech', 'editAudioName')">Browse Lib</button>
+                            <button class="btn outline" id="playAudioBtn" onclick="toggleAudioPreview(this)"
+                                style="display:none; width: auto; padding: 8px 12px;" title="Play Audio">Play</button>
+                            <input type="file" id="editAudioInput" accept="audio/*" style="display:none">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                            <label style="margin: 0; min-width: 58px;">Volume</label>
+                            <input type="range" id="editAudioVolume" min="0" max="1" step="0.05" value="1"
+                                style="flex: 1;">
+                            <span id="editAudioVolumeValue"
+                                style="min-width: 40px; color: var(--text-muted); font-size: 0.85rem;">100%</span>
+                        </div>
+                        <div id="audioLayersList" style="display: grid; gap: 8px; margin-top: 10px;"></div>
+                        <button class="btn outline" type="button" id="addAudioLayerBtn"
+                            style="width: auto; margin-top: 8px;">+ Add Audio Layer</button>
+                    </div>
+
+                    <div class="field">
+                        <label>Background:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="editBgName" placeholder="No file selected" style="flex: 1;">
+                            <button class="btn outline" style="width: auto;"
+                                onclick="chooseMediaForTarget('img', 'editBgName', 'editBgInput')">Choose Image</button>
+                            <button class="btn outline" style="width: auto;"
+                                onclick="openMediaLibrary('img', 'editBgName')">Browse Lib</button>
+                            <input type="file" id="editBgInput" accept="image/*" style="display:none">
+                        </div>
+                        <div class="file-wrapper">
+                            <input type="text" id="editBgEffect" placeholder="No effect" readonly>
+                            <button class="btn outline" style="width: auto;" id="editBgBtn"
+                                onclick="openEffectInHub('bg')">Edit</button>
+                            <button class="btn outline" style="width: auto;" onclick="openEffectsHub('bg')">Hub</button>
+                            <button class="btn outline" style="width: auto; padding: 8px 12px;" id="jsonBgBtn"
+                                onclick="openEffectEditor('bg')" title="Edit Effect JSON">JSON</button>
+                            <button class="btn outline" style="width: auto;" id="clearBgBtn" onclick="clearEffect('bg')"
+                                style="color:var(--danger)">X</button>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Foreground Layers:</label>
+                        <div id="foregroundLayersList" style="display: grid; gap: 8px;"></div>
+                        <button class="btn outline" type="button" id="addForegroundLayerBtn"
+                            style="width: auto; margin-top: 8px;">+ Add Foreground Layer</button>
+                    </div>
+                    <div class="field">
+                        <label>Transition:</label>
+                        <select id="editTransition">
+                            <option value="fade">Fade (Default)</option>
+                            <option value="none">None</option>
+                            <option value="push-up">Push Up</option>
+                            <option value="push-left">Push Left</option>
+                            <option value="push-right">Push Right</option>
+                            <option value="zoom">Zoom</option>
+                            <option value="dissolve">Dissolve</option>
+                        </select>
+                        <label>Advanced Transition:</label>
+                        <div class="advanced-transition-row">
+                            <input type="text" id="transitionAdvancedName" placeholder="No advanced transition"
+                                readonly>
+                            <button class="btn outline" type="button" id="transitionEditBtn"
+                                style="width:auto;">Edit</button>
+                            <button class="btn outline" type="button" id="transitionHubBtn"
+                                style="width:auto;">Hub</button>
+                            <button class="btn outline" type="button" id="transitionJsonBtn"
+                                style="width:auto; padding:8px 12px;">JSON</button>
+                            <button class="btn outline" type="button" id="transitionClearBtn"
+                                style="width:auto;">X</button>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Duration override:</label>
+                        <div class="row">
+                            <input type="number" id="editDuration" placeholder="Auto" min="1" step="0.5">
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">seconds (optional)</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                        <button class="btn outline" style="width: auto;" id="duplicateSlideBtn">Duplicate Slide</button>
+                        <button class="btn outline"
+                            style="width: auto; color: var(--danger); border-color: var(--danger);"
+                            id="deleteSlideBtn">Delete Slide</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Project-wide Media Manager -->
+    <div id="project-media-manager-modal" class="project-media-manager-modal" role="dialog"
+        aria-modal="true" aria-labelledby="projectMediaManagerTitle">
+        <div class="project-media-manager-panel">
+            <div class="project-media-manager-header">
+                <div>
+                    <h2 id="projectMediaManagerTitle">Project Media</h2>
+                    <p>See unused files and every saved media connection in slideshow order.</p>
+                </div>
+                <div class="media-manager-actions">
+                    <button class="btn outline" type="button" data-media-manager-import="img">Import Image</button>
+                    <button class="btn outline" type="button" data-media-manager-import="speech">Import Speech</button>
+                    <button class="btn outline" type="button" data-media-manager-import="audio">Import Audio</button>
+                    <button class="btn secondary" type="button" id="refreshProjectMediaManagerBtn">Refresh</button>
+                    <button class="btn media-manager-close" type="button"
+                        id="closeProjectMediaManagerBtn">Close</button>
+                </div>
+            </div>
+            <div class="project-media-manager-body">
+                <div id="projectMediaManagerStatus" class="media-manager-status"></div>
+                <div id="projectMediaManagerContent">
+                    <div class="media-empty">Loading project media…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Library Modal -->
+    <div id="media-library-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(10,7,6,0.94); z-index: 2500;">
+        <div
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 900px; max-height: 80vh; background: var(--panel-bg); border-radius: var(--app-radius-lg); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <div
+                style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0;" id="mediaLibTitle">Server Media Library</h3>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="btn outline" id="mediaLibImportBtn" type="button"
+                        onclick="importMediaIntoActiveLibrary()" style="display:none; width:auto;">Import New</button>
+                    <button onclick="document.getElementById('media-library-modal').style.display='none'"
+                        style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+                </div>
+            </div>
+            <div id="mediaLibGrid"
+                style="padding: 20px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; align-content: start; align-items: start;">
+                <!-- Items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Effects Hub Modal -->
+    <div id="effects-modal">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeEffectsHub()">Close Effects Hub</button>
+        </div>
+        <iframe id="effects-iframe" src=""></iframe>
+    </div>
+
+    <!-- Transitions Hub Modal -->
+    <div id="transitions-modal">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeTransitionsHub()">Close Transitions Hub</button>
+        </div>
+        <iframe id="transitions-iframe" src=""></iframe>
+    </div>
+
+    <!-- Slideshow Playback Modal -->
+    <div id="playback-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(10,7,6,0.94); z-index: 2000;">
+        <div style="position: absolute; top: 20px; right: 20px; z-index: 2001;">
+            <button class="btn"
+                style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 1px solid rgba(255,255,255,0.4);"
+                onclick="closePlaybackModal()">&times; Close Player</button>
+        </div>
+        <iframe id="playback-iframe" src="" style="width: 100%; height: 100%; border: none;" allow="autoplay"></iframe>
+    </div>
+
+    <!-- Effect JSON Editor Modal -->
+    <div id="effect-edit-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(10,7,6,0.86); z-index: 1000; padding: 40px;">
+        <div class="panel"
+            style="max-width: 800px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; height: 100%;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Edit Effect JSON</span>
+                <button class="modal-close" onclick="closeEffectEditor()">Close</button>
+            </div>
+            <div class="panel-content" style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="field">
+                    <label>Effect Name:</label>
+                    <input type="text" id="effectEditName" placeholder="e.g. morph-effect-123">
+                </div>
+                <div class="field" style="flex: 1; display: flex; flex-direction: column;">
+                    <label>Effect JSON:</label>
+                    <textarea id="effectEditJson" style="flex: 1; font-family: monospace; resize: none;"
+                        spellcheck="false"></textarea>
+                </div>
+                <p id="effectEditError" style="color: var(--danger); font-size: 0.9rem; margin: 0; display: none;">
+                    Invalid JSON.</p>
+                <button class="btn" style="width: auto;" onclick="saveEffectEditor()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop project context. PHP emits its own context in json-maker.php. -->
+    <script>
+        (function configureProjectContext() {
+            const params = new URLSearchParams(window.location.search);
+            const desktopMode = true;
+            window.PROJECT_CONTEXT = {
+                project: params.get('projectId') || '',
+                workspaceId: params.get('workspaceId') || '',
+                projectDir: '',
+                makerEndpoint: null,
+                playerUrl: '/studio/player/local-player.html',
+                flowUrl: 'flow.json',
+                imgBaseUrl: 'img/',
+                speechBaseUrl: 'speech/',
+                audioBaseUrl: 'audio/',
+                desktopMode
+            };
+        })();
+        window.INITIAL_PROJECT_DATA = null;
+    </script>
+
+    <!-- Main Logic Script -->
+    <script src="/studio/editor/json-maker-logic.js"></script>
+    <script src="/studio/editor/editor-layout.js"></script>
+</body>
+
+</html>

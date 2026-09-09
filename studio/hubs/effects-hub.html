@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Effects Studio</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root {
+            --bg: #0f172a;
+            /* Main dark background */
+            --sidebar: #1e293b;
+            /* Sidebar background */
+            --border: #334155;
+            /* Border lines */
+            --text: #e2e8f0;
+            /* Main text */
+            --muted: #94a3b8;
+            /* Muted text */
+            --accent: #3b82f6;
+            /* Bright Blue */
+            --hover: #334155;
+            /* Hover state */
+            --active: #2563eb;
+            /* Active state */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            /* Sidebar | Main Content */
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-bottom: 1px solid var(--border);
+            color: #fff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-list {
+            padding: 10px;
+            flex: 1;
+        }
+
+        .category-group {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            margin-bottom: 4px;
+        }
+
+        .effect-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-transform: capitalize;
+        }
+
+        .effect-btn:hover {
+            background: var(--hover);
+            color: #fff;
+        }
+
+        .effect-btn.active {
+            background: var(--active);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* --- MAIN AREA --- */
+        .main-stage {
+            position: relative;
+            background: #000;
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Placeholder state */
+        .welcome-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .welcome-screen h1 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        /* --- HUB HEADER --- */
+        .hub-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #0f172a;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .hub-header button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: none;
+            /* Hidden until an effect loads */
+        }
+
+        .hub-header button:hover {
+            background: #34d399;
+        }
+
+        .hub-header .registry-button {
+            display: inline-flex;
+            margin-right: 12px;
+            background: #334155;
+        }
+
+        .hub-header .registry-button:hover {
+            background: #475569;
+        }
+
+        .hub-header .prompt-button {
+            display: inline-flex;
+            margin-right: 12px;
+            background: #7c3aed;
+        }
+
+        .hub-header .prompt-button:hover {
+            background: #8b5cf6;
+        }
+
+        /* Adjust iframe and welcome to sit below header */
+        .stage-content {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="brand">
+            <span>✨ EFFECTS HUB</span>
+        </div>
+        <div class="nav-list" id="navList">
+        </div>
+    </div>
+
+    <div class="main-stage">
+        <div class="hub-header" id="hubHeader">
+            <button class="prompt-button" id="createEffectPromptBtn" type="button">Create or improve effect</button>
+            <button class="registry-button" id="manageRegistryBtn" type="button">Manage effects</button>
+            <button id="globalApplyBtn">✅ Apply Effect to Slide</button>
+        </div>
+
+        <div class="stage-content">
+            <div class="welcome-screen" id="welcome">
+                <h1>Select an Effect</h1>
+                <p>Choose a category from the sidebar to begin.</p>
+            </div>
+            <iframe id="toolFrame" name="toolFrame"></iframe>
+        </div>
+    </div>
+
+    <script src="/studio/maker/maker-scroll-guard.js"></script>
+    <script>
+        // 1. The Configuration JSON mapping decoupled via fetch
+        let effectsData = [];
+
+        // 2. Build the UI
+        const navList = document.getElementById('navList');
+        const frame = document.getElementById('toolFrame');
+        const welcome = document.getElementById('welcome');
+
+        frame.addEventListener('load', () => {
+            window.MovementMakerScrollGuard.install(frame);
+        });
+
+        function cleanName(filename) {
+            // "effects/wipe-maker.html" -> "Wipe"
+            return filename
+                .split('/')
+                .pop()
+                .replace('.html', '')
+                .replace('-maker', '')
+                .replace(/-/g, ' ');
+        }
+
+        function renderSidebar() {
+            navList.replaceChildren();
+            effectsData.forEach(group => {
+                // A. Create Group Container
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'category-group';
+
+                // B. Create Title
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = group.Category;
+                groupDiv.appendChild(title);
+
+                // C. Process Files string
+                const files = group.engines ? group.engines.split(',') : [];
+
+                files.forEach(rawFile => {
+                    const engine = rawFile.trim();
+                    if (!engine) return;
+
+                    const file = '/effects/' + engine + '-maker.html';
+
+                    const btn = document.createElement('button');
+                    btn.className = 'effect-btn';
+                    btn.textContent = cleanName(engine);
+
+                    btn.addEventListener('click', () => {
+                        loadEffect(file, btn);
+                    });
+
+                    groupDiv.appendChild(btn);
+                });
+
+                navList.appendChild(groupDiv);
+            });
+        }
+
+        function loadEffect(url, activeBtn) {
+            // 1. Update Visuals
+            document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+            activeBtn.classList.add('active');
+
+            // 2. Hide Welcome, Show Frame and Header Button
+            welcome.style.display = 'none';
+            frame.style.display = 'block';
+            document.getElementById('globalApplyBtn').style.display = 'block';
+
+            // 3. Load URL with inherited query params (e.g. ?img=bg.jpg)
+            frame.src = url + window.location.search;
+        }
+
+        async function runSmokeCheck() {
+            const requestedEngine = new URLSearchParams(window.location.search).get('smokeEffect');
+            if (!requestedEngine) return;
+
+            const engines = [];
+            effectsData.forEach(group => {
+                if (!group.engines) return;
+                group.engines.split(',').forEach(engine => {
+                    if (engine.trim()) engines.push(engine.trim());
+                });
+            });
+            const buttons = document.querySelectorAll('.effect-btn');
+            const requestedEngines = requestedEngine === 'all' ? engines : [requestedEngine];
+
+            try {
+                for (const engine of requestedEngines) {
+                    const engineIndex = engines.indexOf(engine);
+                    const targetBtn = engineIndex >= 0 ? buttons[engineIndex] : null;
+                    if (!targetBtn) throw new Error(`Effect is not registered: ${engine}`);
+
+                    await new Promise((resolve, reject) => {
+                        frame.addEventListener('load', async () => {
+                            const makerWindow = frame.contentWindow;
+                            const makerApi = makerWindow && makerWindow.MakerAPI;
+                            if (
+                                !makerApi
+                                || typeof makerApi.run !== 'function'
+                                || typeof makerApi.getExportJSON !== 'function'
+                            ) {
+                                reject(new Error(`Effect maker did not initialize: ${engine}`));
+                                return;
+                            }
+                            try {
+                                makerApi.run();
+                                const definition = makerApi.getExportJSON();
+                                if (!definition || definition.engine !== engine) {
+                                    throw new Error(`Effect maker exported the wrong engine: ${engine}`);
+                                }
+                                if (typeof makerApi.runStressCheck === 'function') {
+                                    const stressResult = await makerApi.runStressCheck();
+                                    if (!stressResult || stressResult.safe !== true) {
+                                        throw new Error(`Effect maker stress check failed: ${engine}`);
+                                    }
+                                }
+                                const playControl = frame.contentDocument.querySelector(
+                                    '#runBtn, #previewBtn, button.run, button.play'
+                                );
+                                if (playControl) playControl.click();
+                                resolve();
+                            } catch (error) {
+                                reject(new Error(
+                                    `Effect maker could not run or export: ${engine}: `
+                                    + (error && error.message ? error.message : String(error))
+                                ));
+                            }
+                        }, { once: true });
+                        targetBtn.click();
+                    });
+                }
+
+                document.getElementById('globalApplyBtn').click();
+            } catch (error) {
+                window.parent.postMessage({
+                    type: 'movement-effects-hub-failed',
+                    message: error && error.message ? error.message : String(error)
+                }, '*');
+            }
+        }
+
+        // Auto-load on edit mode
+        function checkEditMode() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'edit') {
+                const storedJson = sessionStorage.getItem('effectEditData');
+                if (storedJson) {
+                    try {
+                        const effectData = JSON.parse(storedJson);
+                        if (effectData.engine) {
+                            // Convert standard engines back to filenames
+                            const expectedName = cleanName(effectData.engine);
+                            let targetBtn = null;
+                            let actualUrl = '/effects/' + effectData.engine + '-maker.html';
+
+                            // Find the real path listed in the registry
+                            let allEngines = [];
+                            effectsData.forEach(g => {
+                                if (g.engines) {
+                                    g.engines.split(',').forEach(f => {
+                                        if (f.trim()) allEngines.push(f.trim());
+                                    });
+                                }
+                            });
+
+                            allEngines.forEach((engine, index) => {
+                                if (engine === effectData.engine) {
+                                    actualUrl = '/effects/' + engine + '-maker.html';
+                                    const buttons = document.querySelectorAll('.effect-btn');
+                                    if (buttons[index]) targetBtn = buttons[index];
+                                }
+                            });
+
+                            if (targetBtn) {
+                                loadEffect(actualUrl, targetBtn);
+                            } else {
+                                // Fallback just load it blind
+                                welcome.style.display = 'none';
+                                frame.style.display = 'block';
+                                frame.src = actualUrl + window.location.search;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse edit JSON", e);
+                    }
+                }
+            }
+        }
+
+        function loadEffectsRegistry() {
+            return fetch(`/effects/registry.json?v=${Date.now()}`, { cache: 'no-store' })
+                .then(res => {
+                    if (!res.ok) throw new Error("Registry fetch failed: " + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    effectsData = data;
+                    renderSidebar();
+                    checkEditMode();
+                    runSmokeCheck();
+                })
+                .catch(err => {
+                    console.error("Hub Error:", err);
+                    navList.innerHTML = '<div style="padding: 20px; color: #ef4444; font-size: 0.9rem;">Failed to load effects registry. The manifest may be missing.</div>';
+                });
+        }
+
+        loadEffectsRegistry();
+
+        document.getElementById('manageRegistryBtn').addEventListener('click', () => {
+            window.parent.postMessage({
+                type: 'movement-open-registry-editor',
+                registryType: 'effects'
+            }, '*');
+        });
+
+        document.getElementById('createEffectPromptBtn').addEventListener('click', () => {
+            window.parent.postMessage({
+                type: 'movement-open-effect-prompt-builder'
+            }, '*');
+        });
+
+        window.addEventListener('message', event => {
+            if (
+                event.data
+                && event.data.type === 'movement-registry-changed'
+                && event.data.registryType === 'effects'
+            ) {
+                loadEffectsRegistry();
+            }
+        });
+
+        // Listen for messages from the inner Maker iframe
+        window.addEventListener('message', (event) => {
+            // Only explicitly forward valid effect objects.
+            // Browser extensions constantly fire random postMessage events that would otherwise crash the relay.
+            if (!event.data || !event.data.engine) return;
+
+            // Forward the effect definition up to the main json-maker.php window
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(event.data, '*');
+                // The parent editor logic handles closing the modal after successfully processing the message payload.
+            }
+        });
+
+        // Global Apply Event Listener
+        document.getElementById('globalApplyBtn').addEventListener('click', () => {
+            // Send message down to iframe telling it to execute its download/apply logic
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage('trigger_apply', '*');
+            }
+        });
+
+        // Bridge function for parent to check if an effect is currently loaded (for safety prompt)
+        window.hasActiveEffect = function () {
+            // If the iframe has a source and it's not empty, it means user is actively viewing/editing an effect
+            return frame.src && frame.src !== '' && frame.src !== window.location.href;
+        };
+
+    </script>
+</body>
+
+</html>

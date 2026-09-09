@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Sequencer (Dark & Soft)</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Sequencer Maker</h2>
+
+        <div class="group">
+            <h4>1. Image</h4>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+            <div style="font-size:0.8rem; color:#aaa; margin-top:5px;">Click image to add lights.</div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Play Sequence</button>
+            <div class="btn-row">
+                <button id="undoBtn">⎌ Undo</button>
+                <button id="clearBtn" class="warn">× Clear</button>
+            </div>
+            <div id="point-count">0 Lights added</div>
+        </div>
+
+        <div class="group">
+            <h4>2. Atmosphere</h4>
+            <label>Darken Background <span id="val-darken"></span></label>
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">0 = Normal, 1 = Pitch Black</div>
+            <input type="range" id="darken" min="0" max="0.95" step="0.05" value="0.6">
+
+            <label>Transparency / Intensity <span id="val-intensity"></span></label>
+            <input type="range" id="intensity" min="0.1" max="1.0" step="0.1" value="0.9">
+        </div>
+
+        <div class="group">
+            <h4>3. Light Style</h4>
+            <label>Color</label>
+            <input type="color" id="color" value="#fbbf24">
+
+            <label>Size (Radius) <span id="val-size"></span></label>
+            <input type="range" id="size" min="5" max="150" value="40">
+
+            <label>Dispersion (Softness) <span id="val-dispersion"></span></label>
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">Low = Hard Dot, High = Soft Glow</div>
+            <input type="range" id="dispersion" min="0.0" max="1.0" step="0.1" value="0.8">
+        </div>
+
+        <div class="group">
+            <h4>4. Timing</h4>
+            <label>Interval (Sec) <span id="val-interval"></span></label>
+            <input type="range" id="interval" min="0.1" max="2.0" step="0.1" value="0.5">
+
+            <label>Start Delay (Sec) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.0">
+        </div>
+
+        <div class="group">
+            <h4>5. Export</h4>
+            <input type="text" id="filename" value="sequence.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        // ENGINE PATH
+        const ENGINE_PATH = '/effects/sequencer-engine.js';
+        const ENGINE = 'sequencer';
+        // Use relative for local testing
+        import { mount } from '/effects/sequencer-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+
+        let cleanup = null;
+
+        let points = [];
+
+        const cfg = {
+            interval: 0.5, startDelay: 0.0,
+            color: '#fbbf24', size: 40,
+            intensity: 0.9, darken: 0.6, dispersion: 0.8,
+            fadeSpeed: 0.5
+        };
+
+        Object.keys(cfg).forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            const isNum = typeof cfg[id] === 'number';
+            const updateCfg = () => {
+                cfg[id] = isNum ? parseFloat(el.value) : el.value;
+                run();
+            };
+
+            el.addEventListener('input', updateCfg);
+            el.addEventListener('change', updateCfg);
+        });
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+
+            // UI Updates
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            document.getElementById('point-count').textContent = `${points.length} Light(s)`;
+
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: window.imgData,
+                points: points
+            });
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            const px = parseFloat((clickX / canvas.width).toFixed(3));
+            const py = parseFloat((clickY / canvas.height).toFixed(3));
+
+            points.push({ x: px, y: py });
+            run();
+        });
+
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            points.pop();
+            run();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (confirm('Remove all lights?')) {
+                points = [];
+                run();
+            }
+        });
+
+        // Image preloading and upload wiring are handled centrally by maker-engine.js.
+        /*
+
+
+
+
+
+
+            if (overrideContainer) overrideContainer.innerHTML = '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>';
+            else { const inputGroup = document.getElementById('imgInput').parentNode;
+            inputGroup.insertAdjacentHTML('beforeend', '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>'); }
+
+        */
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
+            run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
+            loadEditConfig: (c) => {
+                if (Array.isArray(c.points)) points = c.points;
+
+                Object.keys(cfg).forEach(k => {
+                    if (c[k] === undefined) return;
+                    cfg[k] = typeof cfg[k] === 'number' ? parseFloat(c[k]) : c[k];
+
+                    const el = document.getElementById(k);
+                    if (el) el.value = cfg[k];
+                });
+
+                run();
+            },
+            getExportJSON: () => {
+                const pointsStr = JSON.stringify(points);
+                const imgSrc = window.imgName ? `img/${window.imgName}` : '';
+                const code = `
+import { mount as runSeq } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runSeq(canvas, ctx, {
+        ...config,
+        imgSrc: '${imgSrc}',
+        points: ${pointsStr},
+        interval: ${cfg.interval},
+        startDelay: ${cfg.startDelay},
+        color: '${cfg.color}',
+        size: ${cfg.size},
+        intensity: ${cfg.intensity},
+        darken: ${cfg.darken},
+        dispersion: ${cfg.dispersion},
+        fadeSpeed: ${cfg.fadeSpeed}
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

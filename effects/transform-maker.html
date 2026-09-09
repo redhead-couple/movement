@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Image Transform Maker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .inline-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toggle-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .toggle-row label {
+            justify-content: flex-start;
+            gap: 8px;
+            margin: 0;
+            padding: 8px;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            background: #020617;
+        }
+
+        .toggle-row input {
+            width: auto;
+            margin: 0;
+        }
+
+        .val {
+            color: #93c5fd;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Image Transform</h2>
+
+        <div class="group">
+            <h4>1. Image</h4>
+            <label>Target Image</label>
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="img1Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">Refresh Preview</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Position</h4>
+            <div class="inline-row">
+                <div>
+                    <label>X <span id="val-x" class="val"></span></label>
+                    <input type="range" id="x" min="-100" max="200" step="1" value="50">
+                </div>
+                <div>
+                    <label>Y <span id="val-y" class="val"></span></label>
+                    <input type="range" id="y" min="-100" max="200" step="1" value="50">
+                </div>
+            </div>
+
+            <label>Anchor</label>
+            <select id="anchor">
+                <option value="center">Center</option>
+                <option value="top-left">Top Left</option>
+                <option value="top">Top</option>
+                <option value="top-right">Top Right</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom">Bottom</option>
+                <option value="bottom-right">Bottom Right</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <h4>3. Size</h4>
+            <div class="inline-row">
+                <div>
+                    <label>Width <span id="val-width" class="val"></span></label>
+                    <input type="range" id="width" min="1" max="300" step="1" value="100">
+                </div>
+                <div>
+                    <label>Height <span id="val-height" class="val"></span></label>
+                    <input type="range" id="height" min="1" max="300" step="1" value="100">
+                </div>
+            </div>
+
+            <label>Scale <span id="val-scale" class="val"></span></label>
+            <input type="range" id="scale" min="0.05" max="3" step="0.05" value="1">
+
+            <label>Fit Mode</label>
+            <select id="fit">
+                <option value="contain">Contain</option>
+                <option value="cover">Cover</option>
+                <option value="stretch">Stretch</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <h4>4. Style</h4>
+            <label>Opacity <span id="val-opacity" class="val"></span></label>
+            <input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
+
+            <label>Rotation <span id="val-rotation" class="val"></span></label>
+            <input type="range" id="rotation" min="-180" max="180" step="1" value="0">
+
+            <div class="toggle-row">
+                <label><input type="checkbox" id="flipX"> Flip X</label>
+                <label><input type="checkbox" id="flipY"> Flip Y</label>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>5. Adjustments</h4>
+            <label>Brightness <span id="val-brightness" class="val"></span></label>
+            <input type="range" id="brightness" min="0" max="2" step="0.05" value="1">
+
+            <label>Contrast <span id="val-contrast" class="val"></span></label>
+            <input type="range" id="contrast" min="0" max="2" step="0.05" value="1">
+
+            <label>Saturation <span id="val-saturation" class="val"></span></label>
+            <input type="range" id="saturation" min="0" max="2" step="0.05" value="1">
+
+            <label>Blur <span id="val-blur" class="val"></span></label>
+            <input type="range" id="blur" min="0" max="40" step="1" value="0">
+        </div>
+
+        <div class="group">
+            <h4>6. Export</h4>
+            <input type="text" id="filename" value="transform-effect.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        const ENGINE_PATH = '/effects/transform-engine.js';
+        const ENGINE = 'transform';
+        import { mount } from '/effects/transform-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        const cfg = {
+            x: 50,
+            y: 50,
+            width: 100,
+            height: 100,
+            scale: 1,
+            opacity: 1,
+            rotation: 0,
+            anchor: 'center',
+            fit: 'contain',
+            flipX: false,
+            flipY: false,
+            brightness: 1,
+            contrast: 1,
+            saturation: 1,
+            blur: 0
+        };
+
+        const numericKeys = ['x', 'y', 'width', 'height', 'scale', 'opacity', 'rotation', 'brightness', 'contrast', 'saturation', 'blur'];
+        const boolKeys = ['flipX', 'flipY'];
+        const selectKeys = ['anchor', 'fit'];
+
+        function formatValue(key, value) {
+            if (['x', 'y', 'width', 'height'].includes(key)) return `${Number(value).toFixed(0)}%`;
+            if (key === 'rotation') return `${Number(value).toFixed(0)} deg`;
+            if (key === 'blur') return `${Number(value).toFixed(0)}px`;
+            return Number(value).toFixed(2);
+        }
+
+        function syncLabels() {
+            numericKeys.forEach(key => {
+                const label = document.getElementById('val-' + key);
+                if (label) label.textContent = formatValue(key, cfg[key]);
+            });
+        }
+
+        function run() {
+            if (cleanup) cleanup();
+            syncLabels();
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: window.img1Data
+            });
+        }
+        window.run = run;
+
+        numericKeys.forEach(key => {
+            const el = document.getElementById(key);
+            el.addEventListener('input', e => {
+                cfg[key] = parseFloat(e.target.value);
+                run();
+            });
+        });
+
+        boolKeys.forEach(key => {
+            const el = document.getElementById(key);
+            el.addEventListener('change', e => {
+                cfg[key] = e.target.checked;
+                run();
+            });
+        });
+
+        selectKeys.forEach(key => {
+            const el = document.getElementById(key);
+            el.addEventListener('change', e => {
+                cfg[key] = e.target.value;
+                run();
+            });
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        window.MakerAPI = {
+            onImageLoaded: () => { run(); },
+            run: () => { run(); },
+            loadEditConfig: (c) => {
+                Object.keys(cfg).forEach(key => {
+                    if (c[key] === undefined) return;
+                    cfg[key] = c[key];
+                    const el = document.getElementById(key);
+                    if (!el) return;
+                    if (el.type === 'checkbox') {
+                        el.checked = !!c[key];
+                    } else {
+                        el.value = c[key];
+                    }
+                });
+                run();
+            },
+            getExportJSON: () => {
+                const path1 = window.name1 ? `img/${window.name1}` : '';
+                return {
+                    engine: ENGINE,
+                    config: {
+                        imgSrc: path1,
+                        x: cfg.x,
+                        y: cfg.y,
+                        width: cfg.width,
+                        height: cfg.height,
+                        scale: cfg.scale,
+                        opacity: cfg.opacity,
+                        rotation: cfg.rotation,
+                        anchor: cfg.anchor,
+                        fit: cfg.fit,
+                        flipX: cfg.flipX,
+                        flipY: cfg.flipY,
+                        brightness: cfg.brightness,
+                        contrast: cfg.contrast,
+                        saturation: cfg.saturation,
+                        blur: cfg.blur
+                    }
+                };
+            }
+        };
+
+        syncLabels();
+    </script>
+
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

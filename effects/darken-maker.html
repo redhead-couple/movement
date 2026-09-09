@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Darken/Drift Generator v4 (Snap)</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Darken & Drift</h2>
+
+        <div class="group">
+            <h4>1. Target Image</h4>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+            <div style="font-size:0.75rem; color:#64748b; margin-top:6px;">
+                * Ensure file is in <b>img/</b> folder.
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>2. Controls</h4>
+            <button class="play" id="previewBtn">▶ Restart Animation</button>
+        </div>
+
+        <div class="group">
+            <h4>3. Lighting Animation</h4>
+
+            <div class="param-row">
+                <label>Start Darkness</label>
+                <input type="number" id="n-darknessStart" class="num-input" step="0.1" value="0.0">
+            </div>
+            <input type="range" id="darknessStart" min="0" max="1" step="0.05" value="0.0">
+
+            <div class="param-row">
+                <label>End Darkness</label>
+                <input type="number" id="n-darknessEnd" class="num-input" step="0.1" value="0.6">
+            </div>
+            <input type="range" id="darknessEnd" min="0" max="1" step="0.05" value="0.6">
+
+            <div class="param-row">
+                <label>Vignette (Static)</label>
+                <input type="number" id="n-vignette" class="num-input" step="0.1" value="0.5">
+            </div>
+            <input type="range" id="vignette" min="0" max="1" step="0.05" value="0.5">
+        </div>
+
+        <div class="group">
+            <h4>4. Motion (Zoom & Drift)</h4>
+
+            <div class="param-row">
+                <label>Start Zoom (1 = Fit)</label>
+                <input type="number" id="n-zoomStart" class="num-input" step="0.1" value="1.0">
+            </div>
+            <input type="range" id="zoomStart" min="1" max="3" step="0.1" value="1.0">
+
+            <div class="param-row">
+                <label>End Zoom</label>
+                <input type="number" id="n-zoomEnd" class="num-input" step="0.1" value="1.2">
+            </div>
+            <input type="range" id="zoomEnd" min="1" max="3" step="0.1" value="1.2">
+
+            <div class="param-row">
+                <label>Drift X (Pixels)</label>
+                <input type="number" id="n-driftX" class="num-input" step="10" value="0">
+            </div>
+            <input type="range" id="driftX" min="-500" max="500" step="10" value="0">
+
+            <div class="param-row">
+                <label>Drift Y (Pixels)</label>
+                <input type="number" id="n-driftY" class="num-input" step="10" value="0">
+            </div>
+            <input type="range" id="driftY" min="-500" max="500" step="10" value="0">
+        </div>
+
+        <div class="group">
+            <h4>5. Timing</h4>
+
+            <div class="param-row">
+                <label style="color:#f472b6;">Yoyo (Back & Forth)</label>
+                <input type="checkbox" id="yoyo">
+            </div>
+
+            <div class="param-row" style="margin-top:8px;">
+                <label style="color:#60a5fa;">Snap to Start at End</label>
+                <input type="checkbox" id="resetAtEnd">
+            </div>
+
+            <div class="param-row" style="margin-top:10px;">
+                <label>Start Delay (ms)</label>
+                <input type="number" id="n-startTime" class="num-input" step="100" value="0">
+            </div>
+            <input type="range" id="startTime" min="0" max="5000" step="100" value="0">
+
+            <div class="param-row">
+                <label>Duration (ms)</label>
+                <input type="number" id="n-duration" class="num-input" step="500" value="5000">
+            </div>
+            <input type="range" id="duration" min="1000" max="20000" step="500" value="5000">
+        </div>
+
+        <div class="group">
+            <h4>6. Export</h4>
+            <label>Filename</label>
+            <input type="text" id="filename" value="snap-back.json">
+            <button id="downloadBtn">Download Effect File</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/darken-engine.js';
+        const ENGINE = 'darken';
+        import { runDarken } from '/effects/darken-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanupFunc = null;
+
+        const config = {
+            startTime: 0, duration: 5000,
+            yoyo: false,
+            resetAtEnd: false, // Default off
+            zoomStart: 1.0, zoomEnd: 1.2,
+            driftX: 0, driftY: 0,
+            darknessStart: 0.0, darknessEnd: 0.6,
+            vignette: 0.5
+        };
+
+        // --- 1. Image Handling ---
+        const imgInput = document.getElementById('imgInput');
+
+        // Auto-load image from query parameter
+
+
+
+
+
+
+
+
+        window.runPreview = runPreview;
+        function runPreview() {
+            if (cleanupFunc) cleanupFunc();
+            cleanupFunc = runDarken(canvas, ctx, {
+                ...config,
+                imgSrc: window.imgData
+            });
+        }
+
+        // --- 2. Bindings ---
+        function bind(id, key, isFloat = false) {
+            const range = document.getElementById(id);
+            const num = document.getElementById('n-' + id);
+
+            if (range) {
+                range.addEventListener('input', () => {
+                    let val = isFloat ? parseFloat(range.value) : parseInt(range.value);
+                    config[key] = val;
+                    if (num) num.value = val;
+                    runPreview();
+                });
+            }
+            if (num) {
+                num.addEventListener('input', () => {
+                    let val = isFloat ? parseFloat(num.value) : parseInt(num.value);
+                    if (isNaN(val)) return;
+                    config[key] = val;
+                    if (range) range.value = val;
+                    runPreview();
+                });
+            }
+        }
+
+        bind('darknessStart', 'darknessStart', true);
+        bind('darknessEnd', 'darknessEnd', true);
+        bind('vignette', 'vignette', true);
+        bind('zoomStart', 'zoomStart', true);
+        bind('zoomEnd', 'zoomEnd', true);
+        bind('driftX', 'driftX');
+        bind('driftY', 'driftY');
+        bind('startTime', 'startTime');
+        bind('duration', 'duration');
+
+        // Checkbox Bindings
+        const yoyoBox = document.getElementById('yoyo');
+        const resetBox = document.getElementById('resetAtEnd');
+
+        yoyoBox.addEventListener('change', (e) => {
+            config.yoyo = e.target.checked;
+            if (config.yoyo) {
+                config.resetAtEnd = false;
+                resetBox.checked = false;
+            }
+            runPreview();
+        });
+
+        resetBox.addEventListener('change', (e) => {
+            config.resetAtEnd = e.target.checked;
+            if (config.resetAtEnd) {
+                config.yoyo = false;
+                yoyoBox.checked = false;
+            }
+            runPreview();
+        });
+
+        document.getElementById('previewBtn').addEventListener('click', runPreview);
+        window.addEventListener('resize', runPreview);
+
+        // Rename the download button if running inside the Hub Iframe
+
+
+        // --- 4. Download ---
+
+
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
+            run: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
+            getExportJSON: () => {
+                const code = `
+import { runDarken } from '${ENGINE_PATH}';
+
+export function mount(canvas, ctx, config) {
+    return runDarken(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.imgName}',
+        startTime: ${config.startTime},
+        duration: ${config.duration},
+        yoyo: ${config.yoyo},
+        resetAtEnd: ${config.resetAtEnd},
+        zoomStart: ${config.zoomStart},
+        zoomEnd: ${config.zoomEnd},
+        driftX: ${config.driftX},
+        driftY: ${config.driftY},
+        darknessStart: ${config.darknessStart},
+        darknessEnd: ${config.darknessEnd},
+        vignette: ${config.vignette}
+    });
+}`;
+                // Look aggressively for an object return signature
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                let configObj = {};
+                if (match) {
+                    const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                    configObj = (new Function("return (" + objExpr + ");"))();
+                } else {
+                     console.error("Could not parse exported config!");
+                }
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

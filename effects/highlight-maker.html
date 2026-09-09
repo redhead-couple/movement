@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Highlight Schema-Driven Maker</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #000;
+            color: #e2e8f0;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        #preview-pane {
+            flex: 1;
+            position: relative;
+            background: #1e293b;
+        }
+
+        #controls {
+            width: 340px;
+            background: #0f172a;
+            border-left: 1px solid #334155;
+            padding: 24px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        input[type="color"] {
+            border: none;
+            height: 38px;
+            width: 100%;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        button.dispatch-btn {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button.dispatch-btn:hover {
+            background: #3b82f6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="preview-pane">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <div id="controls">
+        <h2 style="margin-top:0; font-size: 1.2rem; margin-bottom: 24px;">Highlight Generator</h2>
+        <!-- Target div where Schema properties inject randomly -->
+        <div id="dynamic-controls"></div>
+        <button class="dispatch-btn" id="generateBtn" style="display:none;">Add to Timeline</button>
+    </div>
+
+    <script type="module">
+        import { schema, mount } from '/effects/highlight-engine.js';
+
+        const dynamicControls = document.getElementById('dynamic-controls');
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const currentConfig = {};
+        let currentUnmount = null;
+
+        // Auto-Inherit Image from json-maker
+        const params = new URLSearchParams(window.location.search);
+        const prefilledImg = params.get('img') || '';
+        const prefilledImgUrl = params.get('imgUrl') || (prefilledImg ? 'img/' + prefilledImg : '');
+
+        // 1. DYNAMIC FORM GENERATION FROM SCHEMA
+        Object.keys(schema).forEach(key => {
+            const def = schema[key];
+
+            // Set initial state
+            currentConfig[key] = def.default;
+            if (key === 'imgSrc') currentConfig[key] = prefilledImgUrl;
+
+            // Skip hidden fields (used internally like x/y coordinates set via mouse later)
+            if (def.hidden) return;
+
+            const group = document.createElement('div');
+            group.className = 'control-group';
+
+            const lbl = document.createElement('label');
+            lbl.textContent = def.label || key;
+            group.appendChild(lbl);
+
+            let input;
+            if (def.type === 'enum') {
+                input = document.createElement('select');
+                def.options.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt;
+                    o.textContent = opt;
+                    input.appendChild(o);
+                });
+                input.value = def.default;
+            } else if (def.type === 'color') {
+                input = document.createElement('input');
+                input.type = 'color';
+                input.value = def.default;
+            } else if (def.type === 'number') {
+                input = document.createElement('input');
+                input.type = 'number';
+                input.step = def.step || 1;
+                input.min = def.min;
+                input.max = def.max;
+                input.value = def.default;
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.value = def.default;
+            }
+
+            // Sync state and restart preview on change
+            input.addEventListener('input', (e) => {
+                currentConfig[key] = def.type === 'number' ? parseFloat(e.target.value) : e.target.value;
+                restartPreview();
+            });
+
+            group.appendChild(input);
+            dynamicControls.appendChild(group);
+        });
+
+        // 2. PREVIEW LIFECYCLE
+        function restartPreview() {
+            if (currentUnmount) currentUnmount();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            currentUnmount = mount(canvas, ctx, currentConfig);
+        }
+        restartPreview();
+
+        // Canvas point selection for X/Y
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            currentConfig.x = (e.clientX - rect.left) / rect.width;
+            currentConfig.y = (e.clientY - rect.top) / rect.height;
+            restartPreview();
+        });
+
+        // 3. EXPORT / PARENT COMMUNICATION
+        function getEffectDefinition() {
+            const exportConfig = { ...currentConfig };
+            if (prefilledImg) exportConfig.imgSrc = 'img/' + prefilledImg;
+
+            return {
+                enabled: true,
+                name: 'Highlight',
+                engine: 'highlight',
+                maker: 'effects/highlight-maker.html', // for edits later
+                config: exportConfig
+            };
+        }
+
+        function generateEffect() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(getEffectDefinition(), '*');
+            }
+        }
+
+        window.MakerAPI = {
+            run: restartPreview,
+            loadEditConfig: (config) => {
+                if (config && typeof config === 'object') Object.assign(currentConfig, config);
+                restartPreview();
+            },
+            getExportJSON: getEffectDefinition
+        };
+
+        // Parent orchestrator trigger
+        window.addEventListener('message', (event) => {
+            if (event.data === 'trigger_apply') {
+                generateEffect();
+            }
+        });
+
+        // Ensure we load pre-existing config if editing
+        if (params.get('mode') === 'edit') {
+            try {
+                const loaded = JSON.parse(sessionStorage.getItem('effectEditData'));
+                if (loaded && loaded.config) {
+                    window.MakerAPI.loadEditConfig(loaded.config);
+
+                    // Sync UI back
+                    dynamicControls.querySelectorAll('input, select').forEach(el => {
+                        const key = el.previousSibling.innerText; // Extremely loose for this generic mapping
+                        // In a real framework, input ids map to keys, but since this is generated...
+                    });
+                }
+            } catch (e) { }
+        }
+    </script>
+</body>
+
+</html>

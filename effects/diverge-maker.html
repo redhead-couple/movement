@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Diverge/Opposite Maker</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Diverge Maker</h2>
+
+        <div class="group">
+            <h4>1. Image</h4>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Play Effect</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Direction & Colors</h4>
+            <label>Axis</label>
+            <select id="axis">
+                <option value="horizontal">Horizontal (Left ↔ Right)</option>
+                <option value="vertical">Vertical (Up ↕ Down)</option>
+            </select>
+
+            <label>Left/Top Color</label>
+            <input type="color" id="color1" value="#3b82f6">
+
+            <label>Right/Bottom Color</label>
+            <input type="color" id="color2" value="#ef4444">
+        </div>
+
+        <div class="group">
+            <h4>3. Beam Style</h4>
+            <label>Thickness (px) <span id="val-thickness"></span></label>
+            <input type="range" id="thickness" min="50" max="1080" value="200">
+
+            <label>Intensity <span id="val-intensity"></span></label>
+            <input type="range" id="intensity" min="0.1" max="1.0" step="0.1" value="0.8">
+        </div>
+
+        <div class="group">
+            <h4>4. Timing</h4>
+            <label>Duration (Sec) <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="1.0" max="10.0" step="0.5" value="3.0">
+
+            <label>Delay (Sec) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.0">
+        </div>
+
+        <div class="group">
+            <h4>5. Export</h4>
+            <input type="text" id="filename" value="diverge.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/diverge-engine.js';
+        const ENGINE = 'diverge';
+        import { mount } from '/effects/diverge-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        const cfg = {
+            axis: 'horizontal',
+            color1: '#3b82f6', color2: '#ef4444',
+            thickness: 200, intensity: 0.8,
+            duration: 3.0, startDelay: 0.0
+        };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            cleanup = mount(canvas, ctx, { ...cfg, imgSrc: window.imgData });
+        }
+
+        ['thickness', 'intensity', 'duration', 'startDelay'].forEach(id => {
+            const input = document.getElementById(id);
+            input.addEventListener('input', event => {
+                cfg[id] = Number.parseFloat(event.target.value);
+                run();
+            });
+        });
+
+        document.getElementById('axis').addEventListener('change', event => {
+            cfg.axis = event.target.value;
+            run();
+        });
+
+        ['color1', 'color2'].forEach(id => {
+            document.getElementById(id).addEventListener('input', event => {
+                cfg[id] = event.target.value;
+                run();
+            });
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            Object.keys(cfg).forEach(key => {
+                if (config[key] === undefined) return;
+                cfg[key] = typeof cfg[key] === 'number'
+                    ? Number.parseFloat(config[key])
+                    : String(config[key]);
+                const input = document.getElementById(key);
+                if (input) input.value = cfg[key];
+            });
+            run();
+        }
+
+        window.MakerAPI = {
+            onImageLoaded: run,
+            run,
+            loadEditConfig,
+            getExportJSON: () => {
+                const imagePath = window.imgName ? `img/${window.imgName}` : '';
+                const code = `
+import { mount as runDiverge } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runDiverge(canvas, ctx, {
+        ...config,
+        imgSrc: '${imagePath}',
+        axis: '${cfg.axis}',
+        color1: '${cfg.color1}',
+        color2: '${cfg.color2}',
+        thickness: ${cfg.thickness},
+        intensity: ${cfg.intensity},
+        duration: ${cfg.duration},
+        startDelay: ${cfg.startDelay}
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+
+        run();
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Morph/Dissolve Maker</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Morph Studio</h2>
+
+        <div class="group">
+            <h4>1. Images</h4>
+            <label>Image 1 (Start)</label>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="img1Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="openMediaLibrary('img', 'img1')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer1"></div>
+
+
+            <label style="margin-top:10px; color:#38bdf8;">Image 2 (End)</label>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="img2Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="openMediaLibrary('img', 'img2')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer2"></div>
+
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Play Morph</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Timing</h4>
+            <label>Duration (Sec) <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.5" max="10.0" step="0.5" value="3.0">
+
+            <label>Start Delay (Sec) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.0">
+        </div>
+
+        <div class="group">
+            <h4>3. Style</h4>
+            <label>Depth / Zoom <span id="val-zoomAmount"></span></label>
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">0 = Simple Fade, 0.5 = High Motion</div>
+            <input type="range" id="zoomAmount" min="0" max="0.5" step="0.01" value="0.1">
+        </div>
+
+        <div class="group">
+            <h4>4. Export</h4>
+            <input type="text" id="filename" value="morph-effect.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        // ENGINE PATH
+        const ENGINE_PATH = '/effects/morph-engine.js';
+        const ENGINE = 'morph';
+        import { mount } from '/effects/morph-engine.js'; // Relative for local preview
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        const cfg = { duration: 3.0, startDelay: 0.0, zoomAmount: 0.1 };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: img1Data,
+                imgSrc2: img2Data
+            });
+        }
+
+
+
+
+
+        const bind = (id, k) => {
+            document.getElementById(id).addEventListener('input', e => {
+                cfg[k] = parseFloat(e.target.value);
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+        };
+
+        bind('duration', 'duration');
+        bind('startDelay', 'startDelay');
+        bind('zoomAmount', 'zoomAmount');
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        // Rename the download button if running inside the Hub Iframe
+
+
+
+
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof run === 'function') run(); },
+            run: () => { if(typeof run === 'function') run(); },
+            getExportJSON: () => {
+                const code = `
+import { mount as runMorph } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runMorph(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.name1}',
+        imgSrc2: 'img/${window.name2}',
+        duration: ${cfg.duration},
+        startDelay: ${cfg.startDelay},
+        zoomAmount: ${cfg.zoomAmount}
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

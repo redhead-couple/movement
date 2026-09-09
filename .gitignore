@@ -1,0 +1,105 @@
+# Config / secrets
+app-config.php
+.env*
+wp-config.php
+*.ini.local
+*.local.php
+config.local.php
+
+# Runtime state
+/slidedeck/
+/private-data/
+workspace/
+backups/
+.movement-registry-backups/
+.movement-trash/
+.movement-media-trash/
+*.save.lock
+.save.lock
+
+# Generated example authoring state
+/examples/**/backups/
+/examples/**/.save.lock
+/examples/**/.movement-media-trash/
+
+# Read-only local reference trees
+/oldversion/
+/attmptedversion/
+
+# Databases
+*.sql
+*.sql.gz
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+
+# Delivery / packaging artifacts
+*.zip
+*.zip.sha256
+*.exe.sha256
+*.tar
+*.tar.gz
+*.7z
+*.rar
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude / agent scratch
+.claude/
+.agents/
+.codex/
+.claude.json
+
+# Logs
+*.log
+/logs/
+/error_log
+
+# PHP / Node artifacts
+/vendor/
+/node_modules/
+/bower_components/
+
+# Build / cache
+.cache/
+/tmp/
+/temp/
+/build/
+/dist/
+/release/
+/releases/
+
+# Backup files (system + editor)
+*.bak
+*.orig
+*.tmp
+*~
+*.backup
+flow-*.json
+
+# Test / coverage
+/coverage/
+/.phpunit.result.cache
+/.phpunit.cache
+
+# Documentation builds
+/docs/_build/
+
+# Misc
+sitemap.xml
+/private/
+/uploads/
+
+
+# Local release preparation
+/PUBLIC_ALPHA_READINESS.md

@@ -1,0 +1,18 @@
+[
+    {
+        "Category": "Wipes",
+        "engines": "soft-wipe, split-wipe"
+    },
+    {
+        "Category": "Reveals",
+        "engines": "iris-wipe"
+    },
+    {
+        "Category": "Cinematic",
+        "engines": "blur-crossfade, light-sweep"
+    },
+    {
+        "Category": "Experimental",
+        "engines": "alternating-panels"
+    }
+]

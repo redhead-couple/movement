@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+  >
+  <title>Movement Timeline Studio</title>
+  <meta
+    name="description"
+    content="An offline medium for timeline-based narrative experiments."
+  >
+  <link rel="stylesheet" href="./app.css">
+  <link rel="stylesheet" href="./project-library.css">
+  <script src="./platform-adapter.js" defer></script>
+  <script src="./creator-tools.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="app-site-header">
+    <div class="wrap app-site-header__inner">
+      <button class="app-brand link-button" type="button" data-route="home">
+        <span class="app-brand__dot" aria-hidden="true"></span>
+        <span>Early Formation</span>
+      </button>
+
+      <nav class="app-nav" aria-label="Primary navigation">
+        <span class="app-version" id="app-version" title="Application version">Desktop</span>
+        <button class="app-nav__link link-button" type="button" data-route="home">Home</button>
+        <button class="app-nav__link link-button" type="button" data-route="library">Library</button>
+        <button class="app-nav__link link-button" type="button" data-route="concept">Concept</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="view" data-view="home">
+      <div class="hero wrap">
+        <div class="hero-media">
+          <div class="hero-bg" aria-hidden="true"></div>
+          <div class="hero-overlay" aria-hidden="true"></div>
+          <div class="hero-content">
+            <p class="kicker">
+              <span class="kicker-line" aria-hidden="true"></span>
+              Timeline-based narrative experiments
+            </p>
+            <h1>Collective expression.<br>Structured through time</h1>
+            <p class="hero-sub">
+              Images, silence, movement, sound, text, and timing become part of one
+              shared language—now available as a private offline studio.
+            </p>
+            <div class="button-row">
+              <button class="button button-primary" type="button" data-route="library">
+                Enter your library
+              </button>
+              <span class="offline-note">No account or server required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="intro-card wrap">
+        <p class="eyebrow">Desktop edition</p>
+        <h2>Your work stays in your own project library.</h2>
+        <p>
+          Movement opens the slideshow folders already stored on this computer.
+          The bundled examples remain separate and read-only.
+        </p>
+      </section>
+    </section>
+
+    <section class="view library-view" data-view="library" hidden>
+      <div class="wrap library-shell">
+        <div class="page-intro page-intro--library">
+          <div class="page-intro__copy">
+            <p class="eyebrow">Offline project library</p>
+            <h1>Your slideshows</h1>
+            <p class="muted" id="library-summary">Reading the project library…</p>
+          </div>
+          <div class="page-intro__actions">
+            <button class="button button-primary" id="new-project-button" type="button">
+              New slideshow
+            </button>
+          </div>
+        </div>
+
+        <section class="first-run-welcome" id="first-run-welcome" aria-labelledby="first-run-title" hidden>
+          <div class="first-run-welcome__copy">
+            <p class="eyebrow">Welcome to Movement</p>
+            <h2 id="first-run-title">Begin with an example or make a space of your own.</h2>
+            <p>
+              Explore the bundled read-only slideshows, then create your own workspace when you are ready to begin making.
+            </p>
+          </div>
+          <div class="first-run-welcome__actions">
+            <button class="button button-primary" id="create-first-workspace-button" type="button">
+              Create your workspace
+            </button>
+            <button class="button" id="play-welcome-example-button" type="button">
+              Play an example
+            </button>
+          </div>
+        </section>
+
+        <div class="library-toolbar" aria-label="Library controls">
+          <div class="workspace-controls">
+            <label class="workspace-field" for="workspace-select">
+              <span>Workspace</span>
+              <select id="workspace-select" aria-describedby="workspace-help"></select>
+            </label>
+            <button class="button" id="new-workspace-button" type="button">
+              New workspace
+            </button>
+          </div>
+
+          <div class="library-toolbar__actions">
+            <button class="button" id="import-project-button" type="button" title="Import a complete portable slideshow ZIP">
+              Import slideshow
+            </button>
+            <button class="button" id="trash-library-button" type="button">
+              Trash
+            </button>
+
+            <details class="creator-tools">
+              <summary class="button creator-tools__trigger">Creator tools</summary>
+              <div class="creator-tools__menu">
+                <button class="creator-tools__action" id="open-storage-button" type="button">
+                  <strong>Open project files</strong>
+                  <span>View the current workspace folder.</span>
+                </button>
+                <button class="creator-tools__action" id="registry-editor-button" type="button">
+                  <strong>Registry editor</strong>
+                  <span>Manage available effects and transitions.</span>
+                </button>
+                <button class="creator-tools__action" id="effect-prompt-button" type="button">
+                  <strong>Design or improve effect</strong>
+                  <span>Open the guided effect designer.</span>
+                </button>
+                <button class="creator-tools__action" id="transition-prompt-button" type="button">
+                  <strong>Design or improve transition</strong>
+                  <span>Open the guided transition designer.</span>
+                </button>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <p class="workspace-help" id="workspace-help">
+          Reading the project files location. Examples cannot be edited.
+        </p>
+
+        <div class="status-card" id="selection-required" hidden>
+          <span class="status-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Choose a workspace to continue</strong>
+            <p>More than one project library was found on this computer.</p>
+          </div>
+        </div>
+
+        <div class="status-card status-card-readonly" id="readonly-note" hidden>
+          <span class="lock-mark" aria-hidden="true">◇</span>
+          <div>
+            <strong>Bundled examples</strong>
+            <p>These projects stay unchanged. Use “Copy to edit” to create your own local copy.</p>
+          </div>
+        </div>
+
+        <div class="loading-state" id="loading-state" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          Reading projects…
+        </div>
+        <div class="project-library project-grid" id="project-grid" aria-live="polite"></div>
+        <div class="project-library project-library-empty empty-state" id="empty-state" hidden>
+          <span class="empty-mark" aria-hidden="true">+</span>
+          <h2>No slideshows here yet</h2>
+          <p>This workspace is ready for its first project.</p>
+        </div>
+        <div class="error-state" id="error-state" role="alert" hidden></div>
+      </div>
+    </section>
+
+    <section class="view concept-view" data-view="concept" hidden>
+      <div class="wrap concept-shell">
+        <div class="page-intro">
+          <div class="page-intro__copy">
+            <p class="eyebrow">The concept</p>
+            <h1 id="concept-title">The Medium</h1>
+            <p class="muted">A growing visual language for communicating ideas, experiences, and meaning through time.</p>
+          </div>
+        </div>
+
+        <div class="concept-layout">
+          <article class="concept-copy">
+            <p class="concept-lead">This project explores a new kind of expressive medium.</p>
+            <p>It is a new form of communication that can be shaped by the wisdom of everyone who uses it. Each creator can discover better ways to combine images, effects, transitions, narration, sound, silence, timing, text, and symbolic movement. Through use, these discoveries can become part of a growing shared language.</p>
+            <p>This medium can be used to present ideas, opinions, stories, and emotional experiences. It can also be used for education, helping people pass knowledge in a clearer, more visual, and more meaningful way.</p>
+            <p>An Expression Tool can be a visual effect, a symbolic movement, a transition pattern, a rhythm between voice and silence, a sound-image combination, a timing structure, or any other creative form that helps communicate meaning.</p>
+            <p>The goal is not only to create one story or one prototype. The larger goal is to begin shaping a shared language of expression.</p>
+            <p>As creators use the medium, they can discover new ways to express ideas. Some patterns may become clearer. Some tools may be improved. Some may be named, reused, combined, changed, or expanded. Through this process, the medium can evolve.</p>
+            <p>This is why the project is moving toward an open-source direction.</p>
+            <p>The first prototype is only the beginning. It is a seed. The language can grow through the people who use it, question it, test it, and add their own ways of seeing.</p>
+            <p>The long-term vision is an open creative system where storytellers, artists, educators, writers, thinkers, and independent creators can help build a new language for expressing complex ideas with clarity, emotion, and intention.</p>
+          </article>
+
+          <aside class="concept-feature" aria-labelledby="concept-series-title">
+            <div class="concept-series-heading">
+              <p class="eyebrow">Concept series</p>
+              <h2 id="concept-series-title">Three perspectives on the medium</h2>
+              <p>Follow the idea from its foundation, through new forms of expression, to sharing discoveries with others.</p>
+            </div>
+
+            <div class="concept-series">
+              <article class="concept-slideshow" data-concept-project="what-this-project-is">
+                <button class="concept-slideshow__image link-button" data-concept-play type="button" aria-label="Play A New Language of Communication">
+                  <img data-concept-thumbnail src="" alt="Opening image for A New Language of Communication">
+                  <span class="concept-slideshow__badge">48 slides</span>
+                </button>
+                <div class="concept-slideshow__copy">
+                  <span class="eyebrow">Part 1 · The idea</span>
+                  <strong>A New Language of Communication</strong>
+                  <span>Experience how images, narration, sound, silence, effects, and timing can work together.</span>
+                  <button class="concept-slideshow__action link-button" data-concept-play type="button">
+                    <span>Play the slideshow</span> <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </article>
+
+              <article class="concept-slideshow" data-concept-project="creating-new-forms-of-expression">
+                <button class="concept-slideshow__image link-button" data-concept-play type="button" aria-label="Play Creating New Forms of Expression">
+                  <img data-concept-thumbnail src="" alt="Opening image for Creating New Forms of Expression">
+                  <span class="concept-slideshow__badge">37 slides</span>
+                </button>
+                <div class="concept-slideshow__copy">
+                  <span class="eyebrow">Part 2 · Possibilities</span>
+                  <strong>Creating New Forms of Expression</strong>
+                  <span>See how images, sound, movement, color, timing, and words can grow into a shared language.</span>
+                  <button class="concept-slideshow__action link-button" data-concept-play type="button">
+                    <span>Play the slideshow</span> <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </article>
+
+              <article class="concept-slideshow" data-concept-project="sharing">
+                <button class="concept-slideshow__image link-button" data-concept-play type="button" aria-label="Play How New Effects Become Part of the Medium">
+                  <img data-concept-thumbnail src="" alt="Opening image for How New Effects Become Part of the Medium">
+                  <span class="concept-slideshow__badge">21 slides</span>
+                </button>
+                <div class="concept-slideshow__copy">
+                  <span class="eyebrow">Part 3 · Sharing</span>
+                  <strong>How New Effects Become Part of the Medium</strong>
+                  <span>Follow a private idea as it becomes an expressive tool that others can review and share.</span>
+                  <button class="concept-slideshow__action link-button" data-concept-play type="button">
+                    <span>Play the slideshow</span> <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <template id="project-card-template">
+    <article class="project-card">
+      <div class="project-image">
+        <img alt="" loading="lazy">
+        <div class="project-placeholder" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="project-access"></span>
+      </div>
+      <div class="project-copy">
+        <div class="project-title-row">
+          <h2></h2>
+          <span class="validity-mark" title="Schema version 2">v2</span>
+        </div>
+        <p class="project-description"></p>
+        <div class="project-meta">
+          <span class="slide-count"></span>
+          <span class="project-status"></span>
+        </div>
+        <div class="project-actions">
+          <button class="card-action card-action-primary edit-action" type="button" data-project-action="edit">
+            Edit
+          </button>
+          <button class="card-action play-action" type="button" data-project-action="play">
+            Play
+          </button>
+          <button class="card-action export-action" type="button" data-project-action="export">
+            Export portable ZIP
+          </button>
+          <button class="card-action copy-action" type="button" data-project-action="copy">
+            Copy to edit
+          </button>
+          <button class="card-action rename-action" type="button" data-project-action="rename">
+            Rename
+          </button>
+          <button class="card-action duplicate-action" type="button" data-project-action="duplicate">
+            Duplicate
+          </button>
+          <button class="card-action card-action-danger trash-action" type="button" data-project-action="trash">
+            Move to trash
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <dialog class="app-dialog recovery-dialog" id="recovery-dialog">
+    <div class="recovery-dialog-content">
+      <header class="recovery-dialog-header">
+        <div>
+          <div class="dialog-kicker">Workspace recovery</div>
+          <h2>Trash</h2>
+          <p class="dialog-copy" id="recovery-summary">
+            Restore a complete slideshow with its flow, images, speech, audio, and backups.
+          </p>
+        </div>
+        <p class="recovery-delete-note">
+          <span aria-hidden="true">!</span>
+          Delete forever cannot be undone.
+        </p>
+      </header>
+      <div class="recovery-loading" id="recovery-loading" role="status" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        Reading recoverable slideshows...
+      </div>
+      <div class="recovery-list" id="recovery-list"></div>
+      <div class="recovery-empty" id="recovery-empty" hidden>
+        <strong>Trash is empty</strong>
+        <span>Removed slideshows from this workspace will appear here.</span>
+      </div>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="recovery-item-template">
+    <article class="recovery-item">
+      <div class="recovery-item-copy">
+        <div class="recovery-item-title-row">
+          <strong class="recovery-item-title"></strong>
+          <span class="recovery-conflict" hidden>Name in use</span>
+        </div>
+        <span class="recovery-item-meta"></span>
+        <span class="recovery-item-description"></span>
+      </div>
+      <div class="recovery-item-actions">
+        <button class="button recovery-restore-button" type="button" data-recovery-action="restore">
+          Restore
+        </button>
+        <button class="button recovery-delete-button" type="button" data-recovery-action="delete">
+          Delete forever
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <dialog class="app-dialog" id="workspace-dialog">
+    <form id="workspace-form">
+      <div class="dialog-kicker">Local project library</div>
+      <h2>Create a workspace</h2>
+      <p class="dialog-copy">
+        A workspace is a folder inside the project library shown on the Library screen.
+      </p>
+      <label class="dialog-field">
+        <span>Workspace name</span>
+        <input name="name" maxlength="80" autocomplete="off" required value="My Workspace">
+      </label>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Create workspace</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="project-dialog">
+    <form id="project-form">
+      <div class="dialog-kicker">New local project</div>
+      <h2>Create a slideshow</h2>
+      <p class="dialog-copy">
+        Movement creates a schema-v2 flow and dedicated media folders.
+      </p>
+      <label class="dialog-field">
+        <span>Slideshow title</span>
+        <input name="title" maxlength="100" autocomplete="off" required>
+      </label>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Create slideshow</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="copy-dialog">
+    <form id="copy-form">
+      <div class="dialog-kicker">Copy before editing</div>
+      <h2>Copy this example</h2>
+      <p class="dialog-copy">
+        The bundled original remains unchanged. Choose where to place your editable copy.
+      </p>
+      <label class="dialog-field">
+        <span>Destination workspace</span>
+        <select name="workspaceId" required></select>
+      </label>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Create local copy</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="rename-dialog">
+    <form id="rename-form">
+      <div class="dialog-kicker">Project details</div>
+      <h2>Rename slideshow</h2>
+      <p class="dialog-copy">
+        The project folder and the title inside flow.json will be updated together.
+      </p>
+      <label class="dialog-field">
+        <span>New title</span>
+        <input name="title" maxlength="100" autocomplete="off" required>
+      </label>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Cancel</button>
+        <button class="button button-primary" type="submit">Rename slideshow</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="trash-dialog">
+    <form id="trash-form">
+      <div class="dialog-kicker">Recoverable removal</div>
+      <h2>Move slideshow to trash?</h2>
+      <p class="dialog-copy">
+        <strong id="trash-project-title"></strong> will disappear from the library, but its
+        complete folder will remain recoverable inside the workspace’s .movement-trash folder.
+      </p>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" data-close-dialog>Keep slideshow</button>
+        <button class="button button-danger" type="submit">Move to trash</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

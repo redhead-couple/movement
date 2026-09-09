@@ -1,0 +1,2013 @@
+{
+    "title": "Creating New Forms of Expression",
+    "schemaVersion": 2,
+    "defaultBeatSeconds": 5,
+    "slides": [
+        {
+            "text": "For most of human history, words had to carry almost everything we wanted to communicate. We had no practical way to combine images, sound, movement, color, and timing as ordinary parts of a message.",
+            "background": {
+                "src": "letters1.webp",
+                "effect": {
+                    "name": "morph-effect-1786493919958",
+                    "engine": "morph",
+                    "config": {
+                        "imgSrc": "img/letters1.webp",
+                        "imgSrc2": "img/letters2.webp",
+                        "duration": 12,
+                        "startDelay": 0.5,
+                        "zoomAmount": 0.20000000000000001
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera4.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide1.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Today, those limitations are largely gone. We can combine all of these forms of expression with extraordinary freedom.",
+            "transition": "push-left",
+            "background": {
+                "src": "media1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media1.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.40000000000000002,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera5.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide2.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Yet, the languages we use were shaped in a world where these possibilities did not exist.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Blur Crossfade Transition",
+                "engine": "blur-crossfade",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/blur-crossfade-maker.html",
+                "config": {
+                    "duration": 1.2,
+                    "blur": 18,
+                    "scale": 1.04,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "past1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/past1.webp",
+                        "zoomStart": 1.3999999999999999,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide3.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "We already have the ingredients. What we do not yet have is a developed language for using them together.",
+            "background": {
+                "src": "media2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media2.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 5,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera2.png",
+                    "effect": {
+                        "name": "transform-effect-1786670101660",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/aera2.png",
+                            "x": 21,
+                            "y": 62,
+                            "width": 72,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide4.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "So what would happen if we began developing a language of expression designed for the possibilities we have now?",
+            "background": {
+                "src": "past1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/past1.webp",
+                        "zoomStart": 1.2,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786414538646",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/nots1.png"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 8,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.51900000000000002,
+                            "startY": -0.5,
+                            "endX": 0.49869999999999998,
+                            "endY": 0.51400000000000001,
+                            "startSize": 0.35999999999999999,
+                            "endSize": 0.35999999999999999,
+                            "startOpacity": 1,
+                            "endOpacity": 1
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide5.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Words would still have a central place. But they would no longer have to carry everything alone.",
+            "transition": "push-right",
+            "background": {
+                "src": "media3.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media3.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 0.90000000000000002,
+                        "startOpacity": 0.5,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1.2,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide6.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Images, sound, movement, color, silence, and timing could also carry meaning as parts of the message.",
+            "transition": "zoom",
+            "background": {
+                "src": "media4.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media4.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.52000000000000002,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.40999999999999998,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera2.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/aera2.png",
+                            "zoomStart": 0.69999999999999996,
+                            "xStart": 0.59999999999999998,
+                            "yStart": 0.34999999999999998,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.69999999999999996,
+                            "xEnd": 0.29999999999999999,
+                            "yEnd": 0.34999999999999998,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 8,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide7.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Yet the deeper expressive power can go beyond the elements themselves as symbols.",
+            "transition": "push-left",
+            "background": {
+                "src": "language1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/language1.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide8.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Meaning can emerge from what happens to them through time—how they appear, move, react, combine, separate, change, or disappear, and how one moment gives way to the next.",
+            "transition": "zoom",
+            "background": {
+                "src": "black1.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786494161071",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/sphere1.png"
+                            ],
+                            "startDelay": 1,
+                            "travelDuration": 5,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.90959999999999996,
+                            "startY": 0.17949999999999999,
+                            "endX": 0.5,
+                            "endY": 0.5,
+                            "startSize": 0.070000000000000007,
+                            "endSize": 0.080000000000000002,
+                            "startOpacity": 1,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 2",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786441237560",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/sphere8.png"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 6,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.35220000000000001,
+                            "startY": 0.62009999999999998,
+                            "endX": 0.5,
+                            "endY": 0.5,
+                            "startSize": 0.070000000000000007,
+                            "endSize": 0.070000000000000007,
+                            "startOpacity": 1,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 3",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786424370578",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/sphere1.png"
+                            ],
+                            "startDelay": 6,
+                            "travelDuration": 3,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.27439999999999998,
+                            "endY": 0.2475,
+                            "startSize": 0.070000000000000007,
+                            "endSize": 0.14999999999999999,
+                            "startOpacity": 1,
+                            "endOpacity": 0
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 4",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786424417460",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/sphere8.png"
+                            ],
+                            "startDelay": 6,
+                            "travelDuration": 3.5,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.71509999999999996,
+                            "endY": 0.72889999999999999,
+                            "startSize": 0.070000000000000007,
+                            "endSize": 0.12,
+                            "startOpacity": 0.45000000000000001,
+                            "endOpacity": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide9.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "In this way, much of the language can come from events, transformations, and relationships unfolding through time, rather than from the symbolic meaning of the elements alone.",
+            "transition": "push-left",
+            "background": {
+                "src": "black2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black2.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.39000000000000001,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 11,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera1.png",
+                    "effect": {
+                        "name": "transform-effect-1786762370189",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/aera1.png",
+                            "x": 74,
+                            "y": 65,
+                            "width": 100,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide10.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When these possibilities work together, an image can carry one idea while its movement adds another, its timing changes how it is felt, sound alters its emotional meaning, and its transformation reveals something new.",
+            "background": {
+                "src": "black3.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black3.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.7,
+                        "xEnd": 0.5,
+                        "yEnd": 0.46999999999999997,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 15,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "blank.png",
+                    "effect": {
+                        "name": "Scattered Orbs",
+                        "enabled": true,
+                        "engine": "scattered-orbs",
+                        "maker": "effects/scattered-orbs-maker.html",
+                        "config": {
+                            "startDelay": 2,
+                            "duration": 4,
+                            "randomness": 65,
+                            "size": 32,
+                            "count": 48,
+                            "origin": {
+                                "x": 0.5,
+                                "y": 0.52000000000000002
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 2",
+                    "src": "",
+                    "effect": {
+                        "name": "Focus Formation",
+                        "enabled": true,
+                        "engine": "focus-formation",
+                        "maker": "effects/focus-formation-maker.html",
+                        "config": {
+                            "startDelay": 5,
+                            "duration": 8,
+                            "randomness": 65,
+                            "size": 32,
+                            "count": 32,
+                            "destination": {
+                                "x": 0.503,
+                                "y": 0.65300000000000002
+                            },
+                            "imgSrc": "blank.png"
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 3",
+                    "src": "",
+                    "effect": {
+                        "name": "Scattered Idea",
+                        "enabled": true,
+                        "engine": "scattered-idea",
+                        "maker": "effects/scattered-idea-maker.html",
+                        "config": {
+                            "imgSrc": "img/media4.webp",
+                            "count": 63,
+                            "spread": 100,
+                            "duration": 3.2000000000000002,
+                            "randomness": 60,
+                            "startDelay": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide11.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Meaning emerges from the whole experience and from the relationships between its parts.",
+            "transition": "push-left",
+            "background": {
+                "src": "black4.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black4.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide12.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A repeated pulse can make something feel urgent.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Iris Wipe Transition",
+                "engine": "iris-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/iris-wipe-maker.html",
+                "config": {
+                    "duration": 1.1000000000000001,
+                    "origin": "center",
+                    "softness": 18,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "black5.webp",
+                "effect": {
+                    "name": "Pulses",
+                    "enabled": true,
+                    "engine": "pulses",
+                    "maker": "effects/pulses-maker.html",
+                    "config": {
+                        "imgSrc": "img/black5.webp",
+                        "startDelay": 0.40000000000000002,
+                        "duration": 6,
+                        "pulseCount": 4,
+                        "pulseSpeed": 85,
+                        "spacing": 28,
+                        "intensity": 8,
+                        "brightnessBoost": 12,
+                        "opacityBoost": 8
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide13.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Several elements moving toward the same point can express gathering or agreement.",
+            "transition": "push-up",
+            "background": {
+                "src": "black6.webp",
+                "effect": {
+                    "name": "Focus Formation",
+                    "enabled": true,
+                    "engine": "focus-formation",
+                    "maker": "effects/focus-formation-maker.html",
+                    "config": {
+                        "startDelay": 0,
+                        "duration": 6,
+                        "randomness": 65,
+                        "size": 130,
+                        "count": 20,
+                        "destination": {
+                            "x": 0.497,
+                            "y": 0.71299999999999997
+                        },
+                        "imgSrc": "black6.webp"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide14.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A color spreading through an image can suggest a change in mood.",
+            "transition": "zoom",
+            "background": {
+                "src": "view1.webp",
+                "effect": {
+                    "name": "Color Spread",
+                    "enabled": true,
+                    "engine": "color-spread",
+                    "maker": "effects/color-spread-maker.html",
+                    "config": {
+                        "imgSrc": "img/view1.webp",
+                        "startDelay": 0,
+                        "duration": 5,
+                        "spreadSpeed": 1,
+                        "softness": 26,
+                        "targetColor": "#ff2424",
+                        "intensity": 33,
+                        "saturationIncrease": 38,
+                        "brightnessShift": 6,
+                        "origin": {
+                            "mode": "center",
+                            "x": 0.5,
+                            "y": 0.5
+                        }
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide15.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A sudden transition can make the next moment feel like an interruption or revelation.",
+            "background": {
+                "src": "view3.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "view2.webp",
+                    "effect": {
+                        "name": "Scattered Idea",
+                        "enabled": true,
+                        "engine": "scattered-idea",
+                        "maker": "effects/scattered-idea-maker.html",
+                        "config": {
+                            "imgSrc": "img/view2.webp",
+                            "count": 63,
+                            "spread": 100,
+                            "duration": 1.5,
+                            "randomness": 60,
+                            "startDelay": 3.2000000000000002
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide16.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Here, language does not mean replacing words.",
+            "transition": "push-left",
+            "background": {
+                "src": "language2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/language2.webp",
+                        "zoomStart": 1.5,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 5,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera5.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide17.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "It means developing reusable ways for images, sound, movement, color, silence, timing, and words to work together to express meaning.",
+            "transition": "push-left",
+            "background": {
+                "src": "media11.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media11.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 10.1,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide18.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "But how do we actually write in this new language?",
+            "transition": "push-right",
+            "background": {
+                "src": "language3.webp",
+                "effect": {
+                    "name": "route-effect-1786589406630",
+                    "engine": "route",
+                    "config": {
+                        "imgSrc": "img/language3.webp",
+                        "symbol": "?",
+                        "color": "#ffffff",
+                        "opacity": 0.40000000000000002,
+                        "size": 49,
+                        "count": 30,
+                        "speed": 0.80000000000000004,
+                        "spread": 1,
+                        "startDelay": 0,
+                        "duration": 4,
+                        "shape": "stream"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera1.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide19.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "We can begin with something familiar: the digital slide. Here, a slide is simply the canvas for one moment in the sequence.",
+            "transition": "zoom",
+            "background": {
+                "src": "view4.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/view4.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide20.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "An effect changes what happens within a slide.",
+            "transition": "push-left",
+            "background": {
+                "src": "view5.png",
+                "effect": {
+                    "name": "ripple-effect-1786591063545",
+                    "engine": "ripple",
+                    "config": {
+                        "imgSrc": "img/view5.png",
+                        "x": 0.5,
+                        "y": 0.5,
+                        "startTime": 1300,
+                        "count": 1,
+                        "interval": 800,
+                        "freq": 0.02,
+                        "speed": 15,
+                        "amp": 34,
+                        "decay": 0.029999999999999999
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "view6.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide21.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A transition shapes what happens between one slide and the next.",
+            "background": {
+                "src": "view7.png",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/view7.png",
+                        "zoomStart": 1,
+                        "xStart": 0.31,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.71999999999999997,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 3.2000000000000002,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "view6.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide22.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "In this project, effects and transitions are some of the tools that make this kind of expression possible.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Alternating Panels",
+                "engine": "alternating-panels",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/alternating-panels-maker.html",
+                "config": {
+                    "segments": 8,
+                    "stagger": 0.059999999999999998,
+                    "duration": 1.3999999999999999,
+                    "easing": "natural",
+                    "shadow": 35
+                }
+            },
+            "background": {
+                "src": "view8.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/view8.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 5,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide23.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "They can become reusable forms of expression—something like a growing visual vocabulary.",
+            "transition": "push-left",
+            "background": {
+                "src": "media6.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media6.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 0.90000000000000002,
+                        "startOpacity": 0.90000000000000002,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1.1000000000000001,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide24.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The goal of this project is to create a language of expression that grows as people use it.",
+            "background": {
+                "src": "media7.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786677147452",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/1.webp"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 7,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.32500000000000001,
+                            "endY": 0.2883,
+                            "startSize": 0.02,
+                            "endSize": 0.14999999999999999,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 2",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786677139426",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/2.webp"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 7,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.49869999999999998,
+                            "endY": 0.21210000000000001,
+                            "startSize": 0.02,
+                            "endSize": 0.14999999999999999,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 3",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786677130736",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/3.webp"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 7,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.64000000000000001,
+                            "endY": 0.32640000000000002,
+                            "startSize": 0.02,
+                            "endSize": 0.14999999999999999,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 4",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786677106527",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/4.webp"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 7,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.50039999999999996,
+                            "endX": 0.58550000000000002,
+                            "endY": 0.64459999999999995,
+                            "startSize": 0.02,
+                            "endSize": 0.14000000000000001,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 5",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786677096368",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/5.webp"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 7,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.5,
+                            "endX": 0.33660000000000001,
+                            "endY": 0.71799999999999997,
+                            "startSize": 0.02,
+                            "endSize": 0.14999999999999999,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 6",
+                    "src": "aera2.png",
+                    "effect": {
+                        "name": "transform-effect-1786764540543",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/aera2.png",
+                            "x": 50,
+                            "y": 63,
+                            "width": 74,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide25.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Each new idea, creative solution, and discovery can add something to that language.",
+            "transition": "push-left",
+            "background": {
+                "src": "media8.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media8.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.56999999999999995,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide26.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "For this to happen, people need a practical way to create new parts of the language themselves.",
+            "transition": "push-left",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "horizontal",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "media9.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media9.webp",
+                        "zoomStart": 0.69999999999999996,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera2.png",
+                    "effect": {
+                        "name": "transform-effect-1786764977622",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/aera2.png",
+                            "x": 45,
+                            "y": 67,
+                            "width": 74,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide27.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "This project is designed so that people do not need to be experienced programmers to create new components of the language.",
+            "transition": "dissolve",
+            "background": {
+                "src": "media10.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/media10.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3999999999999999,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "media9.webp",
+                    "effect": {
+                        "name": "Scattered Idea",
+                        "enabled": true,
+                        "engine": "scattered-idea",
+                        "maker": "effects/scattered-idea-maker.html",
+                        "config": {
+                            "imgSrc": "img/media9.webp",
+                            "count": 63,
+                            "spread": 100,
+                            "duration": 1.6000000000000001,
+                            "randomness": 60,
+                            "startDelay": 0.80000000000000004
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 2",
+                    "src": "aera5.png",
+                    "effect": {
+                        "name": "transform-effect-1786765237974",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/aera5.png",
+                            "x": 40,
+                            "y": 72,
+                            "width": 82,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide28.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Creating a custom effect may be much easier than it sounds.\nThere are two reasons for this.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Alternating Panels",
+                "engine": "alternating-panels",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/alternating-panels-maker.html",
+                "config": {
+                    "segments": 8,
+                    "stagger": 0.059999999999999998,
+                    "duration": 1.3999999999999999,
+                    "easing": "natural",
+                    "shadow": 35
+                }
+            },
+            "background": {
+                "src": "black7.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black7.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide29.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "First, modern AI systems can write and modify much of the code.",
+            "transition": "push-right",
+            "background": {
+                "src": "black8.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black8.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.42999999999999999,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide30.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Second, because the project is open, the AI can examine the existing effects and understand how a new one needs to fit into the system.",
+            "transition": "push-left",
+            "background": {
+                "src": "black9.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/black9.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.45000000000000001,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.56000000000000005,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide31.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "In practice, a person opens the open-source project folder in an AI coding tool—for example, Codex, Claude Code, Antigravity, or another tool that can work directly with a codebase.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "vertical",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "computer1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/computer1.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.1000000000000001,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 12,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide32.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "They fill in a form describing what the new effect or transition should do.",
+            "transition": "push-left",
+            "background": {
+                "src": "computer2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/computer2.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.42999999999999999,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide33.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "They copy the prompt generated by the form and paste it into the AI chat.",
+            "transition": "push-left",
+            "background": {
+                "src": "computer3.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786754572222",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/prompt1.png"
+                            ],
+                            "startDelay": 0,
+                            "travelDuration": 3,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.45979999999999999,
+                            "startY": 0.69110000000000005,
+                            "endX": 0.5,
+                            "endY": 0.40000000000000002,
+                            "startSize": 0.02,
+                            "endSize": 0.25,
+                            "startOpacity": 0,
+                            "endOpacity": 1
+                        }
+                    }
+                },
+                {
+                    "name": "Foreground 2",
+                    "src": "",
+                    "effect": {
+                        "name": "frame-animation-effect-1786754606239",
+                        "engine": "frame-animation",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "frames": [
+                                "img/prompt1.png"
+                            ],
+                            "startDelay": 3,
+                            "travelDuration": 3,
+                            "sequenceDuration": 1,
+                            "loops": 1,
+                            "startX": 0.5,
+                            "startY": 0.40000000000000002,
+                            "endX": 0.6996,
+                            "endY": 0.69999999999999996,
+                            "startSize": 0.25,
+                            "endSize": 0.02,
+                            "startOpacity": 1,
+                            "endOpacity": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide34.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The AI can then examine the existing project, create the necessary files, and fit the new effect or transition into the system.",
+            "background": {
+                "src": "computer4.webp",
+                "effect": {
+                    "name": "slideshow-effect-1786759592036",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/computer4.webp",
+                            "img/computer5.webp",
+                            "img/computer6.webp"
+                        ],
+                        "interval": 2.5,
+                        "transDuration": 1,
+                        "transition": "zoom",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide35.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Instead of beginning with the question,\n“Do I know how to program this?”,\nthe creator can begin with a different question:",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Alternating Panels",
+                "engine": "alternating-panels",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/alternating-panels-maker.html",
+                "config": {
+                    "segments": 8,
+                    "stagger": 0.059999999999999998,
+                    "duration": 1.3999999999999999,
+                    "easing": "natural",
+                    "shadow": 35
+                }
+            },
+            "background": {
+                "src": "computer7.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/computer7.webp",
+                        "zoomStart": 1.2,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "Image1.png",
+                    "effect": {
+                        "name": "transform-effect-1786765557458",
+                        "engine": "transform",
+                        "config": {
+                            "imgSrc": "img/Image1.png",
+                            "x": 63,
+                            "y": 71,
+                            "width": 77,
+                            "height": 100,
+                            "scale": 1,
+                            "opacity": 1,
+                            "rotation": 0,
+                            "anchor": "center",
+                            "fit": "contain",
+                            "flipX": false,
+                            "flipY": false,
+                            "brightness": 1,
+                            "contrast": 1,
+                            "saturation": 1,
+                            "blur": 0
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide36.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "What do I want to express?",
+            "transition": "zoom",
+            "background": {
+                "src": "possibilities1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities1.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide37.mp3",
+                    "volume": 1
+                }
+            ]
+        }
+    ],
+    "description": "Exploring how images, sound, movement, color, timing, and words can grow into a shared language of expression.",
+    "openingImage": "media3.webp",
+    "isPublished": true,
+    "publishedAt": 1786767509
+}

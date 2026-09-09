@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Wipe Transition Maker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root { --bg: #10131c; --panel: #1d2433; --border: #38445a; --text: #eef2ff; --muted: #aeb9d1; --accent: #7c3aed; --success: #14b8a6; }
+        * { box-sizing: border-box; }
+        body { margin: 0; height: 100vh; display: grid; grid-template-columns: 280px 1fr; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 18px; overflow-y: auto; }
+        h2 { margin: 0 0 18px; font-size: 1.1rem; }
+        .group { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+        label { display: block; margin: 12px 0 6px; color: var(--muted); font-size: 0.85rem; font-weight: 700; }
+        input, select, button { width: 100%; font: inherit; }
+        input, select { color: var(--text); background: #111827; border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px; }
+        button { border: none; border-radius: 6px; padding: 10px 12px; cursor: pointer; font-weight: 800; }
+        .run { background: var(--accent); color: white; }
+        #downloadBtn { background: var(--success); color: #05201d; margin-top: 10px; }
+        .preview { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 45%, rgba(124, 58, 237, 0.18), transparent 38%), #050816; display: grid; place-items: center; }
+        .stage { position: relative; width: min(74vw, 960px); aspect-ratio: 16 / 9; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #111827; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42); }
+        .slide { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(1.4rem, 4vw, 3.4rem); font-weight: 900; letter-spacing: 0; }
+        .from { background: radial-gradient(circle at 20% 25%, rgba(251, 191, 36, 0.45), transparent 30%), linear-gradient(135deg, #312e81, #111827); }
+        .to { background: radial-gradient(circle at 75% 35%, rgba(45, 212, 191, 0.46), transparent 30%), linear-gradient(135deg, #164e63, #581c87); clip-path: circle(0% at var(--origin, 50% 50%)); }
+        .stage.is-playing .to { animation: iris var(--duration, 1s) var(--ease, ease-in-out) forwards; }
+        @keyframes iris {
+            from { clip-path: circle(0% at var(--origin, 50% 50%)); filter: blur(var(--softness, 18px)); }
+            to { clip-path: circle(145% at var(--origin, 50% 50%)); filter: blur(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2>Iris Wipe Maker</h2>
+        <div class="group"><button id="runBtn" class="run">Play Transition</button></div>
+        <div class="group">
+            <label>Duration <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.2" max="5" step="0.1" value="1.1">
+            <label>Origin</label>
+            <select id="origin">
+                <option value="center">Center</option>
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+            </select>
+            <label>Softness <span id="val-softness"></span></label>
+            <input type="range" id="softness" min="0" max="36" step="1" value="18">
+            <label>Easing</label>
+            <select id="easing">
+                <option value="ease-in-out">Ease In Out</option>
+                <option value="ease">Ease</option>
+                <option value="ease-out">Ease Out</option>
+                <option value="linear">Linear</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Transition Name</label>
+            <input type="text" id="transitionName" value="Iris Wipe Transition">
+            <button id="downloadBtn">Use Transition</button>
+        </div>
+    </aside>
+    <main class="preview">
+        <div class="stage" id="stage">
+            <div class="slide from">Outgoing Slide</div>
+            <div class="slide to">Incoming Slide</div>
+        </div>
+    </main>
+    <script>
+        const ENGINE = 'iris-wipe';
+        const MAKER = 'transitions/iris-wipe-maker.html';
+        const cfg = { duration: 1.1, origin: 'center', softness: 18, easing: 'ease-in-out' };
+        const stage = document.getElementById('stage');
+
+        function originPoint(origin) {
+            if (origin === 'top-left') return '0% 0%';
+            if (origin === 'top-right') return '100% 0%';
+            if (origin === 'bottom-left') return '0% 100%';
+            if (origin === 'bottom-right') return '100% 100%';
+            return '50% 50%';
+        }
+
+        function applyValues() {
+            cfg.duration = Number(document.getElementById('duration').value) || 1.1;
+            cfg.origin = document.getElementById('origin').value;
+            cfg.softness = Number(document.getElementById('softness').value) || 0;
+            cfg.easing = document.getElementById('easing').value;
+            document.getElementById('val-duration').textContent = `${cfg.duration.toFixed(1)}s`;
+            document.getElementById('val-softness').textContent = `${cfg.softness}px`;
+            stage.style.setProperty('--duration', `${cfg.duration}s`);
+            stage.style.setProperty('--origin', originPoint(cfg.origin));
+            stage.style.setProperty('--softness', `${cfg.softness}px`);
+            stage.style.setProperty('--ease', cfg.easing);
+        }
+
+        function runPreview() {
+            applyValues();
+            stage.classList.remove('is-playing');
+            void stage.offsetWidth;
+            stage.classList.add('is-playing');
+        }
+
+        function getExportJSON() {
+            applyValues();
+            return { version: 1, name: document.getElementById('transitionName').value.trim() || 'Iris Wipe Transition', engine: ENGINE, maker: MAKER, config: { ...cfg } };
+        }
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            if (config.duration != null) document.getElementById('duration').value = config.duration;
+            if (config.origin) document.getElementById('origin').value = config.origin;
+            if (config.softness != null) document.getElementById('softness').value = config.softness;
+            if (config.easing) document.getElementById('easing').value = config.easing;
+            applyValues();
+        }
+
+        document.getElementById('runBtn').addEventListener('click', runPreview);
+        ['duration', 'origin', 'softness', 'easing'].forEach(id => document.getElementById(id).addEventListener('input', runPreview));
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const payload = getExportJSON();
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(payload, '*');
+            } else {
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'iris-wipe-transition.json';
+                a.click();
+            }
+        });
+        window.addEventListener('message', event => { if (event.data === 'trigger_apply') document.getElementById('downloadBtn').click(); });
+        const storedJson = sessionStorage.getItem('transitionEditData');
+        if (storedJson) {
+            try {
+                const transitionData = JSON.parse(storedJson);
+                if (transitionData.name) document.getElementById('transitionName').value = transitionData.name;
+                loadEditConfig(transitionData.config);
+            } catch (error) {}
+        }
+        applyValues();
+        runPreview();
+    </script>
+</body>
+
+</html>

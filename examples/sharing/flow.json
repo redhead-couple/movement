@@ -1,0 +1,981 @@
+{
+    "title": "How New Effects Become Part of the Medium",
+    "schemaVersion": 2,
+    "defaultBeatSeconds": 5,
+    "slides": [
+        {
+            "text": "This medium is designed to grow through the people who use it.",
+            "transition": "zoom",
+            "background": {
+                "src": "bg1.webp",
+                "effect": {
+                    "name": "morph-effect-1785369197271",
+                    "engine": "morph",
+                    "config": {
+                        "imgSrc": "img/bg1.webp",
+                        "imgSrc2": "img/bg3.webp",
+                        "duration": 3,
+                        "startDelay": 0.5,
+                        "zoomAmount": 0
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera3.png",
+                    "effect": {
+                        "name": "zoom-effect-1785637073717",
+                        "engine": "zoom",
+                        "config": {
+                            "imgSrc": "img/aera3.png",
+                            "zoomStart": 0.5,
+                            "xStart": 0.40999999999999998,
+                            "yStart": 0,
+                            "brightStart": 1,
+                            "zoomEnd": 0.80000000000000004,
+                            "xEnd": 0.5,
+                            "yEnd": 0.37,
+                            "brightEnd": 1,
+                            "duration": 1,
+                            "startDelay": 0,
+                            "easing": "linear",
+                            "opacity": 0.40000000000000002
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide1.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "A creator may want to express uncertainty, discovery, separation, memory, resistance, or change.",
+            "transition": "zoom",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "horizontal",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "possibilities2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities2.webp",
+                        "zoomStart": 1.2,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.45000000000000001,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide2.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Sometimes the existing library will already contain the right effect or transition. Sometimes it will not.",
+            "transition": "push-left",
+            "background": {
+                "src": "sharing2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/sharing2.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3999999999999999,
+                        "xEnd": 0.5,
+                        "yEnd": 0.45000000000000001,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide3.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "When the needed tool does not yet exist, the creator can build one.",
+            "transition": "zoom",
+            "background": {
+                "src": "room11.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/room11.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide4.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Each expressive tool has two connected parts.",
+            "transition": "push-right",
+            "background": {
+                "src": "possibilities4.webp",
+                "effect": {
+                    "name": "morph-effect-1785894931332",
+                    "engine": "morph",
+                    "config": {
+                        "imgSrc": "img/possibilities4.webp",
+                        "imgSrc2": "img/possibilities4.webp",
+                        "duration": 3,
+                        "startDelay": 0,
+                        "zoomAmount": 0.10000000000000001
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide5.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The engine generates the effect or transition inside the slideshow.",
+            "background": {
+                "src": "engine1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/engine1.webp",
+                        "zoomStart": 1.2,
+                        "xStart": 0.40999999999999998,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.55000000000000004,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 6,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide6.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The maker is the interface that allows people to control its parameters—such as timing, movement, direction, intensity, repetition, color, and scale.",
+            "transition": "push-left",
+            "background": {
+                "src": "controls1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/controls1.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3,
+                        "xEnd": 0.5,
+                        "yEnd": 0.63,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 12,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide7.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "With the help of AI, creators do not need to be experienced programmers to begin.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "vertical",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "making1.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/making1.webp",
+                        "zoomStart": 0.90000000000000002,
+                        "xStart": 0.38,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.57999999999999996,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "presenter1.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/presenter1.png",
+                            "zoomStart": 0.90000000000000002,
+                            "xStart": 0.5,
+                            "yStart": 0.28000000000000003,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.90000000000000002,
+                            "xEnd": 0.55000000000000004,
+                            "yEnd": 0.28000000000000003,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 7,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide8.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "They can describe what the tool should communicate, explain how it should behave, and use a structured prompt to generate a starting version of the engine and maker.",
+            "transition": "zoom",
+            "background": {
+                "src": "engine2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/engine2.webp",
+                        "zoomStart": 1,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 10,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide9.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "They can then test the tool in the real player, adjust its behavior, correct problems, and prepare it for the shared library.",
+            "transition": "push-left",
+            "background": {
+                "src": "controls2.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/controls2.webp",
+                        "zoomStart": 0.80000000000000004,
+                        "xStart": 0.31,
+                        "yStart": 0.45000000000000001,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 0.90000000000000002,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 9,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide10.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The question is: how can a new effect or transition, created by one person, become a tool used by many?",
+            "transition": "zoom",
+            "background": {
+                "src": "sharing3.webp",
+                "effect": {
+                    "name": "morph-effect-1785979050297",
+                    "engine": "morph",
+                    "config": {
+                        "imgSrc": "img/engine2.webp",
+                        "imgSrc2": "img/sharing3.webp",
+                        "duration": 5,
+                        "startDelay": 1,
+                        "zoomAmount": 0.10000000000000001
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "",
+                    "effect": {
+                        "name": "route-effect-1785979372093",
+                        "engine": "route",
+                        "config": {
+                            "imgSrc": "img/blank.png",
+                            "symbol": "?",
+                            "color": "#ffffff",
+                            "opacity": 0.10000000000000001,
+                            "size": 41,
+                            "count": 10,
+                            "speed": 0.40000000000000002,
+                            "spread": 1,
+                            "startDelay": 0,
+                            "duration": 2.2999999999999998,
+                            "shape": "cloud"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide11.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "It begins with a need. A creator wants to express an idea, intention, or feeling that the existing library cannot yet represent.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "vertical",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "morph-effect-1785980395338",
+                    "engine": "morph",
+                    "config": {
+                        "imgSrc": "img/need1.webp",
+                        "imgSrc2": "img/need2.webp",
+                        "duration": 5,
+                        "startDelay": 3,
+                        "zoomAmount": 0.10000000000000001
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide12.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "From that need comes an initial concept and a prompt for creating the new tool.",
+            "transition": "push-left",
+            "background": {
+                "src": "need3.webp",
+                "effect": null
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/possibilities3.png",
+                            "zoomStart": 0.69999999999999996,
+                            "xStart": 0.5,
+                            "yStart": 0.23000000000000001,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.90000000000000002,
+                            "xEnd": 0.5,
+                            "yEnd": 0.33000000000000002,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 5,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide13.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The creator then experiments with it in a local environment, uses it inside a real slideshow, and refines it until it behaves as intended.",
+            "transition": "dissolve",
+            "background": {
+                "src": "need4.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/need4.webp",
+                        "zoomStart": 1.7,
+                        "xStart": 0.70999999999999996,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.33000000000000002,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 10,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide14.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Before it can reach the public, however, the contribution must pass through a review process that helps ensure it is safe, understandable, and suitable for others to explore.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Light Sweep Transition",
+                "engine": "light-sweep",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/light-sweep-maker.html",
+                "config": {
+                    "duration": 1.1000000000000001,
+                    "direction": "left",
+                    "bandWidth": 22,
+                    "intensity": 0.75,
+                    "blur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "need5.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/need5.webp",
+                        "zoomStart": 1.1000000000000001,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.3999999999999999,
+                        "xEnd": 0.63,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 12,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "possibilities3.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/possibilities3.png",
+                            "zoomStart": 0.80000000000000004,
+                            "xStart": 0.5,
+                            "yStart": 0.10000000000000001,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 0.80000000000000004,
+                            "xEnd": 0.5,
+                            "yEnd": 0.10000000000000001,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 5,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide15.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Once accepted, it can enter an experimental library, where creators can try it in their own work.",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Alternating Panels",
+                "engine": "alternating-panels",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/alternating-panels-maker.html",
+                "config": {
+                    "segments": 8,
+                    "stagger": 0.059999999999999998,
+                    "duration": 1.3999999999999999,
+                    "easing": "natural",
+                    "shadow": 35
+                }
+            },
+            "background": {
+                "src": "possibilities5.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities5.webp",
+                        "zoomStart": 1.8,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.2,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 7,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera3.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide16.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "If it proves reliable and useful through repeated use, it may eventually become part of the main library.",
+            "transition": "zoom",
+            "transitionDraft": {
+                "version": 1,
+                "enabled": true,
+                "name": "Split Wipe Transition",
+                "engine": "split-wipe",
+                "direction": "left",
+                "duration": 1,
+                "easing": "ease",
+                "intensity": 0.5,
+                "maker": "transitions/split-wipe-maker.html",
+                "config": {
+                    "duration": 1,
+                    "axis": "horizontal",
+                    "mode": "open",
+                    "gapBlur": 8,
+                    "easing": "ease-in-out"
+                }
+            },
+            "background": {
+                "src": "possibilities6.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities6.webp",
+                        "zoomStart": 1.5,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1,
+                        "xEnd": 0.5,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide17.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "The experimental library serves as a testing ground between private creation and general use.",
+            "transition": "push-left",
+            "background": {
+                "src": "possibilities7.webp",
+                "effect": {
+                    "name": "Zoom / Pan",
+                    "enabled": true,
+                    "engine": "zoom",
+                    "maker": "effects/zoom-maker.html",
+                    "config": {
+                        "imgSrc": "img/possibilities7.webp",
+                        "zoomStart": 1.2,
+                        "xStart": 0.5,
+                        "yStart": 0.5,
+                        "brightStart": 1,
+                        "startOpacity": 1,
+                        "zoomEnd": 1.6000000000000001,
+                        "xEnd": 0.67000000000000004,
+                        "yEnd": 0.5,
+                        "brightEnd": 1,
+                        "endOpacity": 1,
+                        "duration": 8,
+                        "startDelay": 0,
+                        "easing": "smooth"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "aera5.png",
+                    "effect": null
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide18.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "It allows new effects and transitions to reach the public without immediately presenting them as established tools.",
+            "transition": "zoom",
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "slideshow-effect-1786063117013",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/library1.webp",
+                            "img/library2.webp"
+                        ],
+                        "interval": 3,
+                        "transDuration": 1.5,
+                        "transition": "zoom",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide19.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "text": "Creators can explore how they behave in different slideshows, discover unexpected problems, and see whether the tools remain clear and useful beyond the original work for which they were created.",
+            "background": {
+                "src": "",
+                "effect": {
+                    "name": "slideshow-effect-1786069032292",
+                    "engine": "slideshow",
+                    "config": {
+                        "images": [
+                            "img/library3.webp",
+                            "img/library4.webp"
+                        ],
+                        "interval": 5,
+                        "transDuration": 2,
+                        "transition": "zoom",
+                        "fit": "cover"
+                    }
+                }
+            },
+            "foregroundLayers": [
+                {
+                    "name": "Foreground 1",
+                    "src": "fr_presenter2.png",
+                    "effect": {
+                        "name": "Zoom / Pan",
+                        "enabled": true,
+                        "engine": "zoom",
+                        "maker": "effects/zoom-maker.html",
+                        "config": {
+                            "imgSrc": "img/fr_presenter2.png",
+                            "zoomStart": 1.3999999999999999,
+                            "xStart": 0.34000000000000002,
+                            "yStart": 0.5,
+                            "brightStart": 1,
+                            "startOpacity": 1,
+                            "zoomEnd": 1.3999999999999999,
+                            "xEnd": 0.39000000000000001,
+                            "yEnd": 0.5,
+                            "brightEnd": 1,
+                            "endOpacity": 1,
+                            "duration": 5,
+                            "startDelay": 0,
+                            "easing": "smooth"
+                        }
+                    }
+                }
+            ],
+            "audioLayers": [
+                {
+                    "name": "Speech",
+                    "src": "speech/slide20.mp3",
+                    "volume": 1
+                }
+            ]
+        },
+        {
+            "background": {
+                "src": "library4.webp",
+                "effect": {
+                    "name": "blur-effect-1786069481135",
+                    "engine": "blur",
+                    "config": {
+                        "imgSrc": "img/library4.webp",
+                        "duration": 8,
+                        "startDelay": 0,
+                        "blurIntensity": 1,
+                        "mode": "out"
+                    }
+                }
+            },
+            "foregroundLayers": [],
+            "audioLayers": []
+        }
+    ],
+    "description": "How a creator’s private idea can become a reviewed, shared expressive tool—and eventually part of the medium’s growing language.",
+    "openingImage": "sharing3.webp",
+    "isPublished": true,
+    "publishedAt": 1786069836
+}

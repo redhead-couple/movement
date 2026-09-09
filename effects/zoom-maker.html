@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Zoom/Ken Burns Maker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Zoom / Pan Studio</h2>
+
+        <div class="group" id="imageGroup">
+            <h4>1. Image</h4>
+            <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width:150px;">
+                <button class="small" type="button" onclick="window.openMediaLibrary('img')" style="margin:0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run" type="button">Play Animation</button>
+        </div>
+
+        <div class="group" id="startControls">
+            <h4>
+                2. START State
+                <button class="small" id="copyStartToEnd" type="button" title="Copy Start settings to End">Copy down</button>
+            </h4>
+
+            <div class="row"><label>Zoom <span id="val-zoomStart" class="val"></span></label></div>
+            <input type="range" id="zoomStart" min="0.1" max="5.0" step="0.1" value="1.0">
+
+            <div class="row"><label>Pan X <span id="val-xStart" class="val"></span></label></div>
+            <input type="range" id="xStart" min="0" max="1" step="0.01" value="0.5">
+
+            <div class="row"><label>Pan Y <span id="val-yStart" class="val"></span></label></div>
+            <input type="range" id="yStart" min="0" max="1" step="0.01" value="0.5">
+
+            <div class="row"><label>Brightness <span id="val-brightStart" class="val"></span></label></div>
+            <input type="range" id="brightStart" min="0" max="2" step="0.1" value="1.0">
+
+            <div class="row"><label>Start Opacity <span id="val-startOpacity" class="val"></span></label></div>
+            <input type="range" id="startOpacity" min="0" max="1" step="0.05" value="1">
+        </div>
+
+        <div class="group" id="endControls">
+            <h4>3. END State</h4>
+
+            <div class="row"><label>Zoom <span id="val-zoomEnd" class="val"></span></label></div>
+            <input type="range" id="zoomEnd" min="0.1" max="5.0" step="0.1" value="1.2">
+
+            <div class="row"><label>Pan X <span id="val-xEnd" class="val"></span></label></div>
+            <input type="range" id="xEnd" min="0" max="1" step="0.01" value="0.5">
+
+            <div class="row"><label>Pan Y <span id="val-yEnd" class="val"></span></label></div>
+            <input type="range" id="yEnd" min="0" max="1" step="0.01" value="0.5">
+
+            <div class="row"><label>Brightness <span id="val-brightEnd" class="val"></span></label></div>
+            <input type="range" id="brightEnd" min="0" max="2" step="0.1" value="1.0">
+
+            <div class="row"><label>End Opacity <span id="val-endOpacity" class="val"></span></label></div>
+            <input type="range" id="endOpacity" min="0" max="1" step="0.05" value="1">
+        </div>
+
+        <div class="group">
+            <h4>4. Timing</h4>
+            <div class="row"><label>Duration (Sec) <span id="val-duration" class="val"></span></label></div>
+            <input type="range" id="duration" min="0.1" max="20.0" step="0.1" value="5.0">
+
+            <div class="row"><label>Delay (Sec) <span id="val-startDelay" class="val"></span></label></div>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.0">
+
+            <label style="margin-top:8px">Easing</label>
+            <select id="easing">
+                <option value="smooth">Smooth (Cinematic)</option>
+                <option value="linear">Linear (Robot)</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <h4>5. Export</h4>
+            <input type="text" id="filename" value="zoom-effect.json">
+            <button id="downloadBtn" type="button">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        import { DEFAULTS, mount, normalizeConfig } from '/effects/zoom-engine.js';
+
+        const ENGINE = 'zoom';
+        const PREVIEW_DEBOUNCE_MS = 140;
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const CONTROL_KEYS = [
+            'zoomStart', 'xStart', 'yStart', 'brightStart',
+            'zoomEnd', 'xEnd', 'yEnd', 'brightEnd',
+            'duration', 'startDelay', 'startOpacity', 'endOpacity'
+        ];
+        const cfg = {
+            zoomStart: DEFAULTS.zoomStart,
+            xStart: DEFAULTS.xStart,
+            yStart: DEFAULTS.yStart,
+            brightStart: DEFAULTS.brightStart,
+            zoomEnd: DEFAULTS.zoomEnd,
+            xEnd: DEFAULTS.xEnd,
+            yEnd: DEFAULTS.yEnd,
+            brightEnd: DEFAULTS.brightEnd,
+            duration: DEFAULTS.duration,
+            startDelay: DEFAULTS.startDelay,
+            easing: DEFAULTS.easing,
+            startOpacity: DEFAULTS.startOpacity,
+            endOpacity: DEFAULTS.endOpacity
+        };
+        let controller = null;
+        let previewTimer = null;
+        let previewRequest = 0;
+        let savedImageRef = '';
+
+        function projectImageRef(source) {
+            if (!source || typeof source !== 'string') return '';
+            if (source.startsWith('data:') || source.startsWith('blob:')) return savedImageRef;
+            if (source.startsWith('img/')) return source;
+            if (/^[a-z][a-z0-9+.-]*:/i.test(source) || source.startsWith('/')) return source;
+            return `img/${source.replace(/^\/+/, '')}`;
+        }
+
+        function updateValueLabel(key) {
+            const label = document.getElementById('val-' + key);
+            if (!label) return;
+            if (key === 'startOpacity' || key === 'endOpacity') {
+                label.textContent = `${Math.round(cfg[key] * 100)}%`;
+            } else {
+                label.textContent = Number(cfg[key]).toFixed(2);
+            }
+        }
+
+        function previewConfig() {
+            return { ...cfg, imgSrc: window.imgData || savedImageRef };
+        }
+
+        function restartPreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            if (!controller) {
+                controller = mount(canvas, ctx, previewConfig());
+            } else if (typeof controller.restart === 'function') {
+                controller.restart(previewConfig());
+            }
+        }
+
+        function schedulePreview() {
+            const request = ++previewRequest;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                previewTimer = null;
+                if (request !== previewRequest) return;
+                restartPreview();
+            }, PREVIEW_DEBOUNCE_MS);
+        }
+
+        function setControlValue(key, value) {
+            const normalized = normalizeConfig({ ...cfg, [key]: value });
+            cfg[key] = normalized[key];
+            const input = document.getElementById(key);
+            if (input) input.value = String(cfg[key]);
+            updateValueLabel(key);
+        }
+
+        CONTROL_KEYS.forEach(key => {
+            document.getElementById(key).addEventListener('input', event => {
+                setControlValue(key, event.target.value);
+                schedulePreview();
+            });
+        });
+
+        document.getElementById('easing').addEventListener('change', event => {
+            cfg.easing = event.target.value === 'linear' ? 'linear' : DEFAULTS.easing;
+            restartPreview();
+        });
+        document.getElementById('runBtn').addEventListener('click', restartPreview);
+
+        document.getElementById('copyStartToEnd').addEventListener('click', () => {
+            const pairs = [
+                ['zoomEnd', 'zoomStart'],
+                ['xEnd', 'xStart'],
+                ['yEnd', 'yStart'],
+                ['brightEnd', 'brightStart'],
+                ['endOpacity', 'startOpacity']
+            ];
+            pairs.forEach(([endKey, startKey]) => setControlValue(endKey, cfg[startKey]));
+            restartPreview();
+        });
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            const normalized = normalizeConfig(config);
+            CONTROL_KEYS.forEach(key => setControlValue(key, normalized[key]));
+            cfg.easing = normalized.easing;
+            document.getElementById('easing').value = cfg.easing;
+            savedImageRef = projectImageRef(config.imgSrc || '');
+            restartPreview();
+        }
+
+        function getExportJSON() {
+            const imageNameRef = window.imgName
+                ? projectImageRef(String(window.imgName).split(/[\\/]/).pop())
+                : '';
+            return {
+                enabled: true,
+                name: 'Zoom / Pan',
+                engine: ENGINE,
+                maker: 'effects/zoom-maker.html',
+                config: {
+                    imgSrc: imageNameRef || savedImageRef,
+                    zoomStart: cfg.zoomStart,
+                    xStart: cfg.xStart,
+                    yStart: cfg.yStart,
+                    brightStart: cfg.brightStart,
+                    startOpacity: cfg.startOpacity,
+                    zoomEnd: cfg.zoomEnd,
+                    xEnd: cfg.xEnd,
+                    yEnd: cfg.yEnd,
+                    brightEnd: cfg.brightEnd,
+                    endOpacity: cfg.endOpacity,
+                    duration: cfg.duration,
+                    startDelay: cfg.startDelay,
+                    easing: cfg.easing
+                }
+            };
+        }
+
+        window.MakerAPI = {
+            onImageLoaded: restartPreview,
+            run: restartPreview,
+            getExportJSON,
+            loadEditConfig
+        };
+        window.run = restartPreview;
+
+        function disposePreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            if (controller) controller();
+            controller = null;
+        }
+
+        window.addEventListener('pagehide', disposePreview, { once: true });
+        CONTROL_KEYS.forEach(updateValueLabel);
+        restartPreview();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

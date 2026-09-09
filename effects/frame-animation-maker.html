@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Frame Animation Maker</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .inline-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .frame-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .frame-actions input[type="file"] {
+            grid-column: 1 / -1;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .inline-actions .small {
+            margin: 0;
+            width: auto;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .frame-actions .small {
+            width: 100%;
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .point-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .point-grid button {
+            margin-top: 0;
+            white-space: nowrap;
+        }
+
+        .point-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .img-list {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .img-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.75);
+            font-size: 0.82rem;
+            color: #e2e8f0;
+        }
+
+        .img-item:last-child {
+            border-bottom: 0;
+        }
+
+        .img-item span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rm-btn {
+            color: #fda4af;
+            cursor: pointer;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .pick-btn.active {
+            background: #f59e0b;
+            color: #020617;
+        }
+
+        .point-hint {
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.35;
+        }
+
+        #pathLine {
+            position: absolute;
+            height: 2px;
+            background: rgba(251, 191, 36, 0.9);
+            transform-origin: 0 50%;
+            pointer-events: none;
+            z-index: 2;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
+        }
+
+        #m-start {
+            border-color: #22c55e;
+        }
+
+        #m-end {
+            border-color: #f97316;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Frame Animation</h2>
+
+        <div class="group">
+            <h4>1. Background</h4>
+            <div class="inline-actions">
+                <input type="file" id="img1Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+        </div>
+
+        <div class="group">
+            <h4>2. Frames</h4>
+            <div class="frame-actions" style="margin-bottom: 8px;">
+                <input type="file" id="framesInput" accept="image/*" multiple>
+                <button class="small" type="button" onclick="window.openMediaLibrary('img', 'frames')" style="margin: 0;">Browse Lib</button>
+                <button class="small" id="clearFramesBtn" style="margin: 0; width: auto;">Clear</button>
+            </div>
+            <div class="img-list" id="framesList">
+                <div style="color:#64748b; font-size:0.8rem; padding:8px 10px;">No frames selected</div>
+            </div>
+            <div class="point-hint">The order you select the files becomes the animation order.</div>
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Play Preview</button>
+        </div>
+
+        <div class="group">
+            <h4>3. Timing</h4>
+            <label>Travel Time (Sec) <span id="val-travelDuration"></span></label>
+            <input type="range" id="travelDuration" min="0.5" max="12" step="0.1" value="4">
+
+            <label>Start Delay (Sec) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="8" step="0.1" value="0">
+
+            <label>Image Sequence Time (Sec) <span id="val-sequenceDuration"></span></label>
+            <input type="range" id="sequenceDuration" min="0.1" max="12" step="0.1" value="1">
+
+            <label>Loops (0 = Infinite) <span id="val-loops"></span></label>
+            <input type="range" id="loops" min="0" max="20" step="1" value="1">
+
+            <div class="point-hint">Travel Time controls how long it takes to move from start to end. Image Sequence Time controls how long it takes to play through the frame images once.</div>
+        </div>
+
+        <div class="group">
+            <h4>4. Position</h4>
+
+            <div class="point-grid">
+                <div>
+                    <label>Start Point</label>
+                    <div class="point-fields">
+                        <input type="number" id="startXInput" min="0" max="100" step="0.1" value="50" title="Start X percent">
+                        <input type="number" id="startYInput" min="0" max="100" step="0.1" value="50" title="Start Y percent">
+                    </div>
+                </div>
+                <button type="button" id="pickStartBtn" class="pick-btn">Pick Start</button>
+            </div>
+
+            <div class="point-grid" style="margin-top: 10px;">
+                <div>
+                    <label>End Point</label>
+                    <div class="point-fields">
+                        <input type="number" id="endXInput" min="0" max="100" step="0.1" value="50" title="End X percent">
+                        <input type="number" id="endYInput" min="0" max="100" step="0.1" value="50" title="End Y percent">
+                    </div>
+                </div>
+                <button type="button" id="pickEndBtn" class="pick-btn">Pick End</button>
+            </div>
+
+            <div class="point-hint">Click a pick button, then click the preview. You can also drag the markers or type the coordinates directly.</div>
+        </div>
+
+        <div class="group">
+            <h4>5. Size & Opacity</h4>
+
+            <div class="mini-grid">
+                <div>
+                    <label>Start Size <span id="val-startSizePct"></span></label>
+                    <input type="range" id="startSizePct" min="2" max="100" step="1" value="25">
+                </div>
+                <div>
+                    <label>End Size <span id="val-endSizePct"></span></label>
+                    <input type="range" id="endSizePct" min="2" max="100" step="1" value="25">
+                </div>
+            </div>
+
+            <div class="mini-grid">
+                <div>
+                    <label>Start Opacity <span id="val-startOpacity"></span></label>
+                    <input type="range" id="startOpacity" min="0" max="1" step="0.05" value="1">
+                </div>
+                <div>
+                    <label>End Opacity <span id="val-endOpacity"></span></label>
+                    <input type="range" id="endOpacity" min="0" max="1" step="0.05" value="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>6. Export</h4>
+            <input type="text" id="filename" value="frame-animation.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <div id="pathLine"></div>
+        <div id="m-start" class="marker">S</div>
+        <div id="m-end" class="marker">E</div>
+        <canvas id="cvs"></canvas>
+    </div>
+
+    <script type="module">
+        const ENGINE_PATH = '/effects/frame-animation-engine.js';
+        const ENGINE = 'frame-animation';
+        import { mount } from '/effects/frame-animation-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const stage = document.getElementById('stage');
+        const pathLine = document.getElementById('pathLine');
+        const markers = {
+            start: document.getElementById('m-start'),
+            end: document.getElementById('m-end')
+        };
+
+        let cleanup = null;
+        let pickMode = 'start';
+        let dragging = null;
+
+        window.frameDataUrls = [];
+        window.frameFileNames = [];
+
+        const cfg = {
+            travelDuration: 4,
+            startDelay: 0,
+            sequenceDuration: 1,
+            loops: 1,
+            startX: 0.5,
+            startY: 0.5,
+            endX: 0.5,
+            endY: 0.5,
+            startSize: 0.25,
+            endSize: 0.25,
+            startOpacity: 1,
+            endOpacity: 1
+        };
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function setValueLabel(id, value, suffix = '') {
+            const el = document.getElementById('val-' + id);
+            if (el) el.textContent = `${value}${suffix}`;
+        }
+
+        function syncLabels() {
+            setValueLabel('travelDuration', cfg.travelDuration);
+            setValueLabel('startDelay', cfg.startDelay);
+            setValueLabel('sequenceDuration', cfg.sequenceDuration);
+            setValueLabel('loops', cfg.loops === 0 ? 'Infinite' : cfg.loops);
+            setValueLabel('startSizePct', Math.round(cfg.startSize * 100), '%');
+            setValueLabel('endSizePct', Math.round(cfg.endSize * 100), '%');
+            setValueLabel('startOpacity', cfg.startOpacity);
+            setValueLabel('endOpacity', cfg.endOpacity);
+        }
+
+        function syncPointInputs() {
+            document.getElementById('startXInput').value = (cfg.startX * 100).toFixed(1);
+            document.getElementById('startYInput').value = (cfg.startY * 100).toFixed(1);
+            document.getElementById('endXInput').value = (cfg.endX * 100).toFixed(1);
+            document.getElementById('endYInput').value = (cfg.endY * 100).toFixed(1);
+        }
+
+        function setPickMode(mode) {
+            pickMode = mode;
+            document.getElementById('pickStartBtn').classList.toggle('active', mode === 'start');
+            document.getElementById('pickEndBtn').classList.toggle('active', mode === 'end');
+        }
+
+        function updateMarkers() {
+            const rect = canvas.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            const offX = rect.left - stageRect.left;
+            const offY = rect.top - stageRect.top;
+            const w = rect.width || canvas.width || 1;
+            const h = rect.height || canvas.height || 1;
+
+            const sx = offX + (cfg.startX * w);
+            const sy = offY + (cfg.startY * h);
+            const ex = offX + (cfg.endX * w);
+            const ey = offY + (cfg.endY * h);
+
+            markers.start.style.left = sx + 'px';
+            markers.start.style.top = sy + 'px';
+            markers.end.style.left = ex + 'px';
+            markers.end.style.top = ey + 'px';
+
+            const dx = ex - sx;
+            const dy = ey - sy;
+            const length = Math.sqrt((dx * dx) + (dy * dy));
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            pathLine.style.left = sx + 'px';
+            pathLine.style.top = sy + 'px';
+            pathLine.style.width = length + 'px';
+            pathLine.style.transform = `rotate(${angle}deg)`;
+        }
+
+        function renderFramesList() {
+            const list = document.getElementById('framesList');
+            list.innerHTML = '';
+            if (!window.frameFileNames.length) {
+                list.innerHTML = '<div style="color:#64748b; font-size:0.8rem; padding:8px 10px;">No frames selected</div>';
+                return;
+            }
+
+            window.frameFileNames.forEach((name, index) => {
+                const item = document.createElement('div');
+                item.className = 'img-item';
+                item.innerHTML = `<span>${index + 1}. ${name}</span><span class="rm-btn" data-idx="${index}">×</span>`;
+                list.appendChild(item);
+            });
+
+            list.querySelectorAll('.rm-btn').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(e.target.dataset.idx, 10);
+                    window.frameFileNames.splice(idx, 1);
+                    window.frameDataUrls.splice(idx, 1);
+                    renderFramesList();
+                    run();
+                });
+            });
+        }
+
+        async function uploadSingleFile(file) {
+            const formData = new FormData();
+            formData.append('action', 'upload_media');
+            formData.append('file', file);
+            const endpoint = (window.top && window.top.MAKER_ENDPOINT) || '/json-maker.php';
+            const res = await fetch(endpoint, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Upload failed');
+            }
+            return data.filename;
+        }
+
+        async function listProjectImages() {
+            if (window.top && typeof window.top.getMakerMediaList === 'function') {
+                return window.top.getMakerMediaList('img');
+            }
+            const formData = new FormData();
+            formData.append('action', 'list_media');
+            const endpoint = (window.top && window.top.MAKER_ENDPOINT) || '/json-maker.php';
+            const res = await fetch(endpoint, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.status !== 'success' || !data.media || !Array.isArray(data.media.img)) {
+                throw new Error('Failed to list project images');
+            }
+            return data.media.img;
+        }
+
+        function escapeRegExp(text) {
+            return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function detectSequencePattern(filename) {
+            const match = String(filename || '').match(/^(.*?)(\d+)(\.[^.]+)$/);
+            if (!match) return null;
+            return {
+                prefix: match[1],
+                digits: match[2],
+                suffix: match[3]
+            };
+        }
+
+        async function loadFrameFromLibrary(filename) {
+            const fileUrl = window.top && typeof window.top.resolveMakerMediaUrl === 'function'
+                ? window.top.resolveMakerMediaUrl('img', filename)
+                : ((window.top && window.top.IMG_BASE_URL) || '/img/') + filename;
+            const res = await fetch(fileUrl);
+            const blob = await res.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => resolve(ev.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            return dataUrl;
+        }
+
+        function sortFilesByDetectedSequence(files) {
+            if (!files.length) return null;
+            const seedPattern = detectSequencePattern(files[0].name);
+            if (!seedPattern) return null;
+
+            const regex = new RegExp(`^${escapeRegExp(seedPattern.prefix)}(\\d+)${escapeRegExp(seedPattern.suffix)}$`);
+            const matches = files
+                .map((file) => {
+                    const found = String(file.name).match(regex);
+                    if (!found) return null;
+                    return {
+                        file,
+                        order: parseInt(found[1], 10)
+                    };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.order - b.order);
+
+            if (matches.length <= 1) return null;
+            return matches.map((item) => item.file);
+        }
+
+        async function expandDetectedSequence(seedFilename) {
+            const pattern = detectSequencePattern(seedFilename);
+            if (!pattern) return false;
+
+            let projectImages = [];
+            try {
+                projectImages = await listProjectImages();
+            } catch (err) {
+                console.error('Could not scan image sequence', err);
+                return false;
+            }
+
+            const regex = new RegExp(`^${escapeRegExp(pattern.prefix)}(\\d+)${escapeRegExp(pattern.suffix)}$`);
+            const matches = projectImages
+                .map((name) => {
+                    const found = String(name).match(regex);
+                    if (!found) return null;
+                    return {
+                        name,
+                        order: parseInt(found[1], 10)
+                    };
+                })
+                .filter(Boolean)
+                .sort((a, b) => a.order - b.order);
+
+            if (matches.length <= 1) return false;
+
+            const shouldUseSequence = window.confirm(`Detected ${matches.length} frames in the sequence. Use the full sequence for the animation?`);
+            if (!shouldUseSequence) return false;
+
+            const existingNames = new Set(window.frameFileNames);
+
+            for (const item of matches) {
+                if (existingNames.has(item.name)) continue;
+                try {
+                    const dataUrl = await loadFrameFromLibrary(item.name);
+                    window.frameFileNames.push(item.name);
+                    window.frameDataUrls.push(dataUrl);
+                } catch (err) {
+                    console.error('Failed loading sequence frame', item.name, err);
+                }
+            }
+
+            renderFramesList();
+            run();
+            return window.frameFileNames.length > 0;
+        }
+
+        async function addLibraryFrames(filenames) {
+            const existingNames = new Set(window.frameFileNames);
+            for (const filename of filenames) {
+                if (existingNames.has(filename)) continue;
+                try {
+                    const dataUrl = await loadFrameFromLibrary(filename);
+                    window.frameFileNames.push(filename);
+                    window.frameDataUrls.push(dataUrl);
+                    existingNames.add(filename);
+                } catch (err) {
+                    console.error('Failed loading library frame', filename, err);
+                }
+            }
+            renderFramesList();
+            run();
+        }
+
+        window.handleFrameLibrarySelection = async function (filename) {
+            try {
+                const expanded = await expandDetectedSequence(filename);
+                if (!expanded) {
+                    await addLibraryFrames([filename]);
+                }
+            } catch (err) {
+                console.error('Failed handling library frame selection', err);
+                alert(`Failed to add frame: ${filename}`);
+            }
+        };
+
+        async function addFrameFiles(files) {
+            for (const file of files) {
+                try {
+                    const uploadedName = await uploadSingleFile(file);
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => resolve(ev.target.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                    window.frameFileNames.push(uploadedName);
+                    window.frameDataUrls.push(dataUrl);
+                } catch (err) {
+                    console.error('Failed to add frame', err);
+                    alert(`Failed to add frame: ${file.name}`);
+                }
+            }
+            renderFramesList();
+            run();
+        }
+
+        function applyPointFromCanvas(clientX, clientY, targetKey) {
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            const x = clamp((clientX - rect.left) / rect.width, 0, 1);
+            const y = clamp((clientY - rect.top) / rect.height, 0, 1);
+            if (targetKey === 'start') {
+                cfg.startX = x;
+                cfg.startY = y;
+            } else {
+                cfg.endX = x;
+                cfg.endY = y;
+            }
+            syncPointInputs();
+            updateMarkers();
+            run();
+        }
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            syncLabels();
+            syncPointInputs();
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: window.img1Data || window.imgData,
+                frames: window.frameDataUrls,
+                onResize: () => setTimeout(updateMarkers, 10)
+            });
+            setTimeout(updateMarkers, 30);
+        }
+
+        ['travelDuration', 'startDelay', 'sequenceDuration', 'startOpacity', 'endOpacity'].forEach((id) => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', (e) => {
+                cfg[id] = parseFloat(e.target.value);
+                run();
+            });
+        });
+
+        document.getElementById('loops').addEventListener('input', (e) => {
+            cfg.loops = parseInt(e.target.value, 10);
+            run();
+        });
+
+        ['startSizePct', 'endSizePct'].forEach((id) => {
+            const key = id === 'startSizePct' ? 'startSize' : 'endSize';
+            document.getElementById(id).addEventListener('input', (e) => {
+                cfg[key] = parseFloat(e.target.value) / 100;
+                run();
+            });
+        });
+
+        const pointBindings = [
+            ['startXInput', 'startX'],
+            ['startYInput', 'startY'],
+            ['endXInput', 'endX'],
+            ['endYInput', 'endY']
+        ];
+        pointBindings.forEach(([id, key]) => {
+            document.getElementById(id).addEventListener('input', (e) => {
+                const value = clamp(parseFloat(e.target.value || '0') / 100, 0, 1);
+                cfg[key] = value;
+                updateMarkers();
+                run();
+            });
+        });
+
+        document.getElementById('framesInput').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+            const sortedSequenceFiles = sortFilesByDetectedSequence(files);
+            if (sortedSequenceFiles) {
+                const shouldUseLocalSequence = window.confirm(`Detected ${sortedSequenceFiles.length} local sequence frames. Use them in sequence order?`);
+                if (shouldUseLocalSequence) {
+                    await addFrameFiles(sortedSequenceFiles);
+                    e.target.value = '';
+                    return;
+                }
+            }
+            if (files.length === 1) {
+                try {
+                    const uploadedName = await uploadSingleFile(files[0]);
+                    const expanded = await expandDetectedSequence(uploadedName);
+                    if (!expanded) {
+                        const dataUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => resolve(ev.target.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(files[0]);
+                        });
+                        window.frameFileNames.push(uploadedName);
+                        window.frameDataUrls.push(dataUrl);
+                        renderFramesList();
+                        run();
+                    }
+                } catch (err) {
+                    console.error('Failed to add frame', err);
+                    alert(`Failed to add frame: ${files[0].name}`);
+                }
+                e.target.value = '';
+                return;
+            }
+            await addFrameFiles(files);
+            e.target.value = '';
+        });
+
+        document.getElementById('clearFramesBtn').addEventListener('click', () => {
+            window.frameFileNames = [];
+            window.frameDataUrls = [];
+            renderFramesList();
+            run();
+        });
+
+        document.getElementById('pickStartBtn').addEventListener('click', () => setPickMode('start'));
+        document.getElementById('pickEndBtn').addEventListener('click', () => setPickMode('end'));
+
+        ['start', 'end'].forEach((key) => {
+            markers[key].addEventListener('mousedown', (e) => {
+                dragging = key;
+                setPickMode(key);
+                e.preventDefault();
+            });
+        });
+
+        canvas.addEventListener('click', (e) => {
+            applyPointFromCanvas(e.clientX, e.clientY, pickMode);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            applyPointFromCanvas(e.clientX, e.clientY, dragging);
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragging = null;
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+        window.addEventListener('resize', updateMarkers);
+
+        syncLabels();
+        syncPointInputs();
+        setPickMode('start');
+        renderFramesList();
+
+        window.MakerAPI = {
+            onImageLoaded: () => { run(); },
+            run: () => { run(); },
+            loadEditConfig: (config) => {
+                if (!config) return;
+                if (config.travelDuration !== undefined || config.duration !== undefined) {
+                    cfg.travelDuration = parseFloat(config.travelDuration ?? config.duration);
+                    document.getElementById('travelDuration').value = cfg.travelDuration;
+                }
+                if (config.startDelay !== undefined) {
+                    cfg.startDelay = parseFloat(config.startDelay);
+                    document.getElementById('startDelay').value = cfg.startDelay;
+                }
+                if (config.sequenceDuration !== undefined) {
+                    cfg.sequenceDuration = parseFloat(config.sequenceDuration);
+                    document.getElementById('sequenceDuration').value = cfg.sequenceDuration;
+                } else if (config.frameRate !== undefined && Array.isArray(config.frames) && config.frames.length) {
+                    cfg.sequenceDuration = Math.max(0.1, config.frames.length / Math.max(1, parseFloat(config.frameRate)));
+                    document.getElementById('sequenceDuration').value = cfg.sequenceDuration;
+                }
+                if (config.loops !== undefined) {
+                    cfg.loops = parseInt(config.loops, 10);
+                    document.getElementById('loops').value = cfg.loops;
+                }
+                if (config.startX !== undefined) cfg.startX = parseFloat(config.startX);
+                if (config.startY !== undefined) cfg.startY = parseFloat(config.startY);
+                if (config.endX !== undefined) cfg.endX = parseFloat(config.endX);
+                if (config.endY !== undefined) cfg.endY = parseFloat(config.endY);
+                if (config.startSize !== undefined) {
+                    cfg.startSize = parseFloat(config.startSize);
+                    document.getElementById('startSizePct').value = Math.round(cfg.startSize * 100);
+                }
+                if (config.endSize !== undefined) {
+                    cfg.endSize = parseFloat(config.endSize);
+                    document.getElementById('endSizePct').value = Math.round(cfg.endSize * 100);
+                }
+                if (config.startOpacity !== undefined) {
+                    cfg.startOpacity = parseFloat(config.startOpacity);
+                    document.getElementById('startOpacity').value = cfg.startOpacity;
+                }
+                if (config.endOpacity !== undefined) {
+                    cfg.endOpacity = parseFloat(config.endOpacity);
+                    document.getElementById('endOpacity').value = cfg.endOpacity;
+                }
+
+                if (Array.isArray(config.frames)) {
+                    window.frameFileNames = config.frames.map((path) => String(path).replace(/^img\//, ''));
+                    if (Array.isArray(config.preloadedFrames) && config.preloadedFrames.length) {
+                        window.frameDataUrls = config.frames.map((path, index) => config.preloadedFrames[index] || path);
+                    } else {
+                        window.frameDataUrls = config.frames.slice();
+                    }
+                    renderFramesList();
+                }
+
+                syncLabels();
+                syncPointInputs();
+                updateMarkers();
+            },
+            getExportJSON: () => {
+                const jsonFrames = JSON.stringify(window.frameFileNames.map((name) => `img/${name}`));
+                return {
+                    engine: ENGINE,
+                    config: {
+                        imgSrc: window.name1 ? `img/${window.name1}` : '',
+                        frames: JSON.parse(jsonFrames),
+                        startDelay: cfg.startDelay,
+                        travelDuration: cfg.travelDuration,
+                        sequenceDuration: cfg.sequenceDuration,
+                        loops: cfg.loops,
+                        startX: parseFloat(cfg.startX.toFixed(4)),
+                        startY: parseFloat(cfg.startY.toFixed(4)),
+                        endX: parseFloat(cfg.endX.toFixed(4)),
+                        endY: parseFloat(cfg.endY.toFixed(4)),
+                        startSize: parseFloat(cfg.startSize.toFixed(4)),
+                        endSize: parseFloat(cfg.endSize.toFixed(4)),
+                        startOpacity: parseFloat(cfg.startOpacity.toFixed(3)),
+                        endOpacity: parseFloat(cfg.endOpacity.toFixed(3))
+                    }
+                };
+            }
+        };
+    </script>
+
+    <script src="studio/maker/maker-engine.js"></script>
+
+</body>
+
+</html>

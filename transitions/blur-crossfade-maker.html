@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blur Crossfade Transition Maker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root { --bg: #14110f; --panel: #241d19; --border: #47372f; --text: #fff7ed; --muted: #d7bca9; --accent: #dc2626; --success: #f97316; }
+        * { box-sizing: border-box; }
+        body { margin: 0; height: 100vh; display: grid; grid-template-columns: 280px 1fr; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+        .sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 18px; overflow-y: auto; }
+        h2 { margin: 0 0 18px; font-size: 1.1rem; }
+        .group { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+        label { display: block; margin: 12px 0 6px; color: var(--muted); font-size: 0.85rem; font-weight: 700; }
+        input, select, button { width: 100%; font: inherit; }
+        input, select { color: var(--text); background: #17120f; border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px; }
+        button { border: none; border-radius: 6px; padding: 10px 12px; cursor: pointer; font-weight: 800; }
+        .run { background: var(--accent); color: white; }
+        #downloadBtn { background: var(--success); color: #271006; margin-top: 10px; }
+        .preview { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 45%, rgba(249, 115, 22, 0.18), transparent 42%), #090706; display: grid; place-items: center; }
+        .stage { position: relative; width: min(74vw, 960px); aspect-ratio: 16 / 9; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #111827; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42); }
+        .slide { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(1.4rem, 4vw, 3.4rem); font-weight: 900; letter-spacing: 0; }
+        .from { background: radial-gradient(circle at 20% 25%, rgba(251, 146, 60, 0.45), transparent 30%), linear-gradient(135deg, #7f1d1d, #1c1917); }
+        .to { background: radial-gradient(circle at 75% 35%, rgba(253, 224, 71, 0.38), transparent 30%), linear-gradient(135deg, #451a03, #581c87); opacity: 0; transform: scale(var(--scale, 1.04)); filter: blur(var(--blur, 18px)); }
+        .stage.is-playing .from { animation: fade-out var(--duration, 1.2s) var(--ease, ease-in-out) forwards; }
+        .stage.is-playing .to { animation: fade-in var(--duration, 1.2s) var(--ease, ease-in-out) forwards; }
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(var(--scale, 1.04)); filter: blur(var(--blur, 18px)); }
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+        @keyframes fade-out {
+            from { opacity: 1; transform: scale(1); filter: blur(0); }
+            to { opacity: 0; transform: scale(var(--scale, 1.04)); filter: blur(var(--blur, 18px)); }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2>Blur Crossfade Maker</h2>
+        <div class="group"><button id="runBtn" class="run">Play Transition</button></div>
+        <div class="group">
+            <label>Duration <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.2" max="5" step="0.1" value="1.2">
+            <label>Blur <span id="val-blur"></span></label>
+            <input type="range" id="blur" min="0" max="36" step="1" value="18">
+            <label>Zoom <span id="val-scale"></span></label>
+            <input type="range" id="scale" min="1" max="1.16" step="0.01" value="1.04">
+            <label>Easing</label>
+            <select id="easing">
+                <option value="ease-in-out">Ease In Out</option>
+                <option value="ease">Ease</option>
+                <option value="ease-out">Ease Out</option>
+                <option value="linear">Linear</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Transition Name</label>
+            <input type="text" id="transitionName" value="Blur Crossfade Transition">
+            <button id="downloadBtn">Use Transition</button>
+        </div>
+    </aside>
+    <main class="preview">
+        <div class="stage" id="stage">
+            <div class="slide from">Outgoing Slide</div>
+            <div class="slide to">Incoming Slide</div>
+        </div>
+    </main>
+    <script>
+        const ENGINE = 'blur-crossfade';
+        const MAKER = 'transitions/blur-crossfade-maker.html';
+        const cfg = { duration: 1.2, blur: 18, scale: 1.04, easing: 'ease-in-out' };
+        const stage = document.getElementById('stage');
+
+        function applyValues() {
+            cfg.duration = Number(document.getElementById('duration').value) || 1.2;
+            cfg.blur = Number(document.getElementById('blur').value) || 0;
+            cfg.scale = Number(document.getElementById('scale').value) || 1.04;
+            cfg.easing = document.getElementById('easing').value;
+            document.getElementById('val-duration').textContent = `${cfg.duration.toFixed(1)}s`;
+            document.getElementById('val-blur').textContent = `${cfg.blur}px`;
+            document.getElementById('val-scale').textContent = `${cfg.scale.toFixed(2)}x`;
+            stage.style.setProperty('--duration', `${cfg.duration}s`);
+            stage.style.setProperty('--blur', `${cfg.blur}px`);
+            stage.style.setProperty('--scale', cfg.scale);
+            stage.style.setProperty('--ease', cfg.easing);
+        }
+
+        function runPreview() {
+            applyValues();
+            stage.classList.remove('is-playing');
+            void stage.offsetWidth;
+            stage.classList.add('is-playing');
+        }
+
+        function getExportJSON() {
+            applyValues();
+            return { version: 1, name: document.getElementById('transitionName').value.trim() || 'Blur Crossfade Transition', engine: ENGINE, maker: MAKER, config: { ...cfg } };
+        }
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            if (config.duration != null) document.getElementById('duration').value = config.duration;
+            if (config.blur != null) document.getElementById('blur').value = config.blur;
+            if (config.scale != null) document.getElementById('scale').value = config.scale;
+            if (config.easing) document.getElementById('easing').value = config.easing;
+            applyValues();
+        }
+
+        document.getElementById('runBtn').addEventListener('click', runPreview);
+        ['duration', 'blur', 'scale', 'easing'].forEach(id => document.getElementById(id).addEventListener('input', runPreview));
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const payload = getExportJSON();
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(payload, '*');
+            } else {
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'blur-crossfade-transition.json';
+                a.click();
+            }
+        });
+        window.addEventListener('message', event => { if (event.data === 'trigger_apply') document.getElementById('downloadBtn').click(); });
+        const storedJson = sessionStorage.getItem('transitionEditData');
+        if (storedJson) {
+            try {
+                const transitionData = JSON.parse(storedJson);
+                if (transitionData.name) document.getElementById('transitionName').value = transitionData.name;
+                loadEditConfig(transitionData.config);
+            } catch (error) {}
+        }
+        applyValues();
+        runPreview();
+    </script>
+</body>
+
+</html>

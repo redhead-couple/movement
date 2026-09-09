@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cursor Move and Click Maker</title>
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .control-value { float: right; color: #93c5fd; font-variant-numeric: tabular-nums; }
+        .preview {
+            background:
+                linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+                radial-gradient(circle at 72% 38%, rgba(56,189,248,.18), transparent 32%),
+                linear-gradient(145deg, #172033, #050914 72%);
+            background-size: 32px 32px, 32px 32px, auto, auto;
+        }
+        .position-help { margin: 0 0 10px; color: #94a3b8; font-size: .78rem; line-height: 1.45; }
+        .position-buttons, .media-btn-row { display: flex; gap: 8px; }
+        .position-buttons button, .media-btn-row button { flex: 1; margin: 0; }
+        .position-buttons button.active { background: #2563eb; border-color: #60a5fa; color: white; }
+        .position-readout { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; color: #cbd5e1; font-size: .76rem; }
+        .position-readout span { padding: 7px 8px; border: 1px solid #334155; border-radius: 7px; background: rgba(15,23,42,.7); }
+        .position-marker {
+            position: absolute; z-index: 5; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+            padding: 0; border: 2px solid white; border-radius: 50%; color: white;
+            box-shadow: 0 5px 18px rgba(0,0,0,.48); cursor: grab; touch-action: none;
+        }
+        .position-marker:active { cursor: grabbing; }
+        .position-marker.click { background: #0284c7; box-shadow: 0 0 0 6px rgba(56,189,248,.24), 0 5px 18px rgba(0,0,0,.48); }
+        .position-marker.start { background: #7c3aed; }
+        .position-marker::after { content: attr(data-label); display: block; font-size: 12px; font-weight: 800; line-height: 28px; }
+        .preview-note { position: absolute; right: 18px; bottom: 16px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(15,23,42,.8); color: #cbd5e1; font-size: .75rem; pointer-events: none; }
+        .check-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; }
+        .check-row input { width: auto; margin: 0; }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Cursor Move and Click</h2>
+
+        <div class="group">
+            <button id="runBtn" class="run" type="button">Replay</button>
+        </div>
+
+        <div class="group">
+            <h4>Positions</h4>
+            <p class="position-help">Choose a point, then click the preview or drag its marker. Positions are saved as percentages.</p>
+            <div class="position-buttons">
+                <button id="selectClickBtn" class="small active" type="button">Set click point</button>
+                <button id="selectStartBtn" class="small" type="button">Set cursor start</button>
+            </div>
+            <div class="position-readout">
+                <span id="val-clickPosition">Click: 68%, 48%</span>
+                <span id="val-startPosition">Start: 14%, 82%</span>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>Timing</h4>
+            <label for="startDelay">Delay before movement <span class="control-value" id="val-startDelay">0.4 s</span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.4">
+            <label for="movementDuration">Movement duration <span class="control-value" id="val-movementDuration">1.2 s</span></label>
+            <input type="range" id="movementDuration" min="0.4" max="4" step="0.1" value="1.2">
+        </div>
+
+        <div class="group">
+            <h4>Click highlight</h4>
+            <label for="highlightColor">Highlight color</label>
+            <input type="color" id="highlightColor" value="#38bdf8">
+            <label for="highlightSize">Highlight size <span class="control-value" id="val-highlightSize">96 px</span></label>
+            <input type="range" id="highlightSize" min="40" max="240" step="4" value="96">
+            <label for="highlightDuration">Highlight duration <span class="control-value" id="val-highlightDuration">0.7 s</span></label>
+            <input type="range" id="highlightDuration" min="0.2" max="3" step="0.1" value="0.7">
+            <label class="check-row" for="disappearAfterClick">
+                <input type="checkbox" id="disappearAfterClick" checked>
+                <span>Cursor disappears after clicking</span>
+            </label>
+        </div>
+
+        <div class="group">
+            <h4>Slide image (optional)</h4>
+            <input type="file" id="img1Input" accept="image/*">
+            <div id="overrideContainer1"></div>
+            <div class="media-btn-row">
+                <button type="button" class="small" onclick="openMediaLibrary('img', 'img1')">Server Library</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>Export</h4>
+            <input type="text" id="filename" value="cursor-move-and-click.json">
+            <button id="downloadBtn" type="button">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+        <button class="position-marker start" id="startMarker" data-label="S" type="button" aria-label="Drag cursor starting position"></button>
+        <button class="position-marker click" id="clickMarker" data-label="C" type="button" aria-label="Drag click position"></button>
+        <div class="preview-note">Guide attention to the exact click target.</div>
+    </div>
+
+    <script type="module">
+        import {
+            CURSOR_ATLAS_PIXELS,
+            DEFAULTS,
+            MAX_ANIMATED_PIXELS,
+            MAX_TOTAL_SURFACE_PIXELS,
+            mount,
+            normalizeConfig
+        } from '/effects/cursor-move-and-click-engine.js';
+
+        const ENGINE = 'cursor-move-and-click';
+        const PREVIEW_DEBOUNCE_MS = 140;
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const stage = document.getElementById('stage');
+        const markers = {
+            startPosition: document.getElementById('startMarker'),
+            clickPosition: document.getElementById('clickMarker')
+        };
+        const cfg = {
+            startDelay: DEFAULTS.startDelay,
+            movementDuration: DEFAULTS.movementDuration,
+            highlightColor: DEFAULTS.highlightColor,
+            highlightSize: DEFAULTS.highlightSize,
+            highlightDuration: DEFAULTS.highlightDuration,
+            disappearAfterClick: DEFAULTS.disappearAfterClick,
+            startPosition: { ...DEFAULTS.startPosition },
+            clickPosition: { ...DEFAULTS.clickPosition },
+            imgSrc: DEFAULTS.imgSrc
+        };
+        const units = { startDelay: ' s', movementDuration: ' s', highlightSize: ' px', highlightDuration: ' s' };
+        let activePosition = 'clickPosition';
+        let draggingPosition = '';
+        let controller = null;
+        let previewTimer = null;
+        let previewRequest = 0;
+
+        function updateValueLabel(key) {
+            const target = document.getElementById('val-' + key);
+            if (target) target.textContent = `${cfg[key]}${units[key]}`;
+        }
+
+        function updatePositionLabels() {
+            document.getElementById('val-clickPosition').textContent =
+                `Click: ${Math.round(cfg.clickPosition.x * 100)}%, ${Math.round(cfg.clickPosition.y * 100)}%`;
+            document.getElementById('val-startPosition').textContent =
+                `Start: ${Math.round(cfg.startPosition.x * 100)}%, ${Math.round(cfg.startPosition.y * 100)}%`;
+        }
+
+        function updateMarkers() {
+            const canvasRect = canvas.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            Object.keys(markers).forEach(key => {
+                markers[key].style.left = `${canvasRect.left - stageRect.left + cfg[key].x * canvasRect.width}px`;
+                markers[key].style.top = `${canvasRect.top - stageRect.top + cfg[key].y * canvasRect.height}px`;
+            });
+            updatePositionLabels();
+        }
+
+        function previewConfig() {
+            return {
+                ...cfg,
+                startPosition: { ...cfg.startPosition },
+                clickPosition: { ...cfg.clickPosition },
+                imgSrc: window.img1Data || window.imgData || cfg.imgSrc,
+                onResize: updateMarkers
+            };
+        }
+
+        function restartPreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+            if (!controller) controller = mount(canvas, ctx, previewConfig());
+            else if (typeof controller.restart === 'function') controller.restart(previewConfig());
+            updateMarkers();
+        }
+
+        function schedulePreview() {
+            const request = ++previewRequest;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                previewTimer = null;
+                if (request !== previewRequest) return;
+                restartPreview();
+            }, PREVIEW_DEBOUNCE_MS);
+        }
+
+        function setControlValue(key, value) {
+            const normalized = normalizeConfig({ ...cfg, [key]: value });
+            cfg[key] = normalized[key];
+            const input = document.getElementById(key);
+            if (input) input.value = String(cfg[key]);
+            updateValueLabel(key);
+        }
+
+        function selectPosition(key) {
+            activePosition = key;
+            document.getElementById('selectClickBtn').classList.toggle('active', key === 'clickPosition');
+            document.getElementById('selectStartBtn').classList.toggle('active', key === 'startPosition');
+        }
+
+        function setPosition(key, x, y, shouldPreview = true) {
+            const normalized = normalizeConfig({ ...cfg, [key]: { x, y } });
+            cfg[key] = { ...normalized[key] };
+            updateMarkers();
+            if (shouldPreview) schedulePreview();
+        }
+
+        function positionFromPointer(key, event, shouldPreview) {
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            setPosition(key, (event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height, shouldPreview);
+        }
+
+        ['startDelay', 'movementDuration', 'highlightSize', 'highlightDuration'].forEach(key => {
+            document.getElementById(key).addEventListener('input', event => {
+                setControlValue(key, event.target.value);
+                schedulePreview();
+            });
+        });
+        document.getElementById('highlightColor').addEventListener('input', event => {
+            cfg.highlightColor = normalizeConfig({ ...cfg, highlightColor: event.target.value }).highlightColor;
+            schedulePreview();
+        });
+        document.getElementById('disappearAfterClick').addEventListener('change', event => {
+            cfg.disappearAfterClick = !!event.target.checked;
+            schedulePreview();
+        });
+        document.getElementById('selectClickBtn').addEventListener('click', () => selectPosition('clickPosition'));
+        document.getElementById('selectStartBtn').addEventListener('click', () => selectPosition('startPosition'));
+        canvas.addEventListener('pointerdown', event => positionFromPointer(activePosition, event, true));
+
+        Object.keys(markers).forEach(key => {
+            const marker = markers[key];
+            marker.addEventListener('pointerdown', event => {
+                draggingPosition = key;
+                selectPosition(key);
+                marker.setPointerCapture(event.pointerId);
+                event.preventDefault();
+            });
+            marker.addEventListener('pointermove', event => {
+                if (draggingPosition === key) positionFromPointer(key, event, false);
+            });
+            marker.addEventListener('pointerup', event => {
+                if (draggingPosition !== key) return;
+                draggingPosition = '';
+                marker.releasePointerCapture(event.pointerId);
+                schedulePreview();
+            });
+            marker.addEventListener('pointercancel', () => {
+                draggingPosition = '';
+                schedulePreview();
+            });
+            marker.addEventListener('keydown', event => {
+                const step = event.shiftKey ? 0.05 : 0.01;
+                let x = cfg[key].x;
+                let y = cfg[key].y;
+                if (event.key === 'ArrowLeft') x -= step;
+                else if (event.key === 'ArrowRight') x += step;
+                else if (event.key === 'ArrowUp') y -= step;
+                else if (event.key === 'ArrowDown') y += step;
+                else return;
+                event.preventDefault();
+                setPosition(key, x, y, true);
+            });
+        });
+
+        document.getElementById('runBtn').addEventListener('click', restartPreview);
+        window.addEventListener('resize', updateMarkers);
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            const normalized = normalizeConfig(config);
+            ['startDelay', 'movementDuration', 'highlightSize', 'highlightDuration'].forEach(key => setControlValue(key, normalized[key]));
+            cfg.highlightColor = normalized.highlightColor;
+            cfg.disappearAfterClick = normalized.disappearAfterClick;
+            cfg.startPosition = { ...normalized.startPosition };
+            cfg.clickPosition = { ...normalized.clickPosition };
+            if (typeof config.imgSrc === 'string') cfg.imgSrc = config.imgSrc;
+            document.getElementById('highlightColor').value = cfg.highlightColor;
+            document.getElementById('disappearAfterClick').checked = cfg.disappearAfterClick;
+            restartPreview();
+        }
+
+        function getExportJSON() {
+            return {
+                enabled: true,
+                name: 'Cursor Move and Click',
+                engine: ENGINE,
+                maker: 'effects/cursor-move-and-click-maker.html',
+                config: {
+                    startDelay: cfg.startDelay,
+                    movementDuration: cfg.movementDuration,
+                    highlightColor: cfg.highlightColor,
+                    highlightSize: cfg.highlightSize,
+                    highlightDuration: cfg.highlightDuration,
+                    disappearAfterClick: cfg.disappearAfterClick,
+                    startPosition: {
+                        x: Number(cfg.startPosition.x.toFixed(3)),
+                        y: Number(cfg.startPosition.y.toFixed(3))
+                    },
+                    clickPosition: {
+                        x: Number(cfg.clickPosition.x.toFixed(3)),
+                        y: Number(cfg.clickPosition.y.toFixed(3))
+                    },
+                    imgSrc: window.name1 || cfg.imgSrc || ''
+                }
+            };
+        }
+
+        async function runStressCheck() {
+            const host = document.createElement('div');
+            host.style.cssText = 'position:fixed;left:0;top:0;width:4px;height:4px;overflow:hidden;opacity:.01;pointer-events:none;';
+            const canvases = [document.createElement('canvas'), document.createElement('canvas')];
+            const controllers = [];
+            const largeSource = 'data:image/svg+xml,' + encodeURIComponent(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160"><rect width="100%" height="100%" fill="#111827"/></svg>'
+            );
+            document.body.appendChild(host);
+            try {
+                canvases.forEach((stressCanvas, index) => {
+                    stressCanvas.width = 3840;
+                    stressCanvas.height = 2160;
+                    host.appendChild(stressCanvas);
+                    controllers.push(mount(stressCanvas, stressCanvas.getContext('2d'), {
+                        imgSrc: largeSource,
+                        startDelay: 0,
+                        movementDuration: 0.4,
+                        highlightSize: 240,
+                        highlightDuration: 3,
+                        startPosition: { x: 0.02, y: index ? 0.02 : 0.98 },
+                        clickPosition: { x: 0.98, y: index ? 0.98 : 0.02 }
+                    }));
+                });
+                await new Promise(resolve => setTimeout(resolve, 300));
+                for (let index = 0; index < 30; index += 1) {
+                    controllers[index % controllers.length].restart({
+                        highlightSize: 240,
+                        highlightDuration: 3,
+                        clickPosition: { x: 0.05 + (index % 10) * 0.1, y: 0.1 + (index % 8) * 0.11 }
+                    });
+                }
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const surfacePixels = canvases.map(item => item.width * item.height);
+                const safe = surfacePixels.every(pixels => (
+                    pixels <= MAX_ANIMATED_PIXELS
+                    && pixels * 2 + CURSOR_ATLAS_PIXELS <= MAX_TOTAL_SURFACE_PIXELS
+                ));
+                if (!safe) throw new Error('Cursor Move and Click exceeded its surface budget.');
+                return { safe, instances: controllers.length, surfacePixels };
+            } finally {
+                controllers.forEach(stop => stop());
+                host.remove();
+            }
+        }
+
+        window.MakerAPI = { run: restartPreview, getExportJSON, loadEditConfig, runStressCheck };
+        window.run = restartPreview;
+
+        function disposePreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            window.removeEventListener('resize', updateMarkers);
+            if (controller) controller();
+            controller = null;
+        }
+
+        window.addEventListener('pagehide', disposePreview, { once: true });
+        Object.keys(units).forEach(updateValueLabel);
+        restartPreview();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

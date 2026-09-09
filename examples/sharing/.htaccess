@@ -1,0 +1,5 @@
+# Deny execution of PHP (and other server-side scripts) in this project folder.
+# This is a hard server-level guardrail applied automatically on project creation.
+<FilesMatch "\.ph(p[0-9]?|tml)$">
+    Require all denied
+</FilesMatch>

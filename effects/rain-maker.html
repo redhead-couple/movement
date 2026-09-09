@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Rain Studio v3 (Blend Modes)</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Rain Studio</h2>
+
+        <div class="group">
+            <h4>1. Import / Image</h4>
+            <label>Target Image</label>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="imgInput" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="window.openMediaLibrary('img')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer"></div>
+
+        </div>
+
+        <div class="group">
+            <button class="run" id="runBtn">▶ Restart Animation</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Physics</h4>
+            <label>Density <span id="val-count"></span></label>
+            <input type="range" id="count" min="10" max="1000" value="100">
+
+            <label>Speed <span id="val-speed"></span></label>
+            <input type="range" id="speed" min="5" max="50" value="15">
+
+            <label>Wind X <span id="val-wind"></span></label>
+            <input type="range" id="wind" min="-10" max="10" step="0.5" value="0">
+
+            <label>Drop Length <span id="val-length"></span></label>
+            <input type="range" id="length" min="5" max="100" value="20">
+        </div>
+
+        <div class="group">
+            <h4>3. Style & Blending</h4>
+            <label>Blend Mode (Brightness)</label>
+            <select id="blendMode">
+                <option value="source-over">Normal (Paint)</option>
+                <option value="screen" selected>Screen (Brightness/Light)</option>
+                <option value="overlay">Overlay (Contrast)</option>
+            </select>
+
+            <label>Color</label> <input type="color" id="color" value="#a3c1e0">
+
+            <label>Intensity (Alpha) <span id="val-opacity"></span></label>
+            <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.6">
+
+            <label style="color:#f472b6;">React to Dark <span id="val-darknessReact"></span></label>
+            <div style="font-size:0.75rem; color:#64748b; margin-bottom:4px;">1 = Hidden on white areas</div>
+            <input type="range" id="darknessReact" min="0" max="1" step="0.1" value="0">
+
+            <label>Splash Height <span id="val-splashBounce"></span></label>
+            <input type="range" id="splashBounce" min="0" max="1" step="0.1" value="0.3">
+        </div>
+
+        <div class="group">
+            <h4>4. Export</h4>
+            <input type="text" id="filename" value="rain-screen.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/rain-engine.js';
+        const ENGINE = 'rain';
+        import { mount } from '/effects/rain-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        // State
+        const cfg = {
+            count: 100, speed: 15, wind: 0,
+            length: 20, color: '#a3c1e0', opacity: 0.6,
+            splashBounce: 0.3, darknessReact: 0.0,
+            blendMode: 'screen'
+        };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            cleanup = mount(canvas, ctx, { ...cfg, imgSrc: window.imgData });
+        }
+
+
+
+        function updateUI() {
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById(k);
+                if (el) el.value = cfg[k];
+            });
+        }
+
+        // --- INPUTS ---
+
+
+
+
+
+
+
+
+        // --- BIND HTML INPUTS TO CFG REACTIVELY ---
+        Object.keys(cfg).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const isNum = typeof cfg[id] === 'number';
+                const eventName = el.tagName === 'SELECT' ? 'change' : 'input';
+                el.addEventListener(eventName, e => {
+                    cfg[id] = isNum ? parseFloat(e.target.value) : e.target.value;
+                    if (typeof run === 'function') run();
+                });
+            }
+        });
+
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
+            run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
+            getExportJSON: () => {
+                const code = `
+import { mount as runRain } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runRain(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.imgName}',
+        count: ${cfg.count}, speed: ${cfg.speed}, wind: ${cfg.wind},
+        length: ${cfg.length}, color: '${cfg.color}', opacity: ${cfg.opacity},
+        splashBounce: ${cfg.splashBounce}, darknessReact: ${cfg.darknessReact},
+        blendMode: '${cfg.blendMode}'
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <!-- GLOBAL MAKER ENGINE -->
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Focus Formation Maker</title>
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .control-value {
+            float: right;
+            color: #93c5fd;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .destination-help {
+            margin: 0 0 9px;
+            color: #94a3b8;
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .destination-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .destination-actions button {
+            width: auto;
+            margin: 0;
+        }
+
+        .preview {
+            background:
+                radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.22), transparent 42%),
+                linear-gradient(145deg, #0b1120, #030712 64%, #111827);
+        }
+
+        .destination-marker {
+            position: absolute;
+            z-index: 4;
+            width: 34px;
+            height: 34px;
+            margin: -17px 0 0 -17px;
+            padding: 0;
+            border: 2px solid rgba(255, 255, 255, 0.92);
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.88);
+            box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.25), 0 5px 16px rgba(0, 0, 0, 0.45);
+            color: white;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .destination-marker::before,
+        .destination-marker::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: currentColor;
+            transform: translate(-50%, -50%);
+        }
+
+        .destination-marker::before {
+            width: 12px;
+            height: 2px;
+        }
+
+        .destination-marker::after {
+            width: 2px;
+            height: 12px;
+        }
+
+        .destination-marker:active {
+            cursor: grabbing;
+        }
+
+        .preview-note {
+            position: absolute;
+            right: 18px;
+            bottom: 16px;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.78);
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .media-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .media-btn-row button {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Focus Formation</h2>
+
+        <div class="group">
+            <button id="runBtn" class="run" type="button">Play from beginning</button>
+        </div>
+
+        <div class="group">
+            <h4>Timing</h4>
+            <label for="startDelay">Start time <span class="control-value" id="val-startDelay">0.5 s</span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.1" value="0.5">
+
+            <label for="duration">Duration <span class="control-value" id="val-duration">3.6 s</span></label>
+            <input type="range" id="duration" min="1" max="8" step="0.1" value="3.6">
+        </div>
+
+        <div class="group">
+            <h4>Orbs</h4>
+            <label for="randomness">Randomness <span class="control-value" id="val-randomness">65%</span></label>
+            <input type="range" id="randomness" min="0" max="100" step="5" value="65">
+
+            <label for="size">Size <span class="control-value" id="val-size">32 px</span></label>
+            <input type="range" id="size" min="12" max="72" step="1" value="32">
+
+            <label for="count">Amount <span class="control-value" id="val-count">48 orbs</span></label>
+            <input type="range" id="count" min="8" max="96" step="1" value="48">
+        </div>
+
+        <div class="group">
+            <h4>Point of destination</h4>
+            <p class="destination-help">Click the preview or drag the marker to choose where the orbs gather.</p>
+            <div class="destination-actions">
+                <span class="control-value" id="val-destination">50%, 50%</span>
+                <button class="small" id="centerDestinationBtn" type="button">Center</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>Slide image (optional)</h4>
+            <input type="file" id="img1Input" accept="image/*">
+            <div id="overrideContainer1"></div>
+            <div class="media-btn-row">
+                <button type="button" class="small" onclick="openMediaLibrary('img', 'img1')">Server Library</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>Export</h4>
+            <input type="text" id="filename" value="focus-formation.json">
+            <button id="downloadBtn" type="button">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+        <button
+            class="destination-marker"
+            id="destinationMarker"
+            type="button"
+            aria-label="Drag to choose the orb destination point"
+            title="Orb destination point"
+        ></button>
+        <div class="preview-note">Scattered elements gather in clarity and focus.</div>
+    </div>
+
+    <script type="module">
+        import {
+            DEFAULTS,
+            MAX_ANIMATED_PIXELS,
+            MAX_TOTAL_SURFACE_PIXELS,
+            SPRITE_ATLAS_PIXELS,
+            mount,
+            normalizeConfig
+        } from '/effects/focus-formation-engine.js';
+
+        const ENGINE = 'focus-formation';
+        const PREVIEW_DEBOUNCE_MS = 140;
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const stage = document.getElementById('stage');
+        const marker = document.getElementById('destinationMarker');
+        const cfg = {
+            startDelay: DEFAULTS.startDelay,
+            duration: DEFAULTS.duration,
+            randomness: DEFAULTS.randomness,
+            size: DEFAULTS.size,
+            count: DEFAULTS.count,
+            destination: { ...DEFAULTS.destination },
+            imgSrc: DEFAULTS.imgSrc
+        };
+        const units = {
+            startDelay: ' s',
+            duration: ' s',
+            randomness: '%',
+            size: ' px',
+            count: ' orbs'
+        };
+        let controller = null;
+        let previewTimer = null;
+        let previewRequest = 0;
+        let draggingDestination = false;
+
+        function updateValueLabel(key) {
+            const target = document.getElementById('val-' + key);
+            if (target) target.textContent = `${cfg[key]}${units[key]}`;
+        }
+
+        function updateDestinationLabel() {
+            document.getElementById('val-destination').textContent =
+                `${Math.round(cfg.destination.x * 100)}%, ${Math.round(cfg.destination.y * 100)}%`;
+        }
+
+        function updateDestinationMarker() {
+            const canvasRect = canvas.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            marker.style.left = `${canvasRect.left - stageRect.left + cfg.destination.x * canvasRect.width}px`;
+            marker.style.top = `${canvasRect.top - stageRect.top + cfg.destination.y * canvasRect.height}px`;
+            updateDestinationLabel();
+        }
+
+        function previewConfig() {
+            return {
+                ...cfg,
+                destination: { ...cfg.destination },
+                imgSrc: window.img1Data || window.imgData || cfg.imgSrc,
+                onResize: updateDestinationMarker
+            };
+        }
+
+        function restartPreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+            if (!controller) controller = mount(canvas, ctx, previewConfig());
+            else if (typeof controller.restart === 'function') controller.restart(previewConfig());
+            updateDestinationMarker();
+        }
+
+        function schedulePreview() {
+            const request = ++previewRequest;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                previewTimer = null;
+                if (request !== previewRequest) return;
+                restartPreview();
+            }, PREVIEW_DEBOUNCE_MS);
+        }
+
+        function setControlValue(key, value) {
+            const normalized = normalizeConfig({ ...cfg, [key]: value });
+            cfg[key] = normalized[key];
+            const input = document.getElementById(key);
+            if (input) input.value = String(cfg[key]);
+            updateValueLabel(key);
+        }
+
+        function setDestination(x, y, shouldPreview = true) {
+            const normalized = normalizeConfig({ ...cfg, destination: { x, y } });
+            cfg.destination = normalized.destination;
+            updateDestinationMarker();
+            if (shouldPreview) schedulePreview();
+        }
+
+        function destinationFromPointer(event, shouldPreview) {
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            setDestination(
+                (event.clientX - rect.left) / rect.width,
+                (event.clientY - rect.top) / rect.height,
+                shouldPreview
+            );
+        }
+
+        ['startDelay', 'duration', 'randomness', 'size', 'count'].forEach((key) => {
+            document.getElementById(key).addEventListener('input', event => {
+                setControlValue(key, event.target.value);
+                schedulePreview();
+            });
+        });
+
+        canvas.addEventListener('pointerdown', event => {
+            destinationFromPointer(event, true);
+        });
+        marker.addEventListener('pointerdown', event => {
+            draggingDestination = true;
+            marker.setPointerCapture(event.pointerId);
+            event.preventDefault();
+        });
+        marker.addEventListener('pointermove', event => {
+            if (draggingDestination) destinationFromPointer(event, false);
+        });
+        marker.addEventListener('pointerup', event => {
+            if (!draggingDestination) return;
+            draggingDestination = false;
+            marker.releasePointerCapture(event.pointerId);
+            schedulePreview();
+        });
+        marker.addEventListener('pointercancel', () => {
+            draggingDestination = false;
+            schedulePreview();
+        });
+        marker.addEventListener('keydown', event => {
+            const step = event.shiftKey ? 0.05 : 0.01;
+            let x = cfg.destination.x;
+            let y = cfg.destination.y;
+            if (event.key === 'ArrowLeft') x -= step;
+            else if (event.key === 'ArrowRight') x += step;
+            else if (event.key === 'ArrowUp') y -= step;
+            else if (event.key === 'ArrowDown') y += step;
+            else return;
+            event.preventDefault();
+            setDestination(x, y, true);
+        });
+
+        document.getElementById('centerDestinationBtn').addEventListener('click', () => {
+            setDestination(DEFAULTS.destination.x, DEFAULTS.destination.y, true);
+        });
+        document.getElementById('runBtn').addEventListener('click', restartPreview);
+        window.addEventListener('resize', updateDestinationMarker);
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            const normalized = normalizeConfig(config);
+            ['startDelay', 'duration', 'randomness', 'size', 'count'].forEach(key => {
+                setControlValue(key, normalized[key]);
+            });
+            cfg.destination = { ...normalized.destination };
+            if (typeof config.imgSrc === 'string') cfg.imgSrc = config.imgSrc;
+            restartPreview();
+        }
+
+        function getExportJSON() {
+            return {
+                enabled: true,
+                name: 'Focus Formation',
+                engine: ENGINE,
+                maker: 'effects/focus-formation-maker.html',
+                config: {
+                    startDelay: cfg.startDelay,
+                    duration: cfg.duration,
+                    randomness: cfg.randomness,
+                    size: cfg.size,
+                    count: cfg.count,
+                    destination: {
+                        x: Number(cfg.destination.x.toFixed(3)),
+                        y: Number(cfg.destination.y.toFixed(3))
+                    },
+                    imgSrc: window.name1 || cfg.imgSrc || ''
+                }
+            };
+        }
+
+        async function runStressCheck() {
+            const host = document.createElement('div');
+            host.style.cssText =
+                'position:fixed;left:0;top:0;width:4px;height:4px;overflow:hidden;opacity:0.01;pointer-events:none;';
+            const canvases = [document.createElement('canvas'), document.createElement('canvas')];
+            const controllers = [];
+            document.body.appendChild(host);
+
+            try {
+                canvases.forEach((stressCanvas, index) => {
+                    stressCanvas.width = 3840;
+                    stressCanvas.height = 2160;
+                    stressCanvas.style.width = '1280px';
+                    stressCanvas.style.height = '720px';
+                    host.appendChild(stressCanvas);
+                    controllers.push(mount(stressCanvas, stressCanvas.getContext('2d'), {
+                        startDelay: 0,
+                        duration: 1,
+                        randomness: 100,
+                        size: 72,
+                        count: 96,
+                        destination: index === 0 ? { x: 0.2, y: 0.3 } : { x: 0.8, y: 0.7 }
+                    }));
+                });
+
+                for (let index = 0; index < 30; index += 1) {
+                    const target = controllers[index % controllers.length];
+                    target.restart({
+                        count: 96,
+                        size: 72,
+                        randomness: 100,
+                        destination: { x: 0.08 + (index % 10) * 0.09, y: 0.15 + (index % 8) * 0.1 }
+                    });
+                }
+
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                await new Promise(resolve => setTimeout(resolve, 450));
+                const surfacePixels = canvases.map(item => item.width * item.height);
+                const safe = surfacePixels.every(pixels => (
+                    pixels <= MAX_ANIMATED_PIXELS
+                    && pixels + SPRITE_ATLAS_PIXELS <= MAX_TOTAL_SURFACE_PIXELS
+                ));
+                if (!safe) throw new Error('Focus Formation exceeded its surface budget.');
+                return { safe, instances: controllers.length, surfacePixels };
+            } finally {
+                controllers.forEach(stop => stop());
+                host.remove();
+            }
+        }
+
+        window.MakerAPI = {
+            run: restartPreview,
+            getExportJSON,
+            loadEditConfig,
+            runStressCheck
+        };
+        window.run = restartPreview;
+
+        function disposePreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            window.removeEventListener('resize', updateDestinationMarker);
+            if (controller) controller();
+            controller = null;
+        }
+
+        window.addEventListener('pagehide', disposePreview, { once: true });
+        Object.keys(units).forEach(updateValueLabel);
+        restartPreview();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Color Spread Maker</title>
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .control-value {
+            float: right;
+            color: #fdba74;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .preview {
+            background:
+                radial-gradient(circle at 52% 40%, rgba(249, 115, 22, 0.16), transparent 42%),
+                linear-gradient(145deg, #111827, #030712 70%);
+        }
+
+        .origin-help,
+        .preview-note {
+            color: #94a3b8;
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .origin-help {
+            margin: 8px 0 0;
+        }
+
+        .origin-marker {
+            position: absolute;
+            z-index: 4;
+            width: 32px;
+            height: 32px;
+            margin: -16px 0 0 -16px;
+            padding: 0;
+            border: 2px solid white;
+            border-radius: 50%;
+            background: rgba(249, 115, 22, 0.9);
+            box-shadow: 0 0 0 6px rgba(249, 115, 22, 0.24), 0 6px 18px rgba(0, 0, 0, 0.45);
+            color: white;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .origin-marker::before,
+        .origin-marker::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: currentColor;
+            transform: translate(-50%, -50%);
+        }
+
+        .origin-marker::before { width: 11px; height: 2px; }
+        .origin-marker::after { width: 2px; height: 11px; }
+        .origin-marker:active { cursor: grabbing; }
+        .origin-marker[hidden] { display: none; }
+
+        .preview-note {
+            position: absolute;
+            right: 18px;
+            bottom: 16px;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            pointer-events: none;
+        }
+
+        .media-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .media-actions button { flex: 1; }
+
+        input[type="color"] {
+            width: 100%;
+            min-height: 42px;
+            padding: 3px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 style="margin-top:0">Color Spread</h2>
+
+        <div class="group">
+            <button id="runBtn" class="run" type="button">Play from beginning</button>
+        </div>
+
+        <div class="group">
+            <h4>Timing</h4>
+            <label for="startDelay">Start time <span class="control-value" id="val-startDelay">0.5 s</span></label>
+            <input type="range" id="startDelay" min="0" max="8" step="0.1" value="0.5">
+
+            <label for="duration">Duration <span class="control-value" id="val-duration">5.0 s</span></label>
+            <input type="range" id="duration" min="1" max="15" step="0.1" value="5">
+
+            <label for="spreadSpeed">Spread speed <span class="control-value" id="val-spreadSpeed">1.0×</span></label>
+            <input type="range" id="spreadSpeed" min="0.5" max="2.5" step="0.1" value="1">
+        </div>
+
+        <div class="group">
+            <h4>Color mood</h4>
+            <label for="targetColor">Target color</label>
+            <input type="color" id="targetColor" value="#f97316">
+
+            <label for="intensity">Color intensity <span class="control-value" id="val-intensity">68%</span></label>
+            <input type="range" id="intensity" min="0" max="100" step="1" value="68">
+
+            <label for="saturationIncrease">Saturation increase <span class="control-value" id="val-saturationIncrease">38%</span></label>
+            <input type="range" id="saturationIncrease" min="0" max="100" step="1" value="38">
+
+            <label for="brightnessShift">Brightness shift <span class="control-value" id="val-brightnessShift">+6%</span></label>
+            <input type="range" id="brightnessShift" min="-30" max="30" step="1" value="6">
+        </div>
+
+        <div class="group">
+            <h4>Spread shape</h4>
+            <label for="softness">Edge softness <span class="control-value" id="val-softness">26%</span></label>
+            <input type="range" id="softness" min="5" max="60" step="1" value="26">
+
+            <label for="originMode">Spread from</label>
+            <select id="originMode">
+                <option value="center">Center</option>
+                <option value="custom">Chosen point</option>
+                <option value="left">Left edge</option>
+                <option value="right">Right edge</option>
+                <option value="top">Top edge</option>
+                <option value="bottom">Bottom edge</option>
+            </select>
+            <p class="origin-help" id="originHelp">Choose “Chosen point,” then click or drag on the preview to place the origin.</p>
+        </div>
+
+        <div class="group">
+            <h4>Slide image</h4>
+            <input type="file" id="img1Input" accept="image/*">
+            <div id="overrideContainer1"></div>
+            <div class="media-actions">
+                <button type="button" class="small" onclick="openMediaLibrary('img', 'img1')">Image Library</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <h4>Export</h4>
+            <input type="text" id="filename" value="color-spread.json">
+            <button id="downloadBtn" type="button">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+        <button
+            class="origin-marker"
+            id="originMarker"
+            type="button"
+            aria-label="Drag to choose where the color spread begins"
+            title="Color spread origin"
+            hidden
+        ></button>
+        <div class="preview-note">A color mood blooms through the neutral image.</div>
+    </div>
+
+    <script type="module">
+        import {
+            DEFAULTS,
+            FULL_SURFACE_COUNT,
+            MASK_SURFACE_PIXELS,
+            MAX_ANIMATED_PIXELS,
+            MAX_TOTAL_SURFACE_PIXELS,
+            mount,
+            normalizeConfig
+        } from '/effects/color-spread-engine.js';
+
+        const ENGINE = 'color-spread';
+        const PREVIEW_DEBOUNCE_MS = 140;
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        const stage = document.getElementById('stage');
+        const marker = document.getElementById('originMarker');
+        const cfg = {
+            imgSrc: DEFAULTS.imgSrc,
+            startDelay: DEFAULTS.startDelay,
+            duration: DEFAULTS.duration,
+            spreadSpeed: DEFAULTS.spreadSpeed,
+            softness: DEFAULTS.softness,
+            targetColor: DEFAULTS.targetColor,
+            intensity: DEFAULTS.intensity,
+            saturationIncrease: DEFAULTS.saturationIncrease,
+            brightnessShift: DEFAULTS.brightnessShift,
+            origin: { ...DEFAULTS.origin }
+        };
+        const numericKeys = [
+            'startDelay', 'duration', 'spreadSpeed', 'softness',
+            'intensity', 'saturationIncrease', 'brightnessShift'
+        ];
+        let controller = null;
+        let previewTimer = null;
+        let previewRequest = 0;
+        let draggingOrigin = false;
+
+        function formatValue(key) {
+            const value = cfg[key];
+            if (key === 'startDelay' || key === 'duration') return `${Number(value).toFixed(1)} s`;
+            if (key === 'spreadSpeed') return `${Number(value).toFixed(1)}×`;
+            if (key === 'brightnessShift') return `${value > 0 ? '+' : ''}${Math.round(value)}%`;
+            return `${Math.round(value)}%`;
+        }
+
+        function updateValueLabel(key) {
+            const target = document.getElementById('val-' + key);
+            if (target) target.textContent = formatValue(key);
+        }
+
+        function updateOriginMarker() {
+            marker.hidden = cfg.origin.mode !== 'custom';
+            if (marker.hidden) return;
+            const canvasRect = canvas.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            marker.style.left = `${canvasRect.left - stageRect.left + cfg.origin.x * canvasRect.width}px`;
+            marker.style.top = `${canvasRect.top - stageRect.top + cfg.origin.y * canvasRect.height}px`;
+        }
+
+        function previewConfig() {
+            return {
+                ...cfg,
+                origin: { ...cfg.origin },
+                imgSrc: window.img1Data || window.imgData || cfg.imgSrc,
+                onResize: updateOriginMarker
+            };
+        }
+
+        function restartPreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            if (!controller) controller = mount(canvas, ctx, previewConfig());
+            else if (typeof controller.restart === 'function') controller.restart(previewConfig());
+            updateOriginMarker();
+        }
+
+        function schedulePreview() {
+            const request = ++previewRequest;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = setTimeout(() => {
+                previewTimer = null;
+                if (request !== previewRequest) return;
+                restartPreview();
+            }, PREVIEW_DEBOUNCE_MS);
+        }
+
+        function setNumericControl(key, value) {
+            const normalized = normalizeConfig({ ...cfg, [key]: value, origin: cfg.origin });
+            cfg[key] = normalized[key];
+            const input = document.getElementById(key);
+            if (input) input.value = String(cfg[key]);
+            updateValueLabel(key);
+        }
+
+        numericKeys.forEach(key => {
+            document.getElementById(key).addEventListener('input', event => {
+                setNumericControl(key, event.target.value);
+                schedulePreview();
+            });
+        });
+
+        document.getElementById('targetColor').addEventListener('input', event => {
+            cfg.targetColor = normalizeConfig({ ...cfg, targetColor: event.target.value }).targetColor;
+            schedulePreview();
+        });
+
+        document.getElementById('originMode').addEventListener('change', event => {
+            cfg.origin = normalizeConfig({ ...cfg, origin: { ...cfg.origin, mode: event.target.value } }).origin;
+            updateOriginMarker();
+            restartPreview();
+        });
+
+        function setOriginPoint(x, y, shouldPreview) {
+            cfg.origin = normalizeConfig({
+                ...cfg,
+                origin: { mode: 'custom', x, y }
+            }).origin;
+            document.getElementById('originMode').value = 'custom';
+            updateOriginMarker();
+            if (shouldPreview) schedulePreview();
+        }
+
+        function originFromPointer(event, shouldPreview) {
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            setOriginPoint(
+                (event.clientX - rect.left) / rect.width,
+                (event.clientY - rect.top) / rect.height,
+                shouldPreview
+            );
+        }
+
+        canvas.addEventListener('pointerdown', event => originFromPointer(event, true));
+        marker.addEventListener('pointerdown', event => {
+            draggingOrigin = true;
+            marker.setPointerCapture(event.pointerId);
+            event.preventDefault();
+        });
+        marker.addEventListener('pointermove', event => {
+            if (draggingOrigin) originFromPointer(event, false);
+        });
+        marker.addEventListener('pointerup', event => {
+            if (!draggingOrigin) return;
+            draggingOrigin = false;
+            marker.releasePointerCapture(event.pointerId);
+            schedulePreview();
+        });
+        marker.addEventListener('pointercancel', () => {
+            draggingOrigin = false;
+            schedulePreview();
+        });
+        marker.addEventListener('keydown', event => {
+            const step = event.shiftKey ? 0.05 : 0.01;
+            let x = cfg.origin.x;
+            let y = cfg.origin.y;
+            if (event.key === 'ArrowLeft') x -= step;
+            else if (event.key === 'ArrowRight') x += step;
+            else if (event.key === 'ArrowUp') y -= step;
+            else if (event.key === 'ArrowDown') y += step;
+            else return;
+            event.preventDefault();
+            setOriginPoint(x, y, true);
+        });
+
+        document.getElementById('runBtn').addEventListener('click', restartPreview);
+        window.addEventListener('resize', updateOriginMarker);
+
+        function loadEditConfig(config) {
+            if (!config || typeof config !== 'object') return;
+            const normalized = normalizeConfig(config);
+            numericKeys.forEach(key => setNumericControl(key, normalized[key]));
+            cfg.targetColor = normalized.targetColor;
+            cfg.origin = { ...normalized.origin };
+            cfg.imgSrc = typeof config.imgSrc === 'string' ? config.imgSrc : DEFAULTS.imgSrc;
+            document.getElementById('targetColor').value = cfg.targetColor;
+            document.getElementById('originMode').value = cfg.origin.mode;
+            restartPreview();
+        }
+
+        function projectImageRef() {
+            if (window.name1) return `img/${String(window.name1).split(/[\\/]/).pop()}`;
+            return cfg.imgSrc || '';
+        }
+
+        function getExportJSON() {
+            return {
+                enabled: true,
+                name: 'Color Spread',
+                engine: ENGINE,
+                maker: 'effects/color-spread-maker.html',
+                config: {
+                    imgSrc: projectImageRef(),
+                    startDelay: cfg.startDelay,
+                    duration: cfg.duration,
+                    spreadSpeed: cfg.spreadSpeed,
+                    softness: cfg.softness,
+                    targetColor: cfg.targetColor,
+                    intensity: cfg.intensity,
+                    saturationIncrease: cfg.saturationIncrease,
+                    brightnessShift: cfg.brightnessShift,
+                    origin: {
+                        mode: cfg.origin.mode,
+                        x: Number(cfg.origin.x.toFixed(3)),
+                        y: Number(cfg.origin.y.toFixed(3))
+                    }
+                }
+            };
+        }
+
+        async function runStressCheck() {
+            const host = document.createElement('div');
+            host.style.cssText =
+                'position:fixed;left:0;top:0;width:4px;height:4px;overflow:hidden;opacity:0.01;pointer-events:none;';
+            const canvases = [document.createElement('canvas'), document.createElement('canvas')];
+            const controllers = [];
+            let largeSource = document.createElement('canvas');
+            largeSource.width = 4096;
+            largeSource.height = 3072;
+            const largeContext = largeSource.getContext('2d');
+            const largeGradient = largeContext.createLinearGradient(0, 0, largeSource.width, largeSource.height);
+            largeGradient.addColorStop(0, '#111827');
+            largeGradient.addColorStop(0.5, '#8b5e54');
+            largeGradient.addColorStop(1, '#e2c28f');
+            largeContext.fillStyle = largeGradient;
+            largeContext.fillRect(0, 0, largeSource.width, largeSource.height);
+            const stressImageSrc = largeSource.toDataURL('image/jpeg', 0.82);
+            largeSource.width = 1;
+            largeSource.height = 1;
+            largeSource = null;
+            document.body.appendChild(host);
+
+            try {
+                canvases.forEach((stressCanvas, index) => {
+                    stressCanvas.width = 7680;
+                    stressCanvas.height = 4320;
+                    stressCanvas.style.width = '1280px';
+                    stressCanvas.style.height = '720px';
+                    host.appendChild(stressCanvas);
+                    controllers.push(mount(stressCanvas, stressCanvas.getContext('2d'), {
+                        startDelay: 0,
+                        duration: 1,
+                        spreadSpeed: 2.5,
+                        softness: 60,
+                        intensity: 100,
+                        saturationIncrease: 100,
+                        brightnessShift: index === 0 ? 30 : -30,
+                        targetColor: index === 0 ? '#ff2d55' : '#2563eb',
+                        imgSrc: stressImageSrc,
+                        origin: index === 0
+                            ? { mode: 'custom', x: 0.1, y: 0.2 }
+                            : { mode: 'right', x: 0.9, y: 0.8 }
+                    }));
+                });
+
+                await new Promise((resolve, reject) => {
+                    const startedAt = performance.now();
+                    function waitForRaster() {
+                        const ready = controllers.every(control => control.getDiagnostics().maskPixels > 0);
+                        if (ready) {
+                            resolve();
+                            return;
+                        }
+                        if (performance.now() - startedAt > 8000) {
+                            reject(new Error('Color Spread large-image rasterization timed out.'));
+                            return;
+                        }
+                        requestAnimationFrame(waitForRaster);
+                    }
+                    waitForRaster();
+                });
+
+                for (let index = 0; index < 40; index += 1) {
+                    controllers[index % controllers.length].restart({
+                        targetColor: index % 2 ? '#7c3aed' : '#f97316',
+                        intensity: 100,
+                        softness: 60,
+                        origin: { mode: 'custom', x: 0.05 + (index % 10) * 0.1, y: 0.1 + (index % 8) * 0.11 }
+                    });
+                }
+
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                await new Promise(resolve => setTimeout(resolve, 450));
+                const diagnostics = controllers.map(control => control.getDiagnostics());
+                const safe = diagnostics.every(item => (
+                    item.framePixels <= MAX_ANIMATED_PIXELS
+                    && item.maskPixels <= MASK_SURFACE_PIXELS
+                    && item.fullSurfaceCount === FULL_SURFACE_COUNT
+                    && item.totalSurfacePixels <= MAX_TOTAL_SURFACE_PIXELS
+                ));
+                if (!safe) throw new Error('Color Spread exceeded its surface budget.');
+                return { safe, instances: controllers.length, diagnostics };
+            } finally {
+                controllers.forEach(stop => stop());
+                host.remove();
+            }
+        }
+
+        window.MakerAPI = {
+            onImageLoaded: restartPreview,
+            run: restartPreview,
+            getExportJSON,
+            loadEditConfig,
+            runStressCheck
+        };
+        window.run = restartPreview;
+
+        function disposePreview() {
+            previewRequest += 1;
+            if (previewTimer !== null) clearTimeout(previewTimer);
+            previewTimer = null;
+            window.removeEventListener('resize', updateOriginMarker);
+            if (controller) controller();
+            controller = null;
+        }
+
+        window.addEventListener('pagehide', disposePreview, { once: true });
+        numericKeys.forEach(updateValueLabel);
+        restartPreview();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+
+</html>

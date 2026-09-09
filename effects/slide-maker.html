@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <title>Slide/Push Maker (4-Way)</title>
+<meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2 style="margin-top:0">Slide Maker</h2>
+
+        <div class="group">
+            <h4>1. Images</h4>
+            <label>Image 1 (Start)</label>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="img1Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="openMediaLibrary('img', 'img1')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer1"></div>
+
+
+            <label style="margin-top:10px; color:#38bdf8;">Image 2 (End)</label>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+                <input type="file" id="img2Input" accept="image/*" style="width: 150px;">
+                <button class="small" onclick="openMediaLibrary('img', 'img2')" style="margin: 0;">Browse Lib</button>
+            </div>
+            <div id="overrideContainer2"></div>
+
+        </div>
+
+        <div class="group">
+            <button id="runBtn" class="run">▶ Play Slide</button>
+        </div>
+
+        <div class="group">
+            <h4>2. Settings</h4>
+            <label>Start Delay (Seconds) <span id="val-startDelay"></span></label>
+            <input type="range" id="startDelay" min="0" max="5" step="0.5" value="0.0">
+
+            <label>Duration (Seconds) <span id="val-duration"></span></label>
+            <input type="range" id="duration" min="0.5" max="10" step="0.5" value="2.0">
+
+            <label>Direction</label>
+            <select id="direction">
+                <option value="left">Push Left (Next Slide)</option>
+                <option value="right">Push Right (Previous)</option>
+                <option value="up">Push Up (Reveal Below)</option>
+                <option value="down">Push Down (Reveal Above)</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <h4>3. Export</h4>
+            <input type="text" id="filename" value="slide-effect.json">
+            <button id="downloadBtn">Download Effect</button>
+        </div>
+    </div>
+
+    <div class="preview" id="stage">
+        <canvas id="cvs"></canvas>
+    </div>
+
+
+    <script type="module">
+        function effectCodeToDefinition(code, engine) {
+            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+            if (!match) throw new Error("Could not parse generated effect code");
+            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+            const config = (new Function("return (" + objExpr + ");"))();
+            return { engine, config };
+        }
+
+        const ENGINE_PATH = '/effects/slide-engine.js';
+        const ENGINE = 'slide';
+        import { mount } from '/effects/slide-engine.js';
+
+        const canvas = document.getElementById('cvs');
+        const ctx = canvas.getContext('2d');
+        let cleanup = null;
+
+        const cfg = { startDelay: 0.0, duration: 2.0, direction: 'left' };
+
+        window.run = run;
+        function run() {
+            if (cleanup) cleanup();
+            Object.keys(cfg).forEach(k => {
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+            cleanup = mount(canvas, ctx, {
+                ...cfg,
+                imgSrc: img1Data,
+                imgSrc2: img2Data
+            });
+        }
+
+
+
+
+
+        const bind = (id, k) => {
+            document.getElementById(id).addEventListener('input', e => {
+                cfg[k] = parseFloat(e.target.value);
+                const el = document.getElementById('val-' + k);
+                if (el) el.textContent = cfg[k];
+            });
+        };
+
+        bind('startDelay', 'startDelay');
+        bind('duration', 'duration');
+        document.getElementById('direction').addEventListener('change', e => {
+            cfg.direction = e.target.value;
+            run();
+        });
+
+        document.getElementById('runBtn').addEventListener('click', run);
+
+        // Rename the download button if running inside the Hub Iframe
+
+
+
+
+
+        window.MakerAPI = {
+            onImageLoaded: () => { if(typeof run === 'function') run(); },
+            run: () => { if(typeof run === 'function') run(); },
+            getExportJSON: () => {
+                const code = `
+import { mount as runSlide } from '${ENGINE_PATH}';
+export function mount(canvas, ctx, config) {
+    return runSlide(canvas, ctx, {
+        ...config,
+        imgSrc: 'img/${window.name1}',
+        imgSrc2: 'img/${window.name2}',
+        startDelay: ${cfg.startDelay},
+        duration: ${cfg.duration},
+        direction: '${cfg.direction}'
+    });
+}`;
+                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
+                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
+                const configObj = (new Function("return (" + objExpr + ");"))();
+                return { engine: ENGINE, config: configObj };
+            }
+        };
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

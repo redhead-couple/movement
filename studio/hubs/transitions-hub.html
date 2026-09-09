@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Transitions Studio</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --sidebar: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --hover: #334155;
+            --active: #2563eb;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border-bottom: 1px solid var(--border);
+            color: #fff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-list {
+            padding: 10px;
+            flex: 1;
+        }
+
+        .category-group {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            margin-bottom: 4px;
+        }
+
+        .transition-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-transform: capitalize;
+        }
+
+        .transition-btn:hover {
+            background: var(--hover);
+            color: #fff;
+        }
+
+        .transition-btn.active {
+            background: var(--active);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .main-stage {
+            position: relative;
+            background: #000;
+            width: 100%;
+            height: 100%;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .welcome-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            color: var(--muted);
+            text-align: center;
+            padding: 24px;
+        }
+
+        .welcome-screen h1 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .hub-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #0f172a;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .hub-header button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: none;
+        }
+
+        .hub-header button:hover {
+            background: #34d399;
+        }
+
+        .hub-header .registry-button {
+            display: inline-flex;
+            margin-right: 12px;
+            background: #334155;
+        }
+
+        .hub-header .registry-button:hover {
+            background: #475569;
+        }
+
+        .hub-header .prompt-button {
+            display: inline-flex;
+            margin-right: 12px;
+            background: #7c3aed;
+        }
+
+        .hub-header .prompt-button:hover {
+            background: #8b5cf6;
+        }
+
+        .stage-content {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <span>TRANSITIONS HUB</span>
+            <small>v1.1</small>
+        </div>
+        <div class="nav-list" id="navList"></div>
+    </div>
+
+    <div class="main-stage">
+        <div class="hub-header" id="hubHeader">
+            <button class="prompt-button" id="createTransitionPromptBtn" type="button">Create or improve transition</button>
+            <button class="registry-button" id="manageRegistryBtn" type="button">Manage transitions</button>
+            <button id="globalApplyBtn">Apply Transition to Slide</button>
+        </div>
+
+        <div class="stage-content">
+            <div class="welcome-screen" id="welcome">
+                <h1>Select a Transition</h1>
+                <p>Choose a transition family from the sidebar to begin.</p>
+            </div>
+            <iframe id="toolFrame" name="toolFrame"></iframe>
+        </div>
+    </div>
+
+    <script src="/studio/maker/maker-scroll-guard.js"></script>
+    <script>
+        // Loaded from JSON Manifest via network.
+        let transitionsData = [];
+
+        const navList = document.getElementById('navList');
+        const frame = document.getElementById('toolFrame');
+        const welcome = document.getElementById('welcome');
+
+        frame.addEventListener('load', () => {
+            window.MovementMakerScrollGuard.install(frame);
+        });
+
+        function cleanName(filename) {
+            return filename
+                .split('/')
+                .pop()
+                .replace('.html', '')
+                .replace('-maker', '')
+                .replace(/-/g, ' ');
+        }
+
+        function engineFromFile(filename) {
+            return cleanName(filename).replace(/\s+/g, '-').toLowerCase();
+        }
+
+        function renderSidebar() {
+            navList.replaceChildren();
+            transitionsData.forEach(group => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'category-group';
+
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = group.Category;
+                groupDiv.appendChild(title);
+
+                const files = group.engines ? group.engines.split(',') : [];
+                files.forEach(rawFile => {
+                    const engine = rawFile.trim();
+                    if (!engine) return;
+
+                    const file = '/transitions/' + engine + '-maker.html';
+
+                    const btn = document.createElement('button');
+                    btn.className = 'transition-btn';
+                    btn.textContent = cleanName(engine);
+                    btn.dataset.file = file;
+                    btn.dataset.engine = engine;
+                    btn.addEventListener('click', () => loadTransition(file, btn));
+                    groupDiv.appendChild(btn);
+                });
+
+                navList.appendChild(groupDiv);
+            });
+        }
+
+        function loadTransition(url, activeBtn) {
+            document.querySelectorAll('.transition-btn').forEach(button => button.classList.remove('active'));
+            activeBtn.classList.add('active');
+            welcome.style.display = 'none';
+            frame.style.display = 'block';
+            document.getElementById('globalApplyBtn').style.display = 'block';
+            const makerUrl = new URL(url, window.location.href);
+            const params = new URLSearchParams(window.location.search);
+            params.forEach((value, key) => makerUrl.searchParams.set(key, value));
+            makerUrl.searchParams.set('v', String(Date.now()));
+            frame.src = makerUrl.toString();
+        }
+
+        function checkEditMode() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') !== 'edit') return;
+
+            const storedJson = sessionStorage.getItem('transitionEditData');
+            if (!storedJson) return;
+
+            try {
+                const transitionData = JSON.parse(storedJson);
+                if (!transitionData.engine) return;
+
+                let targetBtn = null;
+                document.querySelectorAll('.transition-btn').forEach(btn => {
+                    if (btn.dataset.engine === transitionData.engine) targetBtn = btn;
+                });
+
+                if (targetBtn) {
+                    loadTransition(targetBtn.dataset.file, targetBtn);
+                }
+            } catch (error) {
+                console.error('Failed to parse transition edit JSON', error);
+            }
+        }
+
+        function loadTransitionsRegistry() {
+            return fetch(`/transitions/registry.json?v=${Date.now()}`, { cache: 'no-store' })
+                .then(res => {
+                    if (!res.ok) throw new Error("Registry fetch failed: " + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    transitionsData = data;
+                    renderSidebar();
+                    checkEditMode();
+                })
+                .catch(err => {
+                    console.error("Hub Error:", err);
+                    navList.innerHTML = '<div style="padding: 20px; color: #ef4444; font-size: 0.9rem;">Failed to load transitions registry.</div>';
+                });
+        }
+
+        loadTransitionsRegistry();
+
+        document.getElementById('manageRegistryBtn').addEventListener('click', () => {
+            window.parent.postMessage({
+                type: 'movement-open-registry-editor',
+                registryType: 'transitions'
+            }, '*');
+        });
+
+        document.getElementById('createTransitionPromptBtn').addEventListener('click', () => {
+            window.parent.postMessage({
+                type: 'movement-open-transition-prompt-builder'
+            }, '*');
+        });
+
+        window.addEventListener('message', event => {
+            if (
+                event.data
+                && event.data.type === 'movement-registry-changed'
+                && event.data.registryType === 'transitions'
+            ) {
+                loadTransitionsRegistry();
+            }
+        });
+
+        window.addEventListener('message', event => {
+            if (!event.data || !event.data.engine || !event.data.config) return;
+
+            const transition = {
+                version: 1,
+                enabled: true,
+                name: event.data.name || `${cleanName(event.data.engine)} Transition`,
+                engine: event.data.engine,
+                maker: event.data.maker || '',
+                config: event.data.config
+            };
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'transition-config',
+                    transition
+                }, '*');
+            }
+        });
+
+        document.getElementById('globalApplyBtn').addEventListener('click', () => {
+            if (frame.contentWindow) {
+                frame.contentWindow.postMessage('trigger_apply', '*');
+            }
+        });
+
+        window.hasActiveTransition = function () {
+            return frame.src && frame.src !== '' && frame.src !== window.location.href;
+        };
+    </script>
+</body>
+
+</html>
