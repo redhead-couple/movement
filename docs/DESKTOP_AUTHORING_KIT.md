@@ -8,12 +8,12 @@ version.
 Movement is the project/medium, Early Formation is the website and umbrella
 brand, and Redhead Couple maintains and publishes the application.
 
-Current source targets **Movement Public Alpha 0.1**, application version
-`0.1.0-alpha.1` and planned tag `v0.1.0-alpha.1`. The kit inherits its version
-from the root `package.json`. The [planned repository](https://github.com/redhead-couple/movement)
-and GitHub release are not yet public. Check the
-[Windows download page](https://redhead-couple.org/download.php) for the version
-actually available; an earlier ZIP is not the current source candidate.
+**Movement Public Alpha 0.1**, application version `0.1.0-alpha.1`, is available as
+[prerelease `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+The kit inherits its version from the root `package.json` in the
+[public repository](https://github.com/redhead-couple/movement). Use the
+[Windows download page](https://redhead-couple.org/download.php) for the
+recommended Authoring Kit ZIP and its SHA-256 checksum.
 
 ## Start the application
 

@@ -34,13 +34,14 @@ The desktop product name and version come from `package.json`:
 - product name: **Movement Timeline Studio**
 - current development version: **0.1.0-alpha.1**
 - human-facing release label: **Movement Public Alpha 0.1**
-- planned Git tag: `v0.1.0-alpha.1`
+- published Git tag: `v0.1.0-alpha.1`
 - publisher: **Redhead Couple**
 - Windows application ID: `org.movement.timelinestudio`
 
-The [planned public repository](https://github.com/redhead-couple/movement) and
-GitHub release are not yet published. Package/internal names, application IDs,
-protocols, and existing storage paths are retained for compatibility.
+The [public repository](https://github.com/redhead-couple/movement) and
+[Public Alpha prerelease](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1)
+are available on GitHub. Package/internal names, application IDs, protocols,
+and existing storage paths are retained for compatibility.
 
 Electron exposes that version through the runtime context and the Library shows
 it in the top navigation. The main window, editor, player, taskbar grouping, and
@@ -142,8 +143,10 @@ The current source would produce
 its application version from `package.json`; the distribution manifest does
 not define a separate version. An existing `0.1.0` artifact is an earlier
 build, not the `0.1.0-alpha.1` candidate. Updating metadata does not rebuild or
-publish a ZIP. Deploy matching package metadata and the intended ZIP together;
-the download page offers a file only when that exact version is present.
+publish a ZIP. The website download page links directly to the published GitHub
+release assets, independently of local build output. GitHub's published filename
+is `Movement.Timeline.Studio-Authoring-Kit-0.1.0-alpha.1-x64.zip`, with a matching
+`.zip.sha256` asset.
 
 Run the packaged library and writable-registry smoke checks with:
 

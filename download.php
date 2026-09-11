@@ -4,19 +4,14 @@ declare(strict_types=1);
 require_once __DIR__ . '/server/core/web-session.php';
 enforceProductionHttps();
 
-$package = json_decode((string) @file_get_contents(__DIR__ . '/package.json'), true);
-$version = is_array($package) && is_string($package['version'] ?? null)
-    ? $package['version']
-    : '0.1.0-alpha.1';
-
-$releaseName = "Movement Timeline Studio-Authoring-Kit-{$version}-x64.zip";
-$releasePath = __DIR__ . '/dist/desktop-authoring-kit/' . $releaseName;
-$releaseAvailable = is_file($releasePath) && is_readable($releasePath);
-$releaseSize = $releaseAvailable ? filesize($releasePath) : false;
-$releaseSizeLabel = $releaseSize !== false
-    ? number_format($releaseSize / 1048576, 1) . ' MB'
-    : 'Size unavailable';
-$releaseUrl = '/dist/desktop-authoring-kit/' . rawurlencode($releaseName);
+// Keep the website download pinned to the published release.
+$version = '0.1.0-alpha.1';
+$repositoryUrl = 'https://github.com/redhead-couple/movement';
+$releaseTag = 'v' . $version;
+$releaseName = "Movement.Timeline.Studio-Authoring-Kit-{$version}-x64.zip";
+$releaseUrl = $repositoryUrl . '/releases/download/' . $releaseTag . '/' . rawurlencode($releaseName);
+$checksumUrl = $releaseUrl . '.sha256';
+$releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -137,6 +132,7 @@ $releaseUrl = '/dist/desktop-authoring-kit/' . rawurlencode($releaseName);
         .download-button {
             width: 100%;
             min-height: 52px;
+            text-align: center;
         }
 
         .download-button::before {
@@ -145,15 +141,16 @@ $releaseUrl = '/dist/desktop-authoring-kit/' . rawurlencode($releaseName);
             line-height: 1;
         }
 
-        .release-unavailable {
-            margin: 0;
-            padding: 14px 16px;
-            border: 1px solid rgba(185, 99, 79, 0.28);
-            border-radius: var(--app-radius-md);
-            color: var(--app-text-muted);
-            background: rgba(185, 99, 79, 0.08);
-            font-size: 14px;
-            line-height: 1.55;
+        .release-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        .release-links a {
+            text-decoration: underline;
         }
 
         .release-note {
@@ -351,26 +348,24 @@ $releaseUrl = '/dist/desktop-authoring-kit/' . rawurlencode($releaseName);
                         <span class="windows-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
                         <div>
                             <p class="eyebrow">Movement Public Alpha 0.1</p>
-                            <h2 id="release-title">Windows 10 / 11</h2>
+                            <h2 id="release-title">Movement Timeline Studio</h2>
                         </div>
                     </div>
                     <div class="release-meta" aria-label="Release details">
                         <span>Version <?= htmlspecialchars($version, ENT_QUOTES, 'UTF-8') ?></span>
-                        <span>64-bit</span>
-                        <span><?= htmlspecialchars($releaseSizeLabel, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span>Windows 10 / 11 x64</span>
                     </div>
 
-                    <?php if ($releaseAvailable): ?>
-                        <a class="button-primary download-button" href="<?= htmlspecialchars($releaseUrl, ENT_QUOTES, 'UTF-8') ?>" download>
-                            Download for Windows
-                        </a>
-                    <?php else: ?>
-                        <p class="release-unavailable" role="status">
-                            The Windows build for this version is being prepared. Please check back soon.
-                        </p>
-                    <?php endif; ?>
-
-                    <p class="release-note">Unsigned Alpha build. Windows may show a SmartScreen or unknown-publisher warning. No installer; extract the complete ZIP before opening the application.</p>
+                    <a class="button-primary download-button" href="<?= htmlspecialchars($releaseUrl, ENT_QUOTES, 'UTF-8') ?>">
+                        Download the Windows x64 Authoring Kit
+                    </a>
+                    <p class="release-note">The recommended Windows download. Extract the complete ZIP, then run <strong>Movement Timeline Studio.exe</strong>.</p>
+                    <div class="release-links">
+                        <a href="<?= htmlspecialchars($checksumUrl, ENT_QUOTES, 'UTF-8') ?>">SHA-256 checksum</a>
+                        <a href="<?= htmlspecialchars($releasePageUrl, ENT_QUOTES, 'UTF-8') ?>">Release notes</a>
+                    </div>
+                    <p class="release-note">The SHA-256 file is provided to verify your download.</p>
+                    <p class="release-note">This Windows Alpha build is currently unsigned. Windows may show an Unknown Publisher or SmartScreen warning.</p>
                 </aside>
             </div>
         </section>
@@ -437,6 +432,7 @@ $releaseUrl = '/dist/desktop-authoring-kit/' . rawurlencode($releaseName);
             <div>&copy; <?= date('Y') ?> Redhead Couple · Early Formation</div>
             <div class="download-footer__links">
                 <a href="/concept/">Concept</a>
+                <a href="<?= htmlspecialchars($repositoryUrl, ENT_QUOTES, 'UTF-8') ?>">GitHub repository</a>
                 <a href="/privacy.php">Privacy</a>
                 <a href="/terms.php">Terms</a>
                 <a href="/contact.php">Contact</a>

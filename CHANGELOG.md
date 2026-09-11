@@ -5,12 +5,12 @@ Movement is maintained and published by Redhead Couple. This file follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html) with numbered alpha
 prereleases.
 
-## 0.1.0-alpha.1 — Unreleased
+## 0.1.0-alpha.1 — Public prerelease
 
-**Movement Public Alpha 0.1** is in preparation. Its planned Git tag is
-`v0.1.0-alpha.1`. The canonical destination is
-[redhead-couple/movement](https://github.com/redhead-couple/movement);
-the public repository, tag, and GitHub release have not yet been created.
+**Movement Public Alpha 0.1** is published as
+[GitHub prerelease `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+The public repository is
+[redhead-couple/movement](https://github.com/redhead-couple/movement).
 
 ### Changed
 

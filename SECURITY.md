@@ -6,38 +6,36 @@ Thank you for helping improve the security of Movement, maintained by Redhead Co
 
 | Version | Supported |
 | --- | --- |
-| Current development source / latest alpha once published | ✅ Yes |
+| Current development source / latest published alpha | ✅ Yes |
 | Older releases or tags | ❌ No |
 
-Security updates target current development source and the latest alpha once
-published. Maintainers may ask reporters to confirm an issue against that
+Security updates target current development source and the latest published
+alpha. Maintainers may ask reporters to confirm an issue against that
 version before investigating further.
 
-The application version is recorded in `package.json`. Current source targets
-`0.1.0-alpha.1` (Movement Public Alpha 0.1), with planned tag `v0.1.0-alpha.1`.
-The public repository and GitHub release have not yet been published. See
-[CHANGELOG.md](CHANGELOG.md) for the current candidate's release notes.
+The application version is recorded in `package.json`. Movement Public Alpha 0.1,
+version `0.1.0-alpha.1`, is available as
+[prerelease `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+See [CHANGELOG.md](CHANGELOG.md) for the release notes.
 
 ## Reporting a Vulnerability
 
-Report suspected vulnerabilities privately by email to:
+Report suspected vulnerabilities through
+[GitHub Private Vulnerability Reporting](https://github.com/redhead-couple/movement/security/advisories/new),
+which is enabled for the public repository and is the preferred reporting route.
+
+For private reporting by email or if GitHub reporting is unavailable, contact:
 
 **[contact@redhead-couple.org](mailto:contact@redhead-couple.org)**
 
-This is the current working security-reporting channel. Redhead Couple is
+This mailbox remains the private fallback. Redhead Couple is
 currently a single-maintainer project; the maintainer actively monitors this
 mailbox and reviews security reports. There is no separate security team.
 
 Do not disclose suspected vulnerabilities in public GitHub issues, public
 discussions, public contact threads, public pull requests, social media, or
-other public channels. Use the private email channel above.
-
-The [planned GitHub repository](https://github.com/redhead-couple/movement)
-does not exist publicly yet, and GitHub Private Vulnerability Reporting is
-not currently enabled. Once the repository exists and that feature is enabled,
-GitHub's private reporting mechanism will become the preferred route. This
-email address will remain the private fallback. Until then, report by email;
-do not wait for GitHub reporting to become available.
+other public channels. Use GitHub's private reporting form or the private
+email channel above.
 
 Please include, when available:
 
@@ -199,8 +197,8 @@ The configuration template (`server/core/app-config.example.php`) contains examp
 
 Security-related releases and notices will be published at:
 
-- **Planned repository:** [github.com/redhead-couple/movement](https://github.com/redhead-couple/movement) (not yet public)
-- **Advisories:** GitHub Security Advisories (when enabled) or via release notes in [CHANGELOG.md](CHANGELOG.md)
+- **Repository:** [github.com/redhead-couple/movement](https://github.com/redhead-couple/movement)
+- **Advisories:** [GitHub Security Advisories](https://github.com/redhead-couple/movement/security/advisories) or release notes in [CHANGELOG.md](CHANGELOG.md)
 
 Security fixes may be described at a high level until users have had a reasonable opportunity to update. Older releases are not expected to receive backported fixes during the alpha stage.
 

@@ -504,7 +504,7 @@ enforceProductionHttps();
             <div class="small footer-links">
                 <a href="/concept/">Concept</a>
                 <a href="/download.php">Download</a>
-                <a href="https://github.com/redhead-couple/movement">Planned repository (not yet public)</a>
+                <a href="https://github.com/redhead-couple/movement">GitHub repository</a>
                 <a href="/contact.php">Contact</a>
             </div>
         </div>

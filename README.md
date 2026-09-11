@@ -37,16 +37,14 @@ installation, or an internet connection. Projects live in the kit's
 unknown-publisher warning. See the [Authoring Kit guide](docs/DESKTOP_AUTHORING_KIT.md)
 for source editing and the distribution boundary.
 
-The current source targets **`0.1.0-alpha.1`**, with planned Git tag
-**`v0.1.0-alpha.1`**. The
-[planned public repository](https://github.com/redhead-couple/movement) and its
-GitHub release have not yet been published. The website may offer an earlier
-build; its displayed version identifies that download.
+**Movement Public Alpha 0.1**, version **`0.1.0-alpha.1`**, is available as
+[release `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+The [public repository](https://github.com/redhead-couple/movement) contains
+the source. Use the Windows download page above for the recommended Authoring Kit.
 
 ## Develop from source with Electron
 
-Use a full source checkout and Node.js **22.12 or newer**. Once the planned
-public repository is available:
+Use a full source checkout and Node.js **22.12 or newer**:
 
 ```powershell
 git clone https://github.com/redhead-couple/movement.git
@@ -112,8 +110,8 @@ establish production security assurance; self-hosters must review their
 deployment configuration.
 
 Read the [Security Policy](SECURITY.md), [Code of Conduct](CODE_OF_CONDUCT.md),
-and [Changelog](CHANGELOG.md). The planned repository will provide the public
-contribution destination once it is available.
+and [Changelog](CHANGELOG.md). Contributions are welcome through the
+[public repository](https://github.com/redhead-couple/movement).
 
 ## Names and licenses
 

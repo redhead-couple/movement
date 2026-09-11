@@ -23,8 +23,8 @@ This project explores a new expressive medium built from images, narration, soun
 ## Quick Start for Contributors
 
 The canonical destination is [redhead-couple/movement](https://github.com/redhead-couple/movement).
-The public repository is not yet available. Once it is published, fork it and
-use the following workflow. Existing source checkouts can start at step 2.
+Fork the public repository and use the following workflow. Existing source
+checkouts can start at step 2.
 
 ```bash
 # 1. Fork the repository on GitHub, then clone your fork

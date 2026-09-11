@@ -7,12 +7,12 @@ Studio. Extract the complete ZIP before using it, then start
 Movement is the project/medium; Early Formation is the website and umbrella
 brand; Redhead Couple is the maintainer and publisher.
 
-The current source candidate is Movement Public Alpha 0.1, version
-`0.1.0-alpha.1`, with planned tag `v0.1.0-alpha.1`. The actual kit version is in
-`resources/app/package.json`. The planned repository is
-https://github.com/redhead-couple/movement; it and its GitHub release have not
-yet been published. This Windows Alpha build is unsigned, so Windows may show
-a SmartScreen or unknown-publisher warning.
+Movement Public Alpha 0.1, version `0.1.0-alpha.1`, is published as
+[prerelease `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+The actual kit version is in `resources/app/package.json`. The public repository
+is [redhead-couple/movement](https://github.com/redhead-couple/movement).
+This Windows Alpha build is unsigned, so Windows may show a SmartScreen or
+unknown-publisher warning.
 
 The editable application source is in:
 
