@@ -1,4 +1,10 @@
-# Movement
+# Movement — Shape how your meaning unfolds
+
+Bring images, speech, sound, and movement together, giving each moment its place and purpose.
+
+[![Movement control panel with illuminated sliders connected to a photograph, a microphone stage, and flowing fabric.](docs/assets/movement-control-panel-light.png)](https://redhead-couple.org/player.php?username=molkho52&project=what-this-project-is)
+
+[▶ Watch “A New Language of Communication”](https://redhead-couple.org/player.php?username=molkho52&project=what-this-project-is)
 
 Movement is an open expressive medium for combining images, narration, sound,
 silence, text, timing, effects, and layered movement. Creators arrange these
