@@ -22,6 +22,16 @@ Explore the [public feed](https://redhead-couple.org/feed.php) or start with
 The [concept series](https://redhead-couple.org/concept/) introduces the medium
 and how people can develop and share new forms of expression.
 
+## Start creating with Movement
+
+Begin with an example, make it your own, and see how your choices shape the experience. This guided slideshow introduces the workspace, layers, effects, transitions, and exporting your work.
+
+<a href="https://redhead-couple.org/player.php?username=molkho52&amp;project=getting-to-know-the-system">
+  <img src="docs/assets/getting-to-know-the-system-cover.webp" alt="Illustrated tutorial cover for Getting to Know the System, showing a desktop computer in a warmly lit creative workspace." width="480">
+</a>
+
+[▶ Watch “Getting to Know the System”](https://redhead-couple.org/player.php?username=molkho52&project=getting-to-know-the-system)
+
 ## Start creating on Windows
 
 The **Movement Timeline Studio Authoring Kit** is the primary way to try
