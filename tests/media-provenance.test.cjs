@@ -19,14 +19,14 @@ test('every current public media file has exactly one conservative provenance ma
   const result = verifyMediaProvenance(repositoryRoot);
 
   assert.equal(result.profile, 'source');
-  assert.equal(result.fileCount, 387);
-  assert.equal(result.mappedCount, 387);
-  assert.equal(result.provenanceRecordCount, 8);
-  assert.equal(result.totalBytes, 88454525);
-  assert.equal(result.uniqueSha256, 356);
+  assert.equal(result.fileCount, 389);
+  assert.equal(result.mappedCount, 389);
+  assert.equal(result.provenanceRecordCount, 9);
+  assert.equal(result.totalBytes, 90413173);
+  assert.equal(result.uniqueSha256, 357);
   assert.equal(
     result.inventorySha256,
-    '6a5c9fe6687cf77daaaa38d487ae4842be1b3bd985a0b8cedad0b04a57228eb3'
+    '01d2c7a46b04be1ed068d4749db487b5d58b3b0a755914c639dc349be4d5d6b9'
   );
 });
 
@@ -35,7 +35,7 @@ test('the exact inventory prevents new or missing public media from passing sile
   const publicMedia = listPublicMediaFiles(repositoryRoot, manifest);
 
   assert.deepEqual([...assetPaths].sort(), publicMedia);
-  assert.equal(new Set(manifest.assets.map(asset => asset.path)).size, 387);
+  assert.equal(new Set(manifest.assets.map(asset => asset.path)).size, 389);
 });
 
 test('all provenance records keep media separate from the repository MIT license', () => {

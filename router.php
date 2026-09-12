@@ -8,6 +8,11 @@ enforceProductionHttps();
 
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
+if ($path === '/concept/' || $path === '/concept/index.html') {
+    require __DIR__ . '/concept/index.php';
+    return true;
+}
+
 // User projects, media, backups, and runtime state live below private-data.
 // Deny the whole tree here because PHP's built-in server ignores .htaccess.
 $accessPath = rawurldecode((string) $path);

@@ -54,7 +54,7 @@ test('M06 actual PHP not-found routes', async t => {
   });
   for (const file of [
     '404.php', 'not-found.php', 'router.php', 'player.php',
-    'server/core/web-session.php', 'server/core/project-paths.php', 'server/core/response.php',
+    'server/core/web-session.php', 'server/core/config-loader.php', 'server/core/project-paths.php', 'server/core/response.php',
     'templates/player/player-page-template.php', 'studio/player/player-runtime.js', 'assets/app.css',
     'examples/what-this-project-is/flow.json',
   ]) {

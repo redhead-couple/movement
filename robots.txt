@@ -1,0 +1,3 @@
+# Allow crawlers to read page-level noindex directives. This is not access control.
+User-agent: *
+Disallow:

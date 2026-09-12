@@ -9,11 +9,33 @@
  * only when APP_TRUST_PROXY/MOVEMENT_TRUST_PROXY is explicitly enabled.
  */
 
-$webSessionConfigPath = __DIR__ . '/app-config.php';
-if (is_file($webSessionConfigPath)) {
-    require_once $webSessionConfigPath;
+// Public controllers opt in only after their normal access/publication checks.
+// Recheck status when headers are sent so errors cannot inherit that permission.
+header_register_callback(static function (): void {
+    if (!isWebPageIndexable()) {
+        header('X-Robots-Tag: noindex, nofollow');
+    }
+});
+
+require_once __DIR__ . '/config-loader.php';
+
+function setWebPageDiscovery(bool $publicDiscovery): void
+{
+    $GLOBALS['movementPublicDiscovery'] = $publicDiscovery;
 }
-unset($webSessionConfigPath);
+
+function isWebPageIndexable(): bool
+{
+    return !empty($GLOBALS['movementPublicDiscovery'])
+        && isProductionWebEnvironment()
+        && (http_response_code() ?: 200) === 200
+        && in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true);
+}
+
+function webRobotsMeta(): string
+{
+    return isWebPageIndexable() ? '' : '<meta name="robots" content="noindex, nofollow">';
+}
 
 function webConfigValue(string $globalName, string $environmentName, $default)
 {

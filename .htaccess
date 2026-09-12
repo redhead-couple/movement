@@ -1,10 +1,23 @@
-<IfModule mod_rewrite.c>
+# Required for both routing and private-storage protection. Fail closed if the
+# host does not support these rules, rather than serving private files directly.
+Options -Indexes -MultiViews
     RewriteEngine On
+    # Keep the concept page behind the environment policy, including old URLs.
+    RewriteRule ^concept/(?:index\.html)?$ concept/index.php [L]
     RewriteCond %{HTTP:Authorization} ^(.+)$
     RewriteRule ^admin-messages\.php$ - [E=HTTP_AUTHORIZATION:%1]
     RewriteRule ^private-data(?:/|$) - [F,L,NC]
     RewriteRule ^server(?:/|$) - [F,L]
     RewriteRule ^examples/[^/]+/(?:backups(?:/|$)|\.movement-media-trash(?:/|$)|.*\.save\.lock$) - [F,L,NC]
+    RewriteRule ^edit/([a-zA-Z0-9_-]+)/?$ json-maker.php?project=$1 [B,QSA,L]
     RewriteRule ^slidedeck/([^/]+)/([^/]+)/?$ player.php?username=$1&project=$2 [B,QSA,L]
     RewriteRule ^slidedeck/(.*)$ media.php?p=$1 [QSA,L]
+
+# Crawler directives only; the access-denial rules above stay intact.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(?:html|htm)$">
+        Header always set X-Robots-Tag "noindex, nofollow"
+    </FilesMatch>
+    Header always set X-Robots-Tag "noindex, nofollow" "expr=%{REQUEST_STATUS} >= 400"
+    Header always set X-Robots-Tag "noindex, nofollow" "expr=%{REQUEST_URI} =~ m#^/(?:tmp|temp|preview|previews)(?:/|$)#"
 </IfModule>

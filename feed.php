@@ -67,6 +67,7 @@ function feedPageUrl(int $page, string $user = ''): string
 }
 $projectCount = count($items);
 $isLoggedIn = isset($_SESSION['user_id'], $_SESSION['username']);
+setWebPageDiscovery(true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,7 +76,7 @@ $isLoggedIn = isset($_SESSION['user_id'], $_SESSION['username']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Slideshow Feed</title>
-    <meta name="robots" content="noindex, nofollow">
+    <?= webRobotsMeta() ?>
 
     <link rel="stylesheet" href="/assets/app.css">
 

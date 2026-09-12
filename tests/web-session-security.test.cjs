@@ -195,7 +195,7 @@ test('all PHP session starts and session destruction use the shared boundary', (
   while (pending.length > 0) {
     const directory = pending.pop();
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-      if (['.git', 'private-data', 'node_modules'].includes(entry.name)) continue;
+      if (['.git', 'private-data', 'node_modules', 'dist', 'tmp'].includes(entry.name)) continue;
       const fullPath = path.join(directory, entry.name);
       if (entry.isDirectory()) pending.push(fullPath);
       if (entry.isFile() && entry.name.endsWith('.php')) phpFiles.push(fullPath);

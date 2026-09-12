@@ -56,6 +56,19 @@ test('Desktop Authoring Kit uses an explicit source allowlist', () => {
   }
 });
 
+test('packaged README illustrations are included and new website-only tests stay out', () => {
+  const readme = fs.readFileSync(path.join(repositoryRoot, 'README.md'), 'utf8');
+  const images = [...new Set(readme.match(/docs\/assets\/[^\s)"<>]+/g))];
+  assert.ok(images.length > 0);
+  for (const image of images) {
+    assert.ok(kitManifest.files.includes(image), `README image missing from package: ${image}`);
+    assert.ok(kitManifest.requiredPaths.includes(image), `README image missing from verification: ${image}`);
+  }
+  for (const filename of ['config-loader.test.cjs', 'indexing.test.cjs', 'web-deployment.test.cjs']) {
+    assert.ok(kitManifest.files.includes(`!tests/${filename}`));
+  }
+});
+
 test('Desktop Authoring Kit is source-visible and does not change installer packaging', () => {
   const config = createAuthoringKitConfig(packageManifest, validateManifest(kitManifest));
   const desktopMain = fs.readFileSync(path.join(repositoryRoot, 'desktop', 'main.cjs'), 'utf8');

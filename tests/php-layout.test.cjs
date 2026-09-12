@@ -8,6 +8,7 @@ const coreRoot = path.join(applicationRoot, 'server', 'core');
 
 const internalPhpFiles = [
   'app-config.example.php',
+  'config-loader.php',
   'app-init.php',
   'auth-check.php',
   'current-user-record.php',

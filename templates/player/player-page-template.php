@@ -384,6 +384,8 @@ function renderPlayerPage(array $options): string
     $title = $options['title'] ?? 'Timeline Player v2';
     $headAssetsHtml = $options['headAssetsHtml'] ?? '';
     $bootstrapScript = $options['bootstrapScript'] ?? '';
+    // Offline exports and callers without an explicit policy remain excluded.
+    $robotsMetaHtml = $options['robotsMetaHtml'] ?? '<meta name="robots" content="noindex, nofollow">';
     $runtimePath = dirname(__DIR__, 2) . '/studio/player/player-runtime.js';
     $runtimeSource = @file_get_contents($runtimePath);
     if (!is_string($runtimeSource)) {
@@ -399,7 +401,7 @@ function renderPlayerPage(array $options): string
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></title>
-        <meta name="robots" content="noindex, nofollow">
+        <?= $robotsMetaHtml ?>
         <?= $headAssetsHtml ?>
         <style>
             <?= playerSharedShellCss() ?>
