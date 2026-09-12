@@ -118,6 +118,14 @@ The shared editor and player live in `studio/`; `desktop/` hosts the Electron
 application, and root PHP pages plus `server/` implement the web platform.
 Bundled examples live in `examples/`.
 
+## How the language could grow
+
+If Movement develops an active community, one person’s expressive discoveries could become tools that others use, adapt, and improve. This slideshow explores a possible future process for sharing and reviewing those contributions.
+
+The review process and experimental library described are proposals, not currently available services.
+
+[▶ Watch “How New Effects Become Part of the Medium”](https://redhead-couple.org/player.php?example=sharing)
+
 ## Alpha security and community
 
 Movement is experimental Alpha software. The web application includes prepared
