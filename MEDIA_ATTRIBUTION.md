@@ -10,13 +10,14 @@ Those assets are documented separately in
 [`distribution/media-provenance.json`](distribution/media-provenance.json).
 
 The machine-readable manifest is the canonical inventory. Its selectors cover
-every media file in the current Public Alpha candidate, and the verification
+every media file in the current source tree, and the verification
 tool rejects missing, extra, overlapping, private, or incorrectly MIT-labelled
 records.
 
 ## Current scope
 
-The verified Public Alpha media scope contains 387 files:
+The current source inventory contains 389 files. The launched Alpha artifact
+retains its original inventory; this source update adds two README illustrations.
 
 | Area | Files | Provenance |
 | --- | ---: | --- |
@@ -25,9 +26,28 @@ The verified Public Alpha media scope contains 387 files:
 | `desktop/assets/` | 3 application-icon files | One icon family created using OpenAI Codex under Ezra's direction; the PNG and ICO are derived from the source image. |
 | `img/bg_wanaka.webp` | 1 photograph | Original photograph taken by Ezra in Wanaka. |
 | `favicon.ico` | 1 favicon | Original project asset created personally by Ezra. |
+| `docs/assets/` | 2 README illustrations | Maintainer-approved documentation images; details below. |
 
 There are no separately bundled music, sound-effect, or video files in this
 scope. Files named `video1.webp` and `video2.webp` are still images.
+
+## README illustrations
+
+`docs/assets/movement-control-panel-light.png` is the maintainer-approved lighting
+edit of a supplied control-panel scene, made with OpenAI image_gen. The original
+source artwork's creator is not independently recorded. The approved edit makes
+the illustration clearer on the README's light background.
+
+`docs/assets/getting-to-know-the-system-cover.webp` is byte-identical to
+`examples/getting-to-know-the-system/img/computer7.webp` and retains that image's
+existing provenance: created by Ezra with ChatGPT or Gemini, with the exact tool
+not individually recorded. It depicts an illustrated desktop workspace.
+
+The maintainer approved both images for the public Movement README. They are
+included with that documentation in future Authoring Kit packages. This does not
+grant independent reuse, modification, relicensing, or standalone redistribution,
+and does not place the images under MIT. No additional credit requirement was
+provided. Neither illustration depicts a person or contains voice audio.
 
 ## Example images
 

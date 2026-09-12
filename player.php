@@ -56,6 +56,12 @@ if ($example !== '') {
     $mediaBase = $paths['mediaWebDir'];
 }
 
+// Publication is the existing feed/discovery rule. Owner access to a draft
+// grants playback only, never indexing. Invalid/unsupported data stays excluded.
+setWebPageDiscovery(is_array($data) && !empty($data['isPublished'])
+    && (int) ($data['schemaVersion'] ?? 0) === 2
+    && isset($data['slides']) && is_array($data['slides']));
+
 $bootstrapConfig = [
     'projectBase' => $projectWebDir,
     'flowUrl' => $mediaBase . 'flow.json',
@@ -77,6 +83,7 @@ $headAssetsHtml = <<<'HTML'
 HTML;
 
 echo renderPlayerPage([
+    'robotsMetaHtml' => webRobotsMeta(),
     'title' => $playerTitle,
     'headAssetsHtml' => $headAssetsHtml,
     'bootstrapScript' => 'window.PLAYER_BOOTSTRAP = ' . json_encode($bootstrapConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';',

@@ -6,6 +6,8 @@
   "files": [
     "package.json",
     "README.md",
+    "docs/assets/movement-control-panel-light.png",
+    "docs/assets/getting-to-know-the-system-cover.webp",
     "CONTRIBUTING.md",
     "LICENSE",
     "MEDIA_ATTRIBUTION.md",
@@ -34,6 +36,9 @@
     "!tests/php-layout.test.cjs",
     "!tests/distribution-config.test.cjs",
     "!tests/desktop-authoring-kit.test.cjs",
+    "!tests/config-loader.test.cjs",
+    "!tests/indexing.test.cjs",
+    "!tests/web-deployment.test.cjs",
     "tools/start-electron.cjs",
     "tools/verify-media-provenance.cjs",
     "distribution/media-provenance.json",
@@ -41,6 +46,8 @@
   ],
   "requiredPaths": [
     "package.json",
+    "docs/assets/movement-control-panel-light.png",
+    "docs/assets/getting-to-know-the-system-cover.webp",
     "desktop/main.cjs",
     "desktop/preload.cjs",
     "shared/frontend/platform-adapter.js",

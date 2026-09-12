@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/server/core/web-session.php';
 enforceProductionHttps();
+setWebPageDiscovery(true);
 
 // Keep the website download pinned to the published release.
 $version = '0.1.0-alpha.1';
@@ -21,7 +22,7 @@ $releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Movement Timeline Studio</title>
     <meta name="description" content="Download the Windows desktop authoring kit for Movement Timeline Studio.">
-    <meta name="robots" content="noindex, nofollow">
+    <?= webRobotsMeta() ?>
     <link rel="stylesheet" href="/assets/app.css">
     <style>
         .download-page {

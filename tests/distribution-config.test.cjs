@@ -192,6 +192,10 @@ test('the PHP development router denies private storage and generated example st
     path.join(applicationRoot, 'server', 'core', 'web-session.php'),
     path.join(coreDirectory, 'web-session.php')
   );
+  fs.copyFileSync(
+    path.join(applicationRoot, 'server', 'core', 'config-loader.php'),
+    path.join(coreDirectory, 'config-loader.php')
+  );
   fs.writeFileSync(path.join(projectDirectory, 'flow.json'), '{"private":true}\n');
   fs.writeFileSync(path.join(projectDirectory, 'img', 'private.png'), 'synthetic-image');
   fs.writeFileSync(path.join(projectDirectory, 'speech', 'private.mp3'), 'synthetic-speech');

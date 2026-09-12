@@ -109,7 +109,7 @@ test('the desktop example workspace discovers the three concept slideshows', () 
 });
 
 test('the online and desktop concept pages present the same three-part series', () => {
-  const concept = read('concept/index.html');
+  const concept = read('concept/index.php');
   const desktopConcept = read('shared/frontend/index.html');
   const desktopScript = read('shared/frontend/app.js');
   const home = read('index.php');

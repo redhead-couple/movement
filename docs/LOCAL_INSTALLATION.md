@@ -137,6 +137,11 @@ Use a dedicated database account when possible, with access limited to this appl
 
 ### 3. Create the application configuration
 
+For hosting, keep the real configuration one directory above `public_html`.
+See [Hosted configuration separation](HOSTED_CONFIGURATION.md) for the loader's
+precedence, exact configuration-only upload list, verification, and rollback.
+The steps below retain the existing local PHP configuration location.
+
 The repository includes `server/core/app-config.example.php` as the configuration template.
 
 If `server/core/app-config.php` already exists, do not overwrite it. For a clean checkout where it is absent, copy the template:
@@ -191,7 +196,7 @@ In production, every PHP entry point redirects an insecure request to the config
 
 Account recovery uses PHP's configured `mail()` transport. Set `$PASSWORD_RESET_FROM_EMAIL` (or `MOVEMENT_PASSWORD_RESET_FROM_EMAIL` when the PHP variable is absent) to a validated sender address on the application domain, configure the server's SMTP/sendmail delivery and SPF/DKIM records as appropriate, and apply the password-reset migration before exposing `forgot-password.php`. Reset links use `$APP_HTTPS_ORIGIN`, expire after 60 minutes, and carry their secret in a URL fragment so ordinary HTTP access logs do not receive it.
 
-`server/core/db.php` is already present in the repository and normally should not be edited. It reads `server/core/app-config.php` and provides the `db()` function used by all database operations.
+`server/core/db.php` is already present in the repository and normally should not be edited. Through `server/core/config-loader.php`, it prefers `app-config.php` one directory above the application root and otherwise reads the local `server/core/app-config.php`. It provides the `db()` function used by all database operations.
 
 ### Application bootstrap
 
@@ -203,7 +208,7 @@ The application bootstrap is `server/core/app-init.php`, which loads:
 | `server/core/current-user.php` | Extracts the current session username |
 | `server/core/project-paths.php` | Resolves `private-data/...` paths from the application root |
 | `server/core/response.php` | HTTP response helpers |
-| `server/core/db.php` | PDO database connection (reads `server/core/app-config.php`) |
+| `server/core/db.php` | PDO database connection (uses the shared configuration loader) |
 | `server/core/current-user-record.php` | Loads the full user record from the database |
 
 Additionally, `server/core/security-helpers.php` provides CSRF protection (`ensureFormGuard()`, `validateFormGuard()`, `resetFormGuard()`), IP extraction, and user-agent helpers. It is required independently by endpoints that process forms.

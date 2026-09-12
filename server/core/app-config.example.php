@@ -1,8 +1,11 @@
 <?php
 /**
  * Example application configuration.
- * Copy this file to server/core/app-config.php and replace every CHANGE_ME value.
- * Never commit the completed server/core/app-config.php file.
+ * Local PHP: copy to server/core/app-config.php and replace every CHANGE_ME value.
+ * Hosting: keep app-config.php one directory above the application document root
+ * (for example /home/ACCOUNT/app-config.php beside public_html/).
+ * The external file takes precedence; do not put real configuration in uploads.
+ * Never commit a completed app-config.php file. See docs/HOSTED_CONFIGURATION.md.
  */
 
 $DB_HOST = '127.0.0.1';

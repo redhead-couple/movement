@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/web-session.php';
 enforceProductionHttps();
+setWebPageDiscovery(true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +11,7 @@ enforceProductionHttps();
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Movement — Early Formation</title>
     <meta name="description" content="An open-source medium for timeline-based narrative experiments combining images, silence, movement, sound, text, and timing.">
-    <meta name="robots" content="noindex, nofollow">
+    <?= webRobotsMeta() ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -440,7 +441,7 @@ enforceProductionHttps();
                     </p>
 
                     <div class="hero-actions">
-                        <a href="/feed.php" class="btn-primary">Explore the feed</a>
+                        <a href="/player.php?username=molkho52&project=what-this-project-is" class="btn-primary">▶ Watch the introduction</a>
                         <a href="/download.php" class="btn">Download the desktop app</a>
                     </div>
                 </div>

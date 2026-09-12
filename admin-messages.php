@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/server/core/app-config.php';
+require_once __DIR__ . '/server/core/config-loader.php';
+movementRequireConfig();
 require_once __DIR__ . '/server/core/db.php';
 require_once __DIR__ . '/server/core/http-basic-auth.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
@@ -564,7 +565,7 @@ $rows = $stmt->fetchAll();
                     <div class="section-head">
                         <div>
                             <h2>Inbox overview</h2>
-                            <p class="muted">Protected with HTTP Basic Auth. Change the admin credentials in <code>server/core/app-config.php</code> before using this page anywhere public.</p>
+                            <p class="muted">Protected with HTTP Basic Auth. Set strong admin credentials in the private application configuration before using this page anywhere public.</p>
                         </div>
                     </div>
 

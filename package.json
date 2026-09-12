@@ -12,6 +12,8 @@
   },
   "main": "desktop/main.cjs",
   "scripts": {
+    "web:build": "node tools/build-web.cjs",
+    "web:test": "node --test tests/web-deployment.test.cjs tests/config-loader.test.cjs tests/indexing.test.cjs tests/php-layout.test.cjs tests/not-found-routes.test.cjs tests/web-session-security.test.cjs",
     "desktop": "node tools/start-electron.cjs",
     "desktop:smoke": "node tools/start-electron.cjs --smoke",
     "desktop:smoke:editor": "node tools/start-electron.cjs --smoke-editor",

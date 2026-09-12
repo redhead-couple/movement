@@ -3,12 +3,12 @@
   "name": "movement-public-media-provenance",
   "description": "Canonical provenance inventory for media in the Movement Timeline Studio Public Alpha candidate.",
   "inventory": {
-    "expectedSourceFileCount": 387,
-    "expectedAuthoringKitFileCount": 386,
-    "expectedSourceTotalBytes": 88454525,
-    "expectedUniqueSha256": 356,
-    "expectedSourceInventorySha256": "6a5c9fe6687cf77daaaa38d487ae4842be1b3bd985a0b8cedad0b04a57228eb3",
-    "expectedAuthoringKitInventorySha256": "7bf49de6abe404efd81955722871292753771ae57653f7cfd299222fdcd449cf",
+    "expectedSourceFileCount": 389,
+    "expectedAuthoringKitFileCount": 388,
+    "expectedSourceTotalBytes": 90413173,
+    "expectedUniqueSha256": 357,
+    "expectedSourceInventorySha256": "01d2c7a46b04be1ed068d4749db487b5d58b3b0a755914c639dc349be4d5d6b9",
+    "expectedAuthoringKitInventorySha256": "f77b7039c6fc63b83ecd4496c13430e750ae59f6458c7b12bd004d33f62d5d30",
     "mediaExtensions": [
       ".png",
       ".jpg",
@@ -138,6 +138,38 @@
     }
   },
   "provenanceRecords": [
+    {
+      "id": "approved-readme-illustrations",
+      "selector": {
+        "paths": [
+          "docs/assets/getting-to-know-the-system-cover.webp",
+          "docs/assets/movement-control-panel-light.png"
+        ]
+      },
+      "expectedFileCount": 2,
+      "mediaType": "IMAGE",
+      "publicArea": "README_DOCUMENTATION",
+      "creator": "Tutorial cover: Ezra, matching the existing example-image record. Control panel: maintainer-supplied artwork with an approved AI lighting edit; original source-art creator not independently recorded.",
+      "sourceTool": "Control-panel lighting edit: OpenAI image_gen. Tutorial cover: byte-identical to examples/getting-to-know-the-system/img/computer7.webp, created with ChatGPT or Gemini; exact tool not individually recorded.",
+      "aiGeneratedStatus": "AI_EDIT_CONFIRMED_FOR_CONTROL_PANEL; EXISTING_AI_IMAGE_RECORD_FOR_TUTORIAL",
+      "recognizableRealPersonStatus": "NO_PEOPLE_DEPICTED_IN_THESE_TWO_ILLUSTRATIONS",
+      "voiceType": "NOT_APPLICABLE",
+      "permissionBasis": "Maintainer-approved public Movement README illustrations, 2026-09-12; included with that documentation in project distributions.",
+      "redistributionStatus": "APPROVED_FOR_MOVEMENT_DOCUMENTATION; NO_SEPARATE_STANDALONE_LICENSE_GRANTED",
+      "modificationStatus": "NO_SEPARATE_LICENSE_FOR_INDEPENDENT_MODIFICATION_REUSE_RELICENSING_OR_STANDALONE_REDISTRIBUTION",
+      "attributionRequirement": "NO_ADDITIONAL_CREDIT_REQUIREMENT_PROVIDED",
+      "repositoryLicense": "NOT_COVERED_BY_REPOSITORY_MIT",
+      "provenanceConfidence": [
+        "MAINTAINER_SUPPLIED_AND_APPROVED",
+        "CONTROL_PANEL_EDIT_TOOL_RECORDED"
+      ],
+      "provenanceSources": [
+        "MAINTAINER_README_APPROVAL_2026_09_12",
+        "README.md",
+        "MEDIA_ATTRIBUTION.md"
+      ],
+      "includedInAuthoringKit": true
+    },
     {
       "id": "example-image-chatgpt-filename-identified",
       "selector": {
@@ -430,6 +462,8 @@
     }
   ],
   "assets": [
+    {"path":"docs/assets/getting-to-know-the-system-cover.webp","provenanceId":"approved-readme-illustrations"},
+    {"path":"docs/assets/movement-control-panel-light.png","provenanceId":"approved-readme-illustrations"},
     { "path": "desktop/assets/movement-icon-source.png", "provenanceId": "movement-icon-source" },
     { "path": "desktop/assets/movement-icon.ico", "provenanceId": "movement-icon-derived-files" },
     { "path": "desktop/assets/movement-icon.png", "provenanceId": "movement-icon-derived-files" },
@@ -819,6 +853,13 @@
     { "path": "img/bg_wanaka.webp", "provenanceId": "wanaka-background-photograph" }
   ],
   "exactDuplicateGroups": [
+    {
+      "sha256": "7f3d09234877211fe93732d7c856e2b427176a387e5e2d2d456b758ea96bd93e",
+      "paths": [
+        "docs/assets/getting-to-know-the-system-cover.webp",
+        "examples/getting-to-know-the-system/img/computer7.webp"
+      ]
+    },
     {
       "sha256": "3999ea65a4d5fa0b15cdaad4667adc7f4bdc04947527317f854647563e987611",
       "paths": [

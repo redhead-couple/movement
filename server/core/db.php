@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/app-config.php';
+require_once __DIR__ . '/config-loader.php';
+movementRequireConfig();
 
 function db(): PDO
 {
