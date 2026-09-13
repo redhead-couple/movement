@@ -2,65 +2,79 @@
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate');
+
 $error = '';
 $success = '';
 $formId = 'change_password';
 $guard = ensureFormGuard($formId);
+$passwordLoginAvailable = false;
+
+try {
+    $stmt = $pdo->prepare('SELECT password_hash FROM users WHERE id = ? LIMIT 1');
+    $stmt->execute([$_SESSION['user_id']]);
+    $passwordRecord = $stmt->fetch();
+    $storedHash = $passwordRecord['password_hash'] ?? null;
+    $passwordLoginAvailable = is_string($storedHash)
+        && password_get_info($storedHash)['algoName'] !== 'unknown';
+} catch (Throwable $e) {
+    $error = 'Unable to load password settings right now. Please try again later.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $guardError = validateFormGuard(
         $formId,
-        (string) ($_POST['form_token'] ?? ''),
-        trim((string) ($_POST['website'] ?? '')),
+        is_string($_POST['form_token'] ?? null) ? $_POST['form_token'] : '',
+        is_string($_POST['website'] ?? '') ? trim($_POST['website'] ?? '') : 'invalid',
         2
     );
 
     if ($guardError !== null) {
         $error = $guardError;
+    } elseif (!$passwordLoginAvailable) {
+        $error = $error ?: 'Password changes are unavailable for this account.';
     } else {
-    $currentPassword = $_POST['current_password'] ?? '';
-    $newPassword = $_POST['new_password'] ?? '';
-    $confirmPassword = $_POST['confirm_password'] ?? '';
+        $currentPassword = is_string($_POST['current_password'] ?? null) ? $_POST['current_password'] : '';
+        $newPassword = is_string($_POST['new_password'] ?? null) ? $_POST['new_password'] : '';
+        $confirmPassword = is_string($_POST['confirm_password'] ?? null) ? $_POST['confirm_password'] : '';
 
-    if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
-        $error = 'Please fill in all password fields.';
-    } elseif (strlen($newPassword) < 6) {
-        $error = 'New password must be at least 6 characters.';
-    } elseif ($newPassword !== $confirmPassword) {
-        $error = 'New password and confirmation do not match.';
-    } else {
-        try {
-            $stmt = $pdo->prepare('
-                SELECT password_hash
-                FROM users
-                WHERE id = ?
-                LIMIT 1
-            ');
-            $stmt->execute([$_SESSION['user_id']]);
-            $user = $stmt->fetch();
+        if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+            $error = 'Please fill in all password fields.';
+        } elseif (strlen($newPassword) < 6) {
+            $error = 'New password must be at least 6 characters.';
+        } elseif ($newPassword !== $confirmPassword) {
+            $error = 'New password and confirmation do not match.';
+        } else {
+            try {
+                if (!password_verify($currentPassword, $storedHash)) {
+                    $error = 'Current password is incorrect.';
+                } elseif (password_verify($newPassword, $storedHash)) {
+                    $error = 'Choose a new password that is different from the current password.';
+                } else {
+                    $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                    if (!is_string($newHash)) {
+                        throw new RuntimeException('Password hashing failed.');
+                    }
 
-            if (!$user || !password_verify($currentPassword, $user['password_hash'])) {
-                $error = 'Current password is incorrect.';
-            } elseif (password_verify($newPassword, $user['password_hash'])) {
-                $error = 'Choose a new password that is different from the current password.';
-            } else {
-                $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+                    // Do not overwrite a password changed by a concurrent request.
+                    $stmt = $pdo->prepare('
+                        UPDATE users
+                        SET password_hash = ?
+                        WHERE id = ? AND password_hash = ?
+                    ');
+                    $stmt->execute([$newHash, $_SESSION['user_id'], $storedHash]);
+                    if ($stmt->rowCount() !== 1) {
+                        throw new RuntimeException('Password changed during submission.');
+                    }
 
-                $stmt = $pdo->prepare('
-                    UPDATE users
-                    SET password_hash = ?
-                    WHERE id = ?
-                    LIMIT 1
-                ');
-                $stmt->execute([$newHash, $_SESSION['user_id']]);
-
-                session_regenerate_id(true);
-                $success = 'Your password was updated successfully.';
+                    session_regenerate_id(true);
+                    $guard = resetFormGuard($formId);
+                    $success = 'Your password has been changed.';
+                }
+            } catch (Throwable $e) {
+                $error = 'Something went wrong while changing your password.';
             }
-        } catch (Throwable $e) {
-            $error = 'Something went wrong while changing your password.';
         }
-    }
     }
 }
 ?>
@@ -70,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Password</title>
+    <title>Account settings</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="/assets/app.css">
     <style>
@@ -102,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .account-page .account-meta-item {
+            overflow-wrap: anywhere;
             padding: 12px 14px;
             border: 1px solid var(--app-line);
             border-radius: var(--app-radius-md);
@@ -124,6 +139,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .account-page .form-stack {
             display: grid;
             gap: 16px;
+        }
+
+        .account-page .password-settings > summary {
+            list-style: none;
+        }
+
+        .account-page .password-settings > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .account-page .password-settings[open] > summary {
+            margin-bottom: 16px;
+        }
+
+        .account-page .password-settings > summary:focus-visible {
+            outline: 2px solid var(--app-text);
+            outline-offset: 3px;
         }
 
         .account-page .status-banner {
@@ -174,6 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <nav class="app-nav" aria-label="Account navigation">
                 <a class="app-nav__link" href="/feed.php">Public Feed</a>
                 <a class="app-nav__link" href="/dashboard.php">My Library</a>
+                <a class="app-nav__link" href="/account-settings.php" aria-current="page">Account settings</a>
                 <form class="app-nav__form" method="post" action="/logout.php">
                     <?php $logoutGuard = ensureFormGuard('logout_form'); ?>
                     <input type="hidden" name="form_token" value="<?php echo htmlspecialchars($logoutGuard['token']); ?>">
@@ -188,8 +221,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="wrap page-intro__inner">
                 <div class="page-intro__copy">
                     <p class="eyebrow">Account</p>
-                    <h1 id="account-title">Change Password</h1>
-                    <p class="page-intro__description">Manage the password for your Early Formation account.</p>
+                    <h1 id="account-title">Account settings</h1>
+                    <p class="page-intro__description">View your account details and manage your password.</p>
                 </div>
             </div>
         </section>
@@ -200,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div>
                             <p class="eyebrow">Signed In</p>
                             <h2><?= htmlspecialchars($currentUserRecord['username']) ?></h2>
-                            <p class="muted">Update the password for this local account.</p>
+                            <p class="muted">Your account details are read-only.</p>
                         </div>
 
                         <div class="account-meta">
@@ -213,6 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <span><?= htmlspecialchars($currentUserRecord['email']) ?></span>
                             </div>
                         </div>
+                        <a class="app-nav__link app-nav__back" href="/dashboard.php">Back to My Library</a>
                     </div>
                 </aside>
 
@@ -221,26 +255,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="section-head">
                             <div>
                                 <h2>Password settings</h2>
-                                <p class="muted">Enter your current password first, then choose a new one.</p>
+                                <?php if (!$passwordLoginAvailable): ?>
+                                    <p class="muted">Password login is not available for this account.</p>
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <?php if ($error !== ''): ?>
-                            <div class="status-banner status-banner--error">
+                            <div id="password-error" class="status-banner status-banner--error" role="alert" tabindex="-1">
                                 <p><?= htmlspecialchars($error) ?></p>
                             </div>
                         <?php endif; ?>
 
                         <?php if ($success !== ''): ?>
-                            <div class="status-banner status-banner--success">
+                            <div id="password-success" class="status-banner status-banner--success" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
                                 <p><?= htmlspecialchars($success) ?></p>
                             </div>
                         <?php endif; ?>
 
-                        <form method="post" action="" class="form-stack">
+                        <?php if ($passwordLoginAvailable): ?>
+                        <details id="password-settings" class="password-settings"<?= $success === '' ? ' open' : '' ?>>
+                        <summary class="button">Change password</summary>
+                        <p class="muted">Enter your current password first, then choose a new one.</p>
+                        <form method="post" action="/account-settings.php" class="form-stack">
                             <input type="hidden" name="form_token" value="<?= htmlspecialchars($guard['token']) ?>">
 
-                            <div class="hp">
+                            <div class="hp" aria-hidden="true">
                                 <label for="website">Website</label>
                                 <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
                             </div>
@@ -265,6 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     name="new_password"
                                     required
                                     minlength="6"
+                                    aria-describedby="password-help"
                                     autocomplete="new-password">
                             </div>
 
@@ -285,12 +326,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         </form>
 
-                        <p class="helper-copy muted">For stronger security, use a long unique password you do not reuse anywhere else.</p>
+                        <p id="password-help" class="helper-copy muted">Use at least 6 characters. For stronger security, choose a long unique password you do not reuse anywhere else.</p>
+                        </details>
+                        <?php endif; ?>
                     </div>
                 </section>
             </section>
         </div>
     </main>
+    <script src="/assets/account-settings.js"></script>
 </body>
 
 </html>

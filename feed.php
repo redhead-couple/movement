@@ -92,7 +92,7 @@ setWebPageDiscovery(true);
                 <a class="app-nav__link" href="/feed.php" aria-current="page">Public Feed</a>
                 <?php if ($isLoggedIn): ?>
                     <a class="app-nav__link" href="/dashboard.php">My Library</a>
-                    <a class="app-nav__link" href="/change-password.php">Account</a>
+                    <a class="app-nav__link" href="/account-settings.php">Account settings</a>
                 <?php else: ?>
                     <a class="app-nav__link" href="/login.php">Login</a>
                 <?php endif; ?>

@@ -24,8 +24,8 @@ const internalPhpFiles = [
 ];
 
 const publicPhpEndpoints = [
+  'account-settings.php',
   'admin-messages.php',
-  'change-password.php',
   'contact.php',
   'create-project.php',
   'dashboard.php',
