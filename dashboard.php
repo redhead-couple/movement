@@ -129,7 +129,8 @@ usort($projects, function ($a, $b) {
             <a class="app-brand" href="/" aria-label="Early Formation home">Early Formation</a>
             <nav class="app-nav" aria-label="Account navigation">
                 <a class="app-nav__link" href="/feed.php">Public Feed</a>
-                <a class="app-nav__link" href="/change-password.php">Account</a>
+                <a class="app-nav__link" href="/dashboard.php" aria-current="page">My Library</a>
+                <a class="app-nav__link" href="/account-settings.php">Account settings</a>
                 <form class="app-nav__form" method="post" action="/logout.php">
                     <?php $logoutGuard = ensureFormGuard('logout_form'); ?>
                     <input type="hidden" name="form_token" value="<?php echo htmlspecialchars($logoutGuard['token']); ?>">

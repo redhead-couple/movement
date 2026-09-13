@@ -75,7 +75,7 @@ Relevant areas include:
 
 ### CSRF & Request Integrity
 - CSRF protection via `validateFormGuard()` in `server/core/security-helpers.php`
-- State-changing endpoints: `create-project.php`, `delete-project.php`, `rename-project.php`, `duplicate-project.php`, `publish-project.php`, `contact.php`, `change-password.php`
+- State-changing endpoints: `create-project.php`, `delete-project.php`, `rename-project.php`, `duplicate-project.php`, `publish-project.php`, `contact.php`, `account-settings.php`
 
 ### File System & Uploads
 - Image, foreground, speech, narration, and audio upload validation (`project-media.php`)

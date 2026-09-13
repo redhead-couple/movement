@@ -32,7 +32,7 @@ test('standard application pages expose the shared home brand', () => {
     'terms.php',
     'contact.php',
     'admin-messages.php',
-    'change-password.php',
+    'account-settings.php',
     'new-project.php',
     'delete-project.php',
     'restore-flow.php',
@@ -58,7 +58,7 @@ test('standard application pages expose the shared home brand', () => {
 
 test('project tools return to the online library and desktop surfaces retain contextual back controls', () => {
   const projectPages = [
-    'change-password.php',
+    'account-settings.php',
     'new-project.php',
     'delete-project.php',
     'rename-project.php',
