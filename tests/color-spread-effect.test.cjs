@@ -15,6 +15,7 @@ function createContextRecorder() {
   return {
     clearCount: 0,
     drawCount: 0,
+    drawnSources: [],
     fillCount: 0,
     maskWrites: 0,
     globalAlpha: 1,
@@ -26,7 +27,7 @@ function createContextRecorder() {
     restore() {},
     setTransform() {},
     clearRect() { this.clearCount += 1; },
-    drawImage() { this.drawCount += 1; },
+    drawImage(source) { this.drawCount += 1; this.drawnSources.push(source); },
     fillRect() { this.fillCount += 1; },
     beginPath() {},
     arc() {},
@@ -149,6 +150,31 @@ function loadEngineHarness({ hidden = false, reducedMotion = false } = {}) {
     }
   };
 }
+
+test('playback uses the decoded project image without changing its loading settings', () => {
+  const harness = loadEngineHarness();
+  const source = '/media.php?p=user/project/img/room1.webp';
+  let loadingSettingsChanged = 0;
+  const image = { naturalWidth: 1600, naturalHeight: 900, width: 0, height: 0 };
+  Object.defineProperty(image, 'crossOrigin', {
+    set() {
+      loadingSettingsChanged += 1;
+      // Changing the request mode can invalidate a decoded browser image.
+      image.naturalWidth = image.naturalHeight = 0;
+    }
+  });
+  const canvas = { width: 300, height: 150 };
+  const cleanup = harness.api.mount(canvas, createContextRecorder(), {
+    imgSrc: source,
+    preloadedImages: new Map([[source, image]])
+  });
+  assert.equal(loadingSettingsChanged, 0);
+  assert.equal(harness.images.length, 0, 'must not request another image');
+  assert.equal(harness.cachedSurfaces[0].context.drawnSources[0], image);
+  assert.equal(harness.cachedSurfaces[0].context.fillCount, 0, 'must not draw the placeholder');
+  assert.ok(Math.abs(canvas.width / canvas.height - 16 / 9) < 0.01);
+  cleanup();
+});
 
 test('Color Spread is registered exactly once under Color & Light', () => {
   const registry = JSON.parse(fs.readFileSync(path.join(applicationRoot, 'effects', 'registry.json'), 'utf8'));

@@ -497,6 +497,13 @@ export function mount(canvas, ctx, config) {
         const token = imageToken;
         const imageResource = createEffectImage(cfg, cfg.imgSrc);
         const image = imageResource.image;
+        // The player already decoded this image. Changing crossOrigin would
+        // restart its request and can clear its dimensions before we draw it.
+        if (imageResource.isPreloaded) {
+            loadedSource = cfg.imgSrc;
+            prepareVisual(image.naturalWidth || image.width, image.naturalHeight || image.height, image);
+            return;
+        }
         pendingImage = image;
         pendingSource = cfg.imgSrc;
         image.decoding = 'async';
@@ -524,8 +531,7 @@ export function mount(canvas, ctx, config) {
             pendingSource = '';
             useFallback(cfg.imgSrc);
         };
-        if (imageResource.isPreloaded) image.onload.call(image);
-        else image.src = cfg.imgSrc;
+        image.src = cfg.imgSrc;
     }
 
     function restart(nextConfig) {
