@@ -6,7 +6,7 @@ Movement uses reusable visual engines. This guide preserves an older overview,
 not the current authoritative contracts. For implementation requirements use
 the [Effect Authoring Contract](EFFECT_AUTHORING_CONTRACT.md) and
 [Transition Authoring Contract](TRANSITION_AUTHORING_CONTRACT.md). Current
-inventory is **25 effects and 6 advanced transitions**, as recorded in the
+inventory is **26 effects and 6 advanced transitions**, as recorded in the
 [effects registry](../effects/registry.json) and
 [transitions registry](../transitions/registry.json).
 

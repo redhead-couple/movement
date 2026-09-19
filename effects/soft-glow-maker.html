@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="../">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Soft Glow Maker</title>
+    <link rel="stylesheet" href="studio/maker/maker-theme.css">
+    <style>
+        .hint { color: #cbd5e1; font-size: 0.85rem; line-height: 1.5; margin: 6px 0; }
+        #emptyHint { position: absolute; padding: 24px; text-align: center; color: #cbd5e1; pointer-events: none; }
+        #stage { background: #101318; }
+        #cvs { box-shadow: none; }
+        @media (max-width: 620px) { body { grid-template-columns: 240px 1fr; } .sidebar { padding: 12px; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h2 style="margin: 0">Soft Glow</h2>
+        <p class="hint">A warm halo that slowly brightens and softens around your image.</p>
+        <div class="group">
+            <h4>Image</h4>
+            <label for="img1Input">Choose an image</label>
+            <input type="file" id="img1Input" accept="image/*">
+            <button type="button" onclick="window.openMediaLibrary('img')">Browse project images</button>
+            <div id="overrideContainer"></div>
+        </div>
+        <div class="group">
+            <label for="strength">Glow strength <span id="val-strength">45%</span></label>
+            <input type="range" id="strength" min="0" max="100" step="1" value="45">
+            <label for="pulseSpeed">Pulse speed <span id="val-pulseSpeed">12 / min</span></label>
+            <input type="range" id="pulseSpeed" min="0" max="24" step="1" value="12">
+            <p class="hint">Set speed to 0 for a steady glow. Reduced motion also keeps the glow steady.</p>
+        </div>
+        <button id="runBtn" class="run" type="button">Run Preview</button>
+        <button id="downloadBtn" type="button">Use Effect</button>
+    </aside>
+    <main class="preview" id="stage">
+        <p id="emptyHint">Choose a project image to preview Soft Glow.</p>
+        <canvas id="cvs" aria-label="Soft Glow preview"></canvas>
+    </main>
+    <script type="module">
+        import { mount, normalizeConfig, DEFAULTS } from '/effects/soft-glow-engine.js';
+        const canvas = document.getElementById('cvs');
+        const context = canvas.getContext('2d');
+        let cfg = normalizeConfig(DEFAULTS);
+        let controller = null, previewSource = '', savedImageRef = '', disposed = false;
+
+        function imageReference(value) {
+            if (typeof value !== 'string' || !value || /^(?:[a-z][a-z0-9+.-]*:|[/\\])/i.test(value)) return '';
+            const filename = value.startsWith('img/') ? value.slice(4) : value;
+            return filename && !/[\\/]/.test(filename) && filename !== '.' && filename !== '..' ? `img/${filename}` : '';
+        }
+        function syncControls() {
+            for (const key of ['strength', 'pulseSpeed']) document.getElementById(key).value = cfg[key];
+            document.getElementById('val-strength').textContent = `${Math.round(cfg.strength)}%`;
+            document.getElementById('val-pulseSpeed').textContent = cfg.pulseSpeed ? `${Math.round(cfg.pulseSpeed)} / min` : 'Steady';
+        }
+        function run() {
+            if (disposed) return;
+            const source = window.img1Data || window.imgData || '';
+            document.getElementById('emptyHint').hidden = Boolean(source);
+            if (!source) return;
+            if (controller && source === previewSource) { controller.update(cfg); return; }
+            if (controller) controller();
+            previewSource = source;
+            controller = mount(canvas, context, { ...cfg, imgSrc: source });
+        }
+        for (const key of ['strength', 'pulseSpeed']) {
+            document.getElementById(key).addEventListener('input', event => {
+                cfg = normalizeConfig({ ...cfg, [key]: event.target.value });
+                syncControls();
+                if (controller) controller.update(cfg);
+            });
+        }
+        document.getElementById('runBtn').addEventListener('click', run);
+        window.MakerAPI = {
+            run,
+            onImageLoaded: run,
+            loadEditConfig(input) {
+                cfg = normalizeConfig(input);
+                savedImageRef = imageReference(input?.imgSrc);
+                syncControls();
+                run();
+            },
+            getExportJSON() {
+                return {
+                    enabled: true, name: 'Soft Glow', engine: 'soft-glow', maker: 'effects/soft-glow-maker.html',
+                    config: { imgSrc: imageReference(window.imgName || window.name1) || savedImageRef,
+                        strength: cfg.strength, pulseSpeed: cfg.pulseSpeed }
+                };
+            }
+        };
+        window.addEventListener('pagehide', () => {
+            disposed = true;
+            if (controller) controller();
+            controller = null; previewSource = '';
+        }, { once: true });
+        syncControls();
+    </script>
+    <script src="studio/maker/maker-engine.js"></script>
+</body>
+</html>

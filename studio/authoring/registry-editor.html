@@ -66,6 +66,7 @@
 
         .topbar {
             display: flex;
+            flex-wrap: wrap;
             align-items: flex-start;
             justify-content: space-between;
             gap: 24px;
@@ -100,6 +101,10 @@
             background: var(--panel-soft);
             color: var(--text);
             font-weight: 700;
+        }
+
+        .top-actions {
+            flex-wrap: wrap;
         }
 
         .btn:hover:not(:disabled) {
@@ -260,6 +265,37 @@
             font-weight: 800;
         }
 
+        .export-note {
+            display: block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-weight: 400;
+            overflow-wrap: anywhere;
+        }
+
+        .inspection-report {
+            margin: 0 20px 20px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #0c1421;
+        }
+
+        .inspection-report pre {
+            font: inherit;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .inspection-report .license-text {
+            max-height: 300px;
+            overflow: auto;
+            padding: 12px;
+            border: 1px solid var(--line);
+        }
+
         .engine-status {
             padding: 4px 8px;
             border: 1px solid #316d61;
@@ -339,6 +375,7 @@
                 <p class="lede">Organize your effects and transitions. Categories stay simple until you choose Edit, and experimental work is welcome.</p>
             </div>
             <div class="top-actions">
+                <button class="btn" id="inspectComponentBtn" type="button">Inspect component ZIP…</button>
                 <button class="btn" id="openFilesBtn" type="button">Open developer files</button>
                 <button class="btn" id="reloadBtn" type="button">Reload from disk</button>
                 <button class="btn btn-primary" id="saveBtn" type="button">Save effects</button>
@@ -356,6 +393,24 @@
             </div>
 
             <div class="status" id="status" role="status"></div>
+            <section class="inspection-report" id="inspectionReport" aria-label="Component ZIP inspection" hidden>
+                <h2>Component ZIP inspection</h2>
+                <p id="inspectionTrust"></p>
+                <pre id="inspectionSummary"></pre>
+                <details open>
+                    <summary>License notice (plain text)</summary>
+                    <pre class="license-text" id="inspectionLicense"></pre>
+                </details>
+                <div id="installationControls">
+                    <p><label for="installationCategory">Install into existing category:</label>
+                        <select id="installationCategory" disabled></select></p>
+                    <p><label><input id="installationTrust" type="checkbox" disabled>
+                        I trust this component’s executable code and want to install it.</label></p>
+                    <p class="hint" id="installationHint"></p>
+                    <button class="btn" id="installComponentBtn" type="button" disabled>Install component</button>
+                </div>
+                <button class="btn btn-small" id="closeInspectionBtn" type="button">Close report</button>
+            </section>
             <div class="categories" id="categories"></div>
 
             <div class="footer-actions">
@@ -371,6 +426,9 @@
             ? window.createMovementPlatformApi()
             : null;
         const state = {
+            inspection: null,
+            installing: false,
+            exporting: false,
             activeType: new URLSearchParams(window.location.search).get('type') === 'transitions'
                 ? 'transitions'
                 : 'effects',
@@ -385,6 +443,16 @@
         };
 
         const elements = {
+            inspectComponentBtn: document.getElementById('inspectComponentBtn'),
+            inspectionReport: document.getElementById('inspectionReport'),
+            inspectionTrust: document.getElementById('inspectionTrust'),
+            inspectionSummary: document.getElementById('inspectionSummary'),
+            inspectionLicense: document.getElementById('inspectionLicense'),
+            closeInspectionBtn: document.getElementById('closeInspectionBtn'),
+            installationCategory: document.getElementById('installationCategory'),
+            installationTrust: document.getElementById('installationTrust'),
+            installationHint: document.getElementById('installationHint'),
+            installComponentBtn: document.getElementById('installComponentBtn'),
             categories: document.getElementById('categories'),
             catalogCount: document.getElementById('catalogCount'),
             status: document.getElementById('status'),
@@ -409,6 +477,118 @@
             elements.status.className = `status${message ? ' show' : ''}${tone ? ` ${tone}` : ''}`;
         }
 
+        function renderInspectionReport(report) {
+            const answer = value => value === true ? 'Yes' : value === false ? 'No' : 'Not checked';
+            const component = report.component;
+            const lines = [`Package: ${report.filename}`];
+            if (component) {
+                lines.push(`Name: ${component.name}`, `ID: ${component.id}`, `Type: ${component.type}`,
+                    `Maker entry: ${component.maker}`, `Engine entry: ${component.engine}`);
+            } else lines.push('Component identity could not be read from a valid manifest.');
+            lines.push('', `Archive and manifest structure valid: ${answer(report.structureValid)}`,
+                `Package format supported: ${answer(report.formatSupported)}`,
+                `Host contract: ${report.hostContract || 'Not available'}`,
+                `Host contract and declared dependencies supported: ${answer(report.hostContractSupported)}`,
+                '', 'Included files:', ...report.files.map(file => `• ${file}`),
+                '', 'Required shared application files:');
+            if (report.sharedFiles.length) lines.push(...report.sharedFiles.map(file => `• ${file.path}: ${file.status}`));
+            else lines.push(component ? 'None declared.' : 'Not checked.');
+            lines.push('', `Already registered: ${answer(report.conflicts.registered)}`,
+                `Maker destination exists or is inaccessible: ${answer(report.conflicts.makerExists)}`,
+                `Engine destination exists or is inaccessible: ${answer(report.conflicts.engineExists)}`,
+                `Manifest/license directory exists or is inaccessible: ${answer(report.conflicts.metadataExists)}`, '',
+                'Problems that would prevent installation:');
+            lines.push(...(report.problems.length ? report.problems.map(problem => `• ${problem}`)
+                : ['No structural, compatibility or destination conflicts found. This does not establish code safety.']));
+            lines.push('', 'No package code was executed or previewed. Installation requires your explicit trust acknowledgement.');
+            // All package-controlled content, including license text, stays plain text.
+            elements.inspectionTrust.textContent = report.trustNotice;
+            elements.inspectionSummary.textContent = lines.join('\n');
+            elements.inspectionLicense.textContent = report.licenseText || 'No readable license notice available.';
+            elements.inspectionReport.hidden = false;
+        }
+
+        async function inspectComponentZip() {
+            if (elements.inspectComponentBtn.disabled) return;
+            elements.inspectComponentBtn.disabled = true;
+            setStatus('Choose a component ZIP to inspect. Nothing will be installed.');
+            try {
+                if (!api || typeof api.inspectComponentZip !== 'function') {
+                    throw new Error('Component inspection requires the editable Windows Authoring Kit.');
+                }
+                const result = await api.inspectComponentZip();
+                if (result.cancelled) {
+                    setStatus('Component inspection cancelled.');
+                    return;
+                }
+                renderInspectionReport(result.report);
+                state.inspection = result;
+                elements.installationTrust.checked = false;
+                elements.installationCategory.replaceChildren();
+                for (const category of result.report.categories || []) {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    elements.installationCategory.appendChild(option);
+                }
+                updateInstallControls();
+                setStatus('Inspection complete. Nothing was installed.');
+            } catch (error) {
+                setStatus(error.message || 'Could not inspect the component ZIP.', 'error');
+            } finally {
+                elements.inspectComponentBtn.disabled = false;
+            }
+        }
+
+        function updateInstallControls() {
+            const inspection = state.inspection;
+            const eligible = Boolean(inspection?.token && !inspection.report.problems.length && state.writable);
+            const blocked = !eligible || state.installing || state.dirty.size > 0 || elements.reloadBtn.disabled;
+            elements.installationCategory.disabled = Boolean(blocked);
+            elements.installationTrust.disabled = Boolean(blocked);
+            elements.installComponentBtn.disabled = Boolean(blocked || !elements.installationCategory.value || !elements.installationTrust.checked);
+            elements.installationHint.textContent = state.installing ? 'Installing component…'
+                : !inspection ? 'Inspect a ZIP to begin.'
+                : !eligible ? 'Installation is unavailable. Resolve the reported problems and inspect the ZIP again.'
+                : state.dirty.size ? 'Save your pending registry edits or reload from disk before installing.'
+                : 'Choose a category for this component’s type and acknowledge that you trust its code. Installation does not certify code safety.';
+        }
+
+        async function installComponent() {
+            updateInstallControls();
+            if (elements.installComponentBtn.disabled) return;
+            state.installing = true;
+            elements.categories.inert = true;
+            elements.inspectComponentBtn.disabled = true;
+            elements.closeInspectionBtn.disabled = true;
+            elements.reloadBtn.disabled = true;
+            updateSaveButton();
+            updateInstallControls();
+            try {
+                const result = await api.installComponent({ token: state.inspection.token,
+                    category: elements.installationCategory.value, trustCode: elements.installationTrust.checked });
+                state.inspection = null;
+                elements.inspectionTrust.textContent = 'Installed with your trust acknowledgement. Structural checks do not establish code safety. No component code was executed or previewed during installation.';
+                elements.inspectionSummary.textContent += '\n\nInstalled into ' + result.category + ':\n' + result.files.join('\n');
+                // No pending edits are allowed when installation starts. Keep the UI
+                // locked until the latest registries have been read back from disk.
+                await loadRegistries();
+                setStatus(`${result.name} installed. Open its Hub to use it.${result.warnings.length ? '\n' + result.warnings.join('\n') : ''}`, result.warnings.length ? 'warning' : 'success');
+            } catch (error) {
+                state.inspection = null;
+                setStatus((error.message || 'Installation failed.') + '\nInspect the ZIP again before retrying.', 'error');
+            } finally {
+                state.installing = false;
+                elements.categories.inert = false;
+                elements.inspectComponentBtn.disabled = false;
+                elements.closeInspectionBtn.disabled = false;
+                elements.reloadBtn.disabled = false;
+                elements.installationTrust.checked = false;
+                updateSaveButton();
+                updateInstallControls();
+            }
+        }
+
         function markDirty(type = state.activeType) {
             if (!state.writable) return;
             state.dirty.add(type);
@@ -421,10 +601,12 @@
             elements.saveBtn.textContent = `${state.dirty.has(type) ? 'Save changes to' : 'Save'} ${label}`;
             elements.saveBtn.disabled = (
                 !state.data
+                || state.installing
                 || !state.writable
                 || !state.dirty.has(type)
             );
-            elements.addCategoryBtn.disabled = !state.data || !state.writable;
+            elements.addCategoryBtn.disabled = !state.data || !state.writable || state.installing;
+            updateInstallControls();
         }
 
         function normalizePayload(payload) {
@@ -474,6 +656,29 @@
             }
         }
 
+        async function exportComponent(type, engine) {
+            if (state.exporting) return;
+            state.exporting = true;
+            render();
+            setStatus('Choose where to save the component ZIP.');
+            try {
+                if (!api || typeof api.exportComponent !== 'function') {
+                    throw new Error('Component export requires the editable Windows Authoring Kit.');
+                }
+                const result = await api.exportComponent(type, engine);
+                setStatus(result.cancelled ? 'Component export cancelled.' : `Saved ${result.filename}.`, result.cancelled ? '' : 'success');
+            } catch (error) {
+                setStatus(error.message || 'Could not export the component.', 'error');
+            } finally {
+                state.exporting = false;
+                const message = elements.status.textContent;
+                const className = elements.status.className;
+                render();
+                elements.status.textContent = message;
+                elements.status.className = className;
+            }
+        }
+
         function renderEngineRow(engine, categoryIndex, engineIndex, editing) {
             const row = document.createElement('div');
             row.className = 'engine-row';
@@ -484,6 +689,20 @@
             row.appendChild(name);
 
             const asset = assetFor(engine);
+            const exportStatus = asset && asset.componentExport;
+            const type = state.activeType;
+            const exportButton = makeButton('Export ZIP…', 'btn btn-small', () => exportComponent(type, engine));
+            exportButton.disabled = state.exporting || !exportStatus || !exportStatus.eligible;
+            exportButton.setAttribute('aria-label', `Export ${titleCase(engine)} component ZIP`);
+            exportButton.dataset.componentExport = engine;
+            row.appendChild(exportButton);
+            if (exportStatus && !exportStatus.eligible) {
+                const note = document.createElement('span');
+                note.className = 'export-note';
+                note.textContent = exportStatus.reason;
+                name.appendChild(note);
+                exportButton.title = exportStatus.reason;
+            }
             const needsAttention = !asset || asset.status === 'needs-attention';
             if (needsAttention) {
                 const status = document.createElement('span');
@@ -673,6 +892,7 @@
 
             elements.reloadBtn.disabled = true;
             elements.saveBtn.disabled = true;
+            updateInstallControls();
             setStatus('Reading registries and looking for local effects and transitions…');
             try {
                 if (!api || typeof api.listRegistries !== 'function') {
@@ -692,6 +912,10 @@
                         workspaceCount: 0,
                         projectCount: 0,
                         registryLoaded: Boolean(state.data.effects && state.data.transitions),
+                        componentExportInterface: typeof api.exportComponent === 'function',
+                        componentInspectionInterface: typeof api.inspectComponentZip === 'function',
+                        componentInspectionButton: Boolean(elements.inspectComponentBtn),
+                        componentExportButtons: elements.categories.querySelectorAll('[data-component-export]').length,
                         registryWritable: state.writable,
                         registryCleanList: elements.categories.querySelectorAll(
                             '.category-name, .add-engine'
@@ -725,6 +949,7 @@
 
             elements.saveBtn.disabled = true;
             elements.reloadBtn.disabled = true;
+            updateInstallControls();
             setStatus(`Validating and saving ${type}…`);
             try {
                 if (!api || typeof api.saveRegistry !== 'function') {
@@ -780,6 +1005,16 @@
         });
 
         elements.reloadBtn.addEventListener('click', () => loadRegistries(true));
+        elements.inspectComponentBtn.addEventListener('click', inspectComponentZip);
+        elements.closeInspectionBtn.addEventListener('click', () => {
+            elements.inspectionReport.hidden = true;
+            state.inspection = null;
+            elements.installationTrust.checked = false;
+            updateInstallControls();
+        });
+        elements.installationCategory.addEventListener('change', updateInstallControls);
+        elements.installationTrust.addEventListener('change', updateInstallControls);
+        elements.installComponentBtn.addEventListener('click', installComponent);
         elements.saveBtn.addEventListener('click', saveActiveRegistry);
         elements.openFilesBtn.addEventListener('click', async () => {
             if (!api || typeof api.openDeveloperFiles !== 'function') return;

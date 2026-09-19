@@ -58,6 +58,10 @@ for source editing and the distribution boundary.
 The [public repository](https://github.com/redhead-couple/movement) contains
 the source. Use the Windows download page above for the recommended Authoring Kit.
 
+The current development source is **`0.1.0-alpha.2`**, prepared locally with
+desktop component sharing. It is not yet published; the public alpha.1 download
+above is unchanged. See the [alpha.2 release notes](docs/RELEASE_NOTES_0.1.0-alpha.2.md).
+
 ## Develop from source with Electron
 
 Use a full source checkout and Node.js **22.12 or newer**:
@@ -101,8 +105,8 @@ Authoring Kit is the supported local Alpha experience.
 
 ## Explore and extend the medium
 
-The current registries contain **25 effects** and **6 advanced transitions**:
-**31 registered expression tools** in total.
+The current registries contain **26 effects** and **6 advanced transitions**:
+**32 registered expression tools** in total.
 
 - [Effects registry](effects/registry.json) and
   [transitions registry](transitions/registry.json): current inventory.

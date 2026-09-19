@@ -93,6 +93,26 @@ test('Desktop Authoring Kit required source files exist in the repository', () =
   }
 });
 
+test('Desktop Authoring Kit verifier rejects a missing application-root component license', () => {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-authoring-kit-license-'));
+  try {
+    const applicationRoot = path.join(fixtureRoot, 'resources', 'app');
+    fs.mkdirSync(path.join(applicationRoot, 'distribution'), { recursive: true });
+    fs.writeFileSync(
+      path.join(applicationRoot, 'distribution', 'desktop-authoring-kit.manifest.json'),
+      JSON.stringify(kitManifest)
+    );
+    fs.writeFileSync(path.join(applicationRoot, 'package.json'), '{}');
+    // The executable-level notice alone cannot satisfy the component exporter.
+    fs.writeFileSync(path.join(fixtureRoot, 'LICENSE'), 'notice outside the application root');
+    assert.throws(() => verifyAuthoringKit(fixtureRoot), /required file is missing: LICENSE/);
+  } finally {
+    assert.equal(path.dirname(fixtureRoot), path.resolve(os.tmpdir()));
+    assert.match(path.basename(fixtureRoot), /^movement-authoring-kit-license-/);
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test('Desktop Authoring Kit verifier rejects generated example state', async t => {
   for (const relativePath of [
     'examples/test-project/backups/flow-old.json',
