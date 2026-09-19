@@ -2,8 +2,8 @@
 
 This is a legacy parameter reference covering 19 effects and 5 advanced
 transitions. It is not the complete inventory or the authoritative authoring
-contract. Current Movement registries contain **25 effects and 6 advanced
-transitions**, or **31 registered expression tools**.
+contract. Current Movement registries contain **26 effects and 6 advanced
+transitions**, or **32 registered expression tools**.
 
 Use [effects/registry.json](../effects/registry.json) and
 [transitions/registry.json](../transitions/registry.json) for the current

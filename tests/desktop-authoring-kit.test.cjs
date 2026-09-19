@@ -46,12 +46,13 @@ test('Desktop Authoring Kit uses an explicit source allowlist', () => {
   for (const exclusion of [
     '!examples/**/backups/**/*',
     '!examples/**/*.save.lock',
-    '!examples/**/.movement-media-trash/**/*'
+    '!examples/**/.movement-media-trash/**/*',
+    '!**/[dD][eE][sS][kK][tT][oO][pP].[iI][nN][iI]'
   ]) {
     assert.ok(validated.files.includes(exclusion), `${exclusion} must be excluded`);
   }
 
-  for (const forbiddenPath of ['backups', '.save.lock', '.movement-media-trash']) {
+  for (const forbiddenPath of ['backups', '.save.lock', '.movement-media-trash', 'desktop.ini']) {
     assert.ok(validated.forbiddenPaths.includes(forbiddenPath), `${forbiddenPath} must be forbidden`);
   }
 });
@@ -93,11 +94,34 @@ test('Desktop Authoring Kit required source files exist in the repository', () =
   }
 });
 
-test('Desktop Authoring Kit verifier rejects generated example state', async t => {
+test('Desktop Authoring Kit verifier rejects a missing application-root component license', () => {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-authoring-kit-license-'));
+  try {
+    const applicationRoot = path.join(fixtureRoot, 'resources', 'app');
+    fs.mkdirSync(path.join(applicationRoot, 'distribution'), { recursive: true });
+    fs.writeFileSync(
+      path.join(applicationRoot, 'distribution', 'desktop-authoring-kit.manifest.json'),
+      JSON.stringify(kitManifest)
+    );
+    fs.writeFileSync(path.join(applicationRoot, 'package.json'), '{}');
+    // The executable-level notice alone cannot satisfy the component exporter.
+    fs.writeFileSync(path.join(fixtureRoot, 'LICENSE'), 'notice outside the application root');
+    assert.throws(() => verifyAuthoringKit(fixtureRoot), /required file is missing: LICENSE/);
+  } finally {
+    assert.equal(path.dirname(fixtureRoot), path.resolve(os.tmpdir()));
+    assert.match(path.basename(fixtureRoot), /^movement-authoring-kit-license-/);
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test('Desktop Authoring Kit verifier rejects generated state and Windows folder metadata', async t => {
   for (const relativePath of [
     'examples/test-project/backups/flow-old.json',
     'examples/test-project/.save.lock',
-    'examples/test-project/.movement-media-trash/item/metadata.json'
+    'examples/test-project/.movement-media-trash/item/metadata.json',
+    'desktop.ini',
+    'effects/desktop.ini',
+    'studio/maker/DeSkToP.InI'
   ]) {
     await t.test(relativePath, () => {
       const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-authoring-kit-'));

@@ -15,6 +15,9 @@
         desktop.saveGeneratedPrompt(prompt, suggestedName)
       ),
       listRegistries: () => desktop.listRegistries(),
+      exportComponent: (type, id) => desktop.exportComponent(type, id),
+        inspectComponentZip: () => desktop.inspectComponentZip(),
+        installComponent: request => desktop.installComponent(request),
       saveRegistry: (type, registry, expectedRevision) => (
         desktop.saveRegistry(type, registry, expectedRevision)
       ),

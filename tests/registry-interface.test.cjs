@@ -43,7 +43,7 @@ test('registry page loads and saves through the desktop bridge with its expected
     },
     currentRegistry: () => state.data.effects,
     normalizePayload: value => value,
-    render() {}, updateSaveButton() {}, setStatus() {},
+    render() {}, updateSaveButton() {}, updateInstallControls() {}, setStatus() {},
     console: { error(error) { throw error; } },
     fetch() { assert.fail('Desktop registry must use its bridge'); }
   };

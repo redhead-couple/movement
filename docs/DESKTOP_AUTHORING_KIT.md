@@ -15,6 +15,10 @@ The kit inherits its version from the root `package.json` in the
 [Windows download page](https://redhead-couple.org/download.php) for the
 recommended Authoring Kit ZIP and its SHA-256 checksum.
 
+The current locally prepared Kit is **`0.1.0-alpha.2`**, not yet published. The
+public alpha.1 release linked above remains unchanged. See the
+[alpha.2 release notes](RELEASE_NOTES_0.1.0-alpha.2.md).
+
 ## Start the application
 
 1. Extract the complete ZIP to a writable directory.
@@ -56,6 +60,18 @@ Read these contracts before making changes:
 The application registry editor can discover correctly named maker and engine
 files. Restart the application after changing source files so every window uses
 the updated code.
+
+Component export, inspection and installation are a **desktop pilot for trusted
+components** in the development application and the locally prepared alpha.2 Kit.
+**The existing public alpha.1 download does not include this feature.** There is
+no hosted component installation or overwrite/update workflow.
+
+Follow [Creating and sharing components](COMPONENT_EXPORT.md) for the complete
+creation/registration, review/license/hash, export, inspection, installation and
+re-export workflows. It uses Soft Glow and Alternating Panels as worked examples,
+distinguishes development-source and built-Kit launch instructions, and records
+the completed manual checks. Dependency review and matching hashes do not prove
+code safety.
 
 ## Testing source changes
 
