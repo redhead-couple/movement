@@ -1,0 +1,55 @@
+{
+  "formatVersion": 1,
+  "components": [
+    {
+      "type": "effect",
+      "id": "ripple",
+      "name": "Ripple",
+      "sharedFiles": [
+        "effects/effect-media.js",
+        "studio/maker/maker-engine.js",
+        "studio/maker/maker-theme.css"
+      ],
+      "hostContract": "movement-effect-host-1",
+      "assets": [],
+      "makerSha256": "04bf6be573c8a783a6f17b7e7b05742b233ce60743d0edcd9ad72fe408448db9",
+      "engineSha256": "3dc66f7c91ad9622447298e6771066e249de22e83a3ede0b36652142c6a88b3a",
+      "license": {
+        "source": "LICENSE",
+        "sha256": "91a692cad618082b6e1a7f7f078ed01dcd89bb3edd00094b8bd8920e186fc6a3"
+      }
+    },
+    {
+      "type": "transition",
+      "id": "alternating-panels",
+      "name": "Alternating Panels",
+      "sharedFiles": [],
+      "hostContract": "movement-transition-host-1",
+      "assets": [],
+      "makerSha256": "109f491f3328301fdee252ae7bb0834ffb0d4b32ed8bde0abf06a64d8af50541",
+      "engineSha256": "4cc0ff63e36a7a46e439b075b3676f0325757bd8174a18ae02102a279b8d5ff6",
+      "license": {
+        "source": "LICENSE",
+        "sha256": "91a692cad618082b6e1a7f7f078ed01dcd89bb3edd00094b8bd8920e186fc6a3"
+      }
+    },
+    {
+      "type": "effect",
+      "id": "soft-glow",
+      "name": "Soft Glow",
+      "sharedFiles": [
+        "effects/effect-media.js",
+        "studio/maker/maker-engine.js",
+        "studio/maker/maker-theme.css"
+      ],
+      "hostContract": "movement-effect-host-1",
+      "assets": [],
+      "makerSha256": "760df564367ef33fc55e3dbc1253cbab9f27b22da70f56957e47f675ff807919",
+      "engineSha256": "43d7bf87c6e537a853eb4addca942f1faf5f2464dd97ab1e715a2092480852d8",
+      "license": {
+        "source": "LICENSE",
+        "sha256": "91a692cad618082b6e1a7f7f078ed01dcd89bb3edd00094b8bd8920e186fc6a3"
+      }
+    }
+  ]
+}

@@ -49,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const parentMediaList = topWindow && typeof topWindow.getMakerMediaList === 'function'
         ? topWindow.getMakerMediaList
         : null;
-    const parentMediaImporter = topWindow && typeof topWindow.importDesktopMediaForMaker === 'function'
+    const parentMediaImporter = topWindow && topWindow.PROJECT_CONTEXT?.desktopMode
+        && typeof topWindow.importDesktopMediaForMaker === 'function'
         ? topWindow.importDesktopMediaForMaker
         : null;
     const isLocalMode = window.location.protocol === 'file:' || (!parentMediaList && !(topWindow && topWindow.MAKER_ENDPOINT));
@@ -63,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return filename;
         }
         if (parentMediaResolver) return parentMediaResolver(type, filename);
+        const relativeName = filename.replace(new RegExp(`^(?:\\./)?${type}/`, 'i'), '');
+        if (type === 'img' && prefilledUrl && relativeName === prefilledImg) return prefilledUrl;
         const base = (topWindow && topWindow.IMG_BASE_URL) || '/img/';
-        return base + filename.replace(/^\/+/, '');
+        return base + relativeName.replace(/^\/+/, '');
     }
 
     function getMakerCsrfToken() {
@@ -115,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!src) return Promise.resolve(false);
 
         const filename = explicitFilename || getFilenameFromSource(src, window[nameTarget] || '');
+        src = resolveMediaUrl('img', src);
+        // Edit hydration can start a preview before the fetch below finishes.
+        // Make its source project-aware immediately, including preloaded blob URLs.
+        applyResolvedImage(src, dataTarget, nameTarget);
         if (filename) {
             window[nameTarget] = filename;
             if (nameTarget === 'name1') {
@@ -568,8 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.localImages.push(effectData.config.preloadedImages[i]);
                     } else {
                         // Fallback to static path if preloader failed
-                        const base = (window.top && window.top.IMG_BASE_URL) || '/img/';
-                        window.localImages.push(base + cleanedName);
+                        window.localImages.push(resolveMediaUrl('img', img));
                     }
                 });
                 if (typeof window.buildList === 'function') window.buildList();

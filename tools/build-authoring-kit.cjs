@@ -60,6 +60,14 @@ function createAuthoringKitConfig(packageManifest, kitManifest) {
       output: path.relative(repositoryRoot, outputDirectory)
     },
     files: kitManifest.files,
+    // Electron Builder filters LICENSE from application files. Component export
+    // reads the notice relative to resources/app, so copy it there explicitly.
+    extraResources: [
+      {
+        from: 'LICENSE',
+        to: 'app/LICENSE'
+      }
+    ],
     extraFiles: [
       {
         from: 'distribution/README-FIRST.md',

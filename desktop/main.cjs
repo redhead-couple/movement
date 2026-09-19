@@ -21,6 +21,8 @@ const {
   resolvePortableStorageRoot
 } = require('./services/storage-location-service.cjs');
 const { createRegistryService } = require('./services/registry-service.cjs');
+const { createComponentExportService } = require('./services/component-export-service.cjs');
+const { createComponentInstallService } = require('./services/component-install-service.cjs');
 const { createWorkspaceService } = require('./services/workspace-service.cjs');
 const {
   loadWindowState,
@@ -79,6 +81,8 @@ const SMOKE_SURFACE = [
 let mainWindow = null;
 let workspaceService = null;
 let registryService = null;
+let componentExportService = null;
+let componentInstallService = null;
 let projectStorageRoot = null;
 let projectStorageDetails = null;
 let developerFilesRoot = null;
@@ -252,6 +256,16 @@ function getRuntimeContext() {
   };
 }
 
+function withComponentExportStatus(type, payload) {
+  return {
+    ...payload,
+    available: payload.available.map(item => ({
+      ...item,
+      componentExport: componentExportService.eligibility(type, item.engine)
+    }))
+  };
+}
+
 function registerIpcHandlers() {
   ipcMain.handle('runtime:get-context', event => {
     assertTrustedIpcSender(event);
@@ -341,7 +355,64 @@ function registerIpcHandlers() {
 
   ipcMain.handle('registry:list', event => {
     assertTrustedIpcSender(event);
-    return registryService.listRegistries();
+    const result = registryService.listRegistries();
+    return {
+      ...result,
+      effects: withComponentExportStatus('effects', result.effects),
+      transitions: withComponentExportStatus('transitions', result.transitions)
+    };
+  });
+
+  ipcMain.handle('component:inspect', async event => {
+    assertTrustedIpcSender(event);
+    if (!event.senderFrame || new URL(event.senderFrame.url).pathname !== '/studio/authoring/registry-editor.html') {
+      throw new Error('Inspect component ZIPs from the Registry Editor.');
+    }
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(owner || undefined, {
+      title: 'Inspect component ZIP',
+      filters: [{ name: 'Component ZIP', extensions: ['zip'] }],
+      properties: ['openFile']
+    });
+    if (result.canceled || !result.filePaths || result.filePaths.length !== 1) return { cancelled: true };
+    return { cancelled: false, ...componentInstallService.inspect(result.filePaths[0], event.sender.id) };
+  });
+
+  ipcMain.handle('component:export', async (event, type, id) => {
+    assertTrustedIpcSender(event);
+    if (!event.senderFrame || new URL(event.senderFrame.url).pathname !== '/studio/authoring/registry-editor.html') {
+      throw new Error('Export components from the Registry Editor.');
+    }
+    componentExportService.prepare(type, id);
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showSaveDialog(owner || undefined, {
+      title: 'Export component',
+      defaultPath: `${id}.component.zip`,
+      filters: [{ name: 'Component ZIP', extensions: ['zip'] }],
+      properties: ['showOverwriteConfirmation']
+    });
+    if (result.canceled || !result.filePath) return { cancelled: true };
+    return componentExportService.exportComponent({ type, id, destinationPath: result.filePath });
+  });
+
+  ipcMain.handle('component:install', (event, request) => {
+    assertTrustedIpcSender(event);
+    if (!event.senderFrame || event.senderFrame !== event.sender.mainFrame
+      || new URL(event.senderFrame.url).pathname !== '/studio/authoring/registry-editor.html') {
+      throw new Error('Install components from the Registry Editor.');
+    }
+    const result = componentInstallService.install({
+      token: request?.token, category: request?.category, trustCode: request?.trustCode
+    }, event.sender.id);
+    // Installation has committed; a closed window must not turn success into failure.
+    for (const window of BrowserWindow.getAllWindows()) {
+      try {
+        if (!window.isDestroyed() && !window.webContents.isDestroyed()) {
+          window.webContents.send('registry:changed', { type: result.type });
+        }
+      } catch (error) { result.warnings.push(`Installed; could not refresh a window: ${error.message}`); }
+    }
+    return result;
   });
 
   ipcMain.handle('registry:save', (event, type, registry, expectedRevision) => {
@@ -356,7 +427,7 @@ function registerIpcHandlers() {
         window.webContents.send('registry:changed', { type: String(type || '') });
       }
     }
-    return result;
+    return withComponentExportStatus(String(type || ''), result);
   });
 
   ipcMain.handle('workspace:list', event => {
@@ -841,6 +912,10 @@ function registerIpcHandlers() {
         details
         && details.registryLoaded
         && details.registryCleanList
+        && details.componentExportInterface
+        && details.componentInspectionInterface
+        && details.componentInspectionButton
+        && details.componentExportButtons > 0
         && details.experimentalCategories
         && Boolean(details.registryWritable) === registryService.listRegistries().writable
       )
@@ -1116,7 +1191,9 @@ function createRegistryEditorWindow(type = 'effects') {
     REGISTRY_EDITOR_PATH,
     { desktop: '1', type: safeType }
   );
+  const inspectionOwner = registryEditorWindow.webContents.id;
   registryEditorWindow.on('closed', () => {
+    componentInstallService?.forget(inspectionOwner);
     registryEditorWindow = null;
   });
   return registryEditorWindow;
@@ -1265,6 +1342,8 @@ if (!hasSingleInstanceLock) {
       applicationRoot,
       forceReadOnly: /\.asar(?:[\\/]|$)/i.test(applicationRoot)
     });
+    componentExportService = createComponentExportService({ applicationRoot });
+    componentInstallService = createComponentInstallService({ applicationRoot, forceReadOnly: /\.asar(?:[\\/]|$)/i.test(applicationRoot) });
 
     protocol.handle(APP_SCHEME, handleAppProtocol);
     protocol.handle(PROJECT_SCHEME, handleProjectProtocol);

@@ -32,9 +32,9 @@ an inherited `ELECTRON_RUN_AS_NODE` variable before launching Electron.
 The desktop product name and version come from `package.json`:
 
 - product name: **Movement Timeline Studio**
-- current development version: **0.1.0-alpha.1**
+- current development version: **0.1.0-alpha.2** (prepared locally, not published)
 - human-facing release label: **Movement Public Alpha 0.1**
-- published Git tag: `v0.1.0-alpha.1`
+- existing published Git tag: `v0.1.0-alpha.1` (unchanged)
 - publisher: **Redhead Couple**
 - Windows application ID: `org.movement.timelinestudio`
 
@@ -109,7 +109,7 @@ npm.cmd run dist:windows
 
 The distributable is written to:
 
-`dist/Movement Timeline Studio-Setup-0.1.0-alpha.1-x64.exe`
+`dist/Movement Timeline Studio-Setup-0.1.0-alpha.2-x64.exe`
 
 The build also leaves `dist/win-unpacked` for packaged-runtime validation. The
 installer is per-user by default, does not require administrator access for its
@@ -139,11 +139,11 @@ checksum beside it. See `docs/DESKTOP_AUTHORING_KIT.md` for the end-user and AI
 authoring workflow.
 
 The current source would produce
-`Movement Timeline Studio-Authoring-Kit-0.1.0-alpha.1-x64.zip`. The kit derives
+`Movement Timeline Studio-Authoring-Kit-0.1.0-alpha.2-x64.zip`. The kit derives
 its application version from `package.json`; the distribution manifest does
-not define a separate version. An existing `0.1.0` artifact is an earlier
-build, not the `0.1.0-alpha.1` candidate. Updating metadata does not rebuild or
-publish a ZIP. The website download page links directly to the published GitHub
+not define a separate version. Existing `0.1.0` and `0.1.0-alpha.1` artifacts are
+earlier builds, not the alpha.2 candidate. Updating metadata does not rebuild or
+publish a ZIP. The website download page still links directly to the published alpha.1 GitHub
 release assets, independently of local build output. GitHub's published filename
 is `Movement.Timeline.Studio-Authoring-Kit-0.1.0-alpha.1-x64.zip`, with a matching
 `.zip.sha256` asset.

@@ -12,6 +12,9 @@ const desktopApi = Object.freeze({
     ipcRenderer.invoke('prompt:save', prompt, suggestedName)
   ),
   listRegistries: () => ipcRenderer.invoke('registry:list'),
+  exportComponent: (type, id) => ipcRenderer.invoke('component:export', type, id),
+  inspectComponentZip: () => ipcRenderer.invoke('component:inspect'),
+  installComponent: request => ipcRenderer.invoke('component:install', request),
   saveRegistry: (type, registry, expectedRevision) => (
     ipcRenderer.invoke('registry:save', type, registry, expectedRevision)
   ),
