@@ -6,7 +6,7 @@ enforceProductionHttps();
 setWebPageDiscovery(true);
 
 // Keep the website download pinned to the published release.
-$version = '0.1.0-alpha.1';
+$version = '0.1.0-alpha.2';
 $repositoryUrl = 'https://github.com/redhead-couple/movement';
 $releaseTag = 'v' . $version;
 $releaseName = "Movement.Timeline.Studio-Authoring-Kit-{$version}-x64.zip";
@@ -365,7 +365,7 @@ $releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
                         <a href="<?= htmlspecialchars($checksumUrl, ENT_QUOTES, 'UTF-8') ?>">SHA-256 checksum</a>
                         <a href="<?= htmlspecialchars($releasePageUrl, ENT_QUOTES, 'UTF-8') ?>">Release notes</a>
                     </div>
-                    <p class="release-note">The SHA-256 file is provided to verify your download.</p>
+                    <p class="release-note">Compare your ZIP's SHA-256 hash with the value in this file. GitHub uses dots instead of spaces in download filenames; the checksum file retains the original name with spaces. For filename-based verification, rename the ZIP to match the filename in the checksum file.</p>
                     <p class="release-note">This Windows Alpha build is currently unsigned. Windows may show an Unknown Publisher or SmartScreen warning.</p>
                 </aside>
             </div>
@@ -410,6 +410,7 @@ $releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
                                 <li>The complete desktop editor and local player</li>
                                 <li>Bundled example projects</li>
                                 <li>Source-visible effects, transitions, and makers</li>
+                                <li>Desktop component export/import for effects and advanced transitions. Install only component code you trust; inspection does not certify code safety.</li>
                                 <li>Authoring contracts and technical documentation</li>
                             </ul>
                         </div>
