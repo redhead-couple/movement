@@ -46,12 +46,13 @@ test('Desktop Authoring Kit uses an explicit source allowlist', () => {
   for (const exclusion of [
     '!examples/**/backups/**/*',
     '!examples/**/*.save.lock',
-    '!examples/**/.movement-media-trash/**/*'
+    '!examples/**/.movement-media-trash/**/*',
+    '!**/[dD][eE][sS][kK][tT][oO][pP].[iI][nN][iI]'
   ]) {
     assert.ok(validated.files.includes(exclusion), `${exclusion} must be excluded`);
   }
 
-  for (const forbiddenPath of ['backups', '.save.lock', '.movement-media-trash']) {
+  for (const forbiddenPath of ['backups', '.save.lock', '.movement-media-trash', 'desktop.ini']) {
     assert.ok(validated.forbiddenPaths.includes(forbiddenPath), `${forbiddenPath} must be forbidden`);
   }
 });
@@ -113,11 +114,14 @@ test('Desktop Authoring Kit verifier rejects a missing application-root componen
   }
 });
 
-test('Desktop Authoring Kit verifier rejects generated example state', async t => {
+test('Desktop Authoring Kit verifier rejects generated state and Windows folder metadata', async t => {
   for (const relativePath of [
     'examples/test-project/backups/flow-old.json',
     'examples/test-project/.save.lock',
-    'examples/test-project/.movement-media-trash/item/metadata.json'
+    'examples/test-project/.movement-media-trash/item/metadata.json',
+    'desktop.ini',
+    'effects/desktop.ini',
+    'studio/maker/DeSkToP.InI'
   ]) {
     await t.test(relativePath, () => {
       const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-authoring-kit-'));

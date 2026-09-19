@@ -45,7 +45,8 @@
     "tools/start-electron.cjs",
     "tools/verify-media-provenance.cjs",
     "distribution/media-provenance.json",
-    "distribution/desktop-authoring-kit.manifest.json"
+    "distribution/desktop-authoring-kit.manifest.json",
+    "!**/[dD][eE][sS][kK][tT][oO][pP].[iI][nN][iI]"
   ],
   "requiredPaths": [
     "package.json",
@@ -87,7 +88,8 @@
     "dist",
     "backups",
     ".save.lock",
-    ".movement-media-trash"
+    ".movement-media-trash",
+    "desktop.ini"
   ],
   "forbiddenExtensions": [
     ".php"
