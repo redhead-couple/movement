@@ -123,14 +123,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/darken-engine.js';
         const ENGINE = 'darken';
         import { runDarken } from '/effects/darken-engine.js';
@@ -240,35 +232,20 @@
             onImageLoaded: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
             run: () => { if(typeof runPreview === 'function') { runPreview(); } else if(typeof run === 'function') { run(); } },
             getExportJSON: () => {
-                const code = `
-import { runDarken } from '${ENGINE_PATH}';
-
-export function mount(canvas, ctx, config) {
-    return runDarken(canvas, ctx, {
-        ...config,
-        imgSrc: 'img/${window.imgName}',
-        startTime: ${config.startTime},
-        duration: ${config.duration},
-        yoyo: ${config.yoyo},
-        resetAtEnd: ${config.resetAtEnd},
-        zoomStart: ${config.zoomStart},
-        zoomEnd: ${config.zoomEnd},
-        driftX: ${config.driftX},
-        driftY: ${config.driftY},
-        darknessStart: ${config.darknessStart},
-        darknessEnd: ${config.darknessEnd},
-        vignette: ${config.vignette}
-    });
-}`;
-                // Look aggressively for an object return signature
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                let configObj = {};
-                if (match) {
-                    const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                    configObj = (new Function("return (" + objExpr + ");"))();
-                } else {
-                     console.error("Could not parse exported config!");
-                }
+                const configObj = {
+                    imgSrc: `img/${window.imgName}`,
+                    startTime: config.startTime,
+                    duration: config.duration,
+                    yoyo: config.yoyo,
+                    resetAtEnd: config.resetAtEnd,
+                    zoomStart: config.zoomStart,
+                    zoomEnd: config.zoomEnd,
+                    driftX: config.driftX,
+                    driftY: config.driftY,
+                    darknessStart: config.darknessStart,
+                    darknessEnd: config.darknessEnd,
+                    vignette: config.vignette
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

@@ -175,12 +175,57 @@ function startWebSession(): void
 {
     enforceProductionHttps();
 
-    if (session_status() !== PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_set_cookie_params(webSessionCookieOptions());
+        session_start();
+    }
+
+    // Every controller (including public playback and media) passes here before
+    // trusting session identity. Check once per request, never on a time cache.
+    static $credentialsChecked = false;
+    if (!$credentialsChecked) {
+        $credentialsChecked = true;
+        validateWebSessionCredentials();
+    }
+}
+
+function bindWebSessionToPassword(string $passwordHash): void
+{
+    // Keep a fingerprint, not a copy of the password hash, in session storage.
+    $_SESSION['credential_version'] = hash('sha256', $passwordHash);
+}
+
+function validateWebSessionCredentials(): void
+{
+    if (!isset($_SESSION['user_id']) && !isset($_SESSION['username']) && !isset($_SESSION['user'])) {
         return;
     }
 
-    session_set_cookie_params(webSessionCookieOptions());
-    session_start();
+    $version = $_SESSION['credential_version'] ?? null;
+    // Older sessions cannot safely be upgraded without authenticating again.
+    if (is_int($_SESSION['user_id'] ?? null) && $_SESSION['user_id'] > 0
+        && is_string($_SESSION['username'] ?? null) && is_string($version)) {
+        try {
+            require_once __DIR__ . '/db.php';
+            $stmt = db()->prepare('SELECT username, password_hash FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$_SESSION['user_id']]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (is_array($user) && $user['username'] === $_SESSION['username']
+                && is_string($user['password_hash']) && $user['password_hash'] !== ''
+                && hash_equals(hash('sha256', $user['password_hash']), $version)) {
+                return;
+            }
+        } catch (Throwable $e) {
+            // Fail closed for private data, while public pages remain available
+            // as guest pages. Never disclose database errors to the browser.
+            error_log('Could not validate authenticated web session.');
+        }
+    }
+
+    $_SESSION = [];
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
 }
 
 function destroyWebSession(): void

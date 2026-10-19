@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/password-reset.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
@@ -56,6 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         throw new RuntimeException('Password hashing failed.');
                     }
 
+                    // Change the password and revoke outstanding reset links as
+                    // one operation, serialized with reset issuance/completion.
+                    $pdo->beginTransaction();
+                    if (lockPasswordResetUser($pdo, (int) $_SESSION['user_id']) === null) {
+                        throw new RuntimeException('Account no longer exists.');
+                    }
                     // Do not overwrite a password changed by a concurrent request.
                     $stmt = $pdo->prepare('
                         UPDATE users
@@ -66,12 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($stmt->rowCount() !== 1) {
                         throw new RuntimeException('Password changed during submission.');
                     }
+                    invalidateUserPasswordResetTokens($pdo, (int) $_SESSION['user_id'], passwordResetNow());
+                    $pdo->commit();
 
                     session_regenerate_id(true);
+                    bindWebSessionToPassword($newHash);
                     $guard = resetFormGuard($formId);
                     $success = 'Your password has been changed.';
                 }
             } catch (Throwable $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $error = 'Something went wrong while changing your password.';
             }
         }

@@ -7,6 +7,7 @@ const net = require('node:net');
 const { once } = require('node:events');
 const { spawn, spawnSync } = require('node:child_process');
 const test = require('node:test');
+const { sessionData, databaseSource } = require('./helpers/session-fixture.cjs');
 const { websiteFiles } = require('../tools/web-files.cjs');
 const root = path.resolve(__dirname, '..');
 const slash = value => value.replaceAll('\\', '/');
@@ -50,7 +51,8 @@ async function server(t, environment) {
 $APP_ENVIRONMENT='${environment}'; $APP_HTTPS_ORIGIN='https://redhead-couple.org'; $APP_TRUST_PROXY=true;
 $DB_PASS='SYNTHETIC_ONLY'; $ADMIN_USER='test'; $ADMIN_PASS='synthetic-password';`);
   // Conflicting process environment must not override the existing private config.
-  write(parent, 'sessions/sess_indexowner', 'username|s:5:"owner";user_id|i:1;');
+  write(documentRoot, 'server/core/db.php', databaseSource({ 1: 'owner' }));
+  write(parent, 'sessions/sess_indexowner', sessionData('owner', 1));
   for (const [name, published] of [['published', true], ['draft', false]]) {
     const flow = JSON.stringify({ schemaVersion: 2, isPublished: published,
       title: published ? 'Public slideshow' : 'PRIVATE_DRAFT', slides: [{ text: 'Fixture' }] });

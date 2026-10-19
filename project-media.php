@@ -3,6 +3,7 @@ require_once __DIR__ . '/server/core/auth-check.php';
 require_once __DIR__ . '/server/core/current-user.php';
 require_once __DIR__ . '/server/core/project-paths.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/project-storage.php';
 
 $formId = 'project_media';
 $guard = ensureFormGuard($formId);
@@ -465,18 +466,6 @@ $imgDir = $projectDir . '/img';
 $speechDir = $projectDir . '/speech';
 $audioDir = $projectDir . '/audio';
 
-if (!is_dir($imgDir) && !mkdir($imgDir, 0755, true) && !is_dir($imgDir)) {
-    mediaError('Unable to prepare the image folder.', 500);
-}
-
-if (!is_dir($speechDir) && !mkdir($speechDir, 0755, true) && !is_dir($speechDir)) {
-    mediaError('Unable to prepare the speech folder.', 500);
-}
-
-if (!is_dir($audioDir) && !mkdir($audioDir, 0755, true) && !is_dir($audioDir)) {
-    mediaError('Unable to prepare the audio folder.', 500);
-}
-
 $projectMediaWebDir = $paths['mediaWebDir'];
 $flowPath = $paths['flowPath'];
 
@@ -537,121 +526,145 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $targetDir = $allowedFolders[$folder]['dir'];
     $allowedExtensions = $allowedFolders[$folder]['extensions'];
 
-    if ($action === 'upload') {
-        if (!isset($_FILES['media_file']) || !is_array($_FILES['media_file'])) {
-            mediaError('No file uploaded.', 400);
-        }
+    if (!in_array($action, ['upload', 'delete'], true)) {
+        mediaError('Unsupported action.', 400);
+    }
 
-        $upload = $_FILES['media_file'];
-        $originalName = trim((string) ($upload['name'] ?? ''));
-        $tmpName = (string) ($upload['tmp_name'] ?? '');
-        $errorCode = (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE);
-
-        if ($errorCode !== UPLOAD_ERR_OK) {
-            mediaError('Upload failed.', 400);
-        }
-
-        $MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-        if (($upload['size'] ?? 0) > $MAX_UPLOAD_BYTES) {
-            mediaError('File exceeds maximum upload size of 50MB.', 400);
-        }
-
-        if ($originalName === '' || $tmpName === '' || !is_uploaded_file($tmpName)) {
-            mediaError('Invalid uploaded file.', 400);
-        }
-
-        // S-04 Step 1: Server-side MIME detection — never trust $_FILES['type'].
-        $finfo    = new finfo(FILEINFO_MIME_TYPE);
-        $realMime = (string) $finfo->file($tmpName);
-
-        if (!array_key_exists($realMime, MEDIA_MIME_MAP)) {
-            mediaError('File type not allowed: ' . $realMime, 400);
-        }
-
-        // S-04 Step 2: Validate folder matches the real content type.
-        // Prevents uploading an audio file into the img/ directory, for instance.
-        $mimeIsImage = str_starts_with($realMime, 'image/');
-        $mimeIsAudio = str_starts_with($realMime, 'audio/');
-        if (($folder === 'img' && !$mimeIsImage) || (in_array($folder, ['speech', 'audio'], true) && !$mimeIsAudio)) {
-            mediaError('File content does not match the target folder type.', 400);
-        }
-
-        // S-04 Step 3: Derive canonical extension from MIME — NEVER from user filename.
-        $ext = MEDIA_MIME_MAP[$realMime];
-
-        // S-04 Step 4: Sanitize basename — strip unsafe chars, re-append single safe extension.
-        $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-        $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $baseName) . '.' . $ext;
-        if ($safeName === '.' . $ext) {
-            $safeName = 'upload_' . time() . '.' . $ext;
-        }
-
-        // S-04 Step 5: GD re-encode raster images to strip any appended polyglot payload.
-        if (in_array($realMime, ['image/jpeg', 'image/png', 'image/gif'], true)) {
-            $gdMap = [
-                'image/jpeg' => ['imagecreatefromjpeg', 'imagejpeg'],
-                'image/png'  => ['imagecreatefrompng',  'imagepng'],
-                'image/gif'  => ['imagecreatefromgif',  'imagegif'],
-            ];
-            [$createFn, $saveFn] = $gdMap[$realMime];
-            if (function_exists($createFn)) {
-                $img = @$createFn($tmpName);
-                if ($img === false) {
-                    mediaError('Uploaded image is corrupted or unreadable.', 400);
-                }
-                $reEncodedTmp = $tmpName . '.reencoded';
-                if ($saveFn($img, $reEncodedTmp)) {
-                    rename($reEncodedTmp, $tmpName);
-                } else {
-                    @unlink($reEncodedTmp);
-                    mediaError('Failed to re-encode uploaded image.', 500);
-                }
-                imagedestroy($img);
+    // Share the editor's lock across all filesystem checks and mutations.
+    // GET only lists media; it must not create folders while a save is active.
+    $projectLock = acquireProjectLock($projectDir);
+    if ($projectLock === false) {
+        mediaError('This project is already being saved or its media is being updated. Please try again.', 409);
+    }
+    try {
+        foreach ([$imgDir, $speechDir, $audioDir] as $directory) {
+            if (!is_dir($directory) && !@mkdir($directory, 0755, true) && !is_dir($directory)) {
+                mediaError('Unable to prepare the media folder.', 500);
             }
         }
 
-        $destination = $targetDir . '/' . $safeName;
-        if (is_file($destination)) {
-            mediaError('A file named "' . htmlspecialchars($safeName) . '" already exists in this folder. Rename the new file before uploading it.', 409);
-        }
-        if (!move_uploaded_file($tmpName, $destination)) {
-            mediaError('Could not save uploaded file.', 500);
-        }
-        // S-05: Explicitly set file permissions regardless of server umask.
-        chmod($destination, 0644);
+        if ($action === 'upload') {
+            if (!isset($_FILES['media_file']) || !is_array($_FILES['media_file'])) {
+                mediaError('No file uploaded.', 400);
+            }
 
-        redirectToProjectMedia($project);
+            $upload = $_FILES['media_file'];
+            $originalName = trim((string) ($upload['name'] ?? ''));
+            $tmpName = (string) ($upload['tmp_name'] ?? '');
+            $errorCode = (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE);
+
+            if ($errorCode !== UPLOAD_ERR_OK) {
+                mediaError('Upload failed.', 400);
+            }
+
+            $MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+            if (($upload['size'] ?? 0) > $MAX_UPLOAD_BYTES) {
+                mediaError('File exceeds maximum upload size of 50MB.', 400);
+            }
+
+            if ($originalName === '' || $tmpName === '' || !is_uploaded_file($tmpName)) {
+                mediaError('Invalid uploaded file.', 400);
+            }
+
+            // S-04 Step 1: Server-side MIME detection — never trust $_FILES['type'].
+            $finfo    = new finfo(FILEINFO_MIME_TYPE);
+            $realMime = (string) $finfo->file($tmpName);
+
+            if (!array_key_exists($realMime, MEDIA_MIME_MAP)) {
+                mediaError('File type not allowed: ' . $realMime, 400);
+            }
+
+            // S-04 Step 2: Validate folder matches the real content type.
+            // Prevents uploading an audio file into the img/ directory, for instance.
+            $mimeIsImage = str_starts_with($realMime, 'image/');
+            $mimeIsAudio = str_starts_with($realMime, 'audio/');
+            if (($folder === 'img' && !$mimeIsImage) || (in_array($folder, ['speech', 'audio'], true) && !$mimeIsAudio)) {
+                mediaError('File content does not match the target folder type.', 400);
+            }
+
+            // S-04 Step 3: Derive canonical extension from MIME — NEVER from user filename.
+            $ext = MEDIA_MIME_MAP[$realMime];
+
+            // S-04 Step 4: Sanitize basename — strip unsafe chars, re-append single safe extension.
+            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+            $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $baseName) . '.' . $ext;
+            if ($safeName === '.' . $ext) {
+                $safeName = 'upload_' . time() . '.' . $ext;
+            }
+
+            // S-04 Step 5: GD re-encode raster images to strip any appended polyglot payload.
+            if (in_array($realMime, ['image/jpeg', 'image/png', 'image/gif'], true)) {
+                $gdMap = [
+                    'image/jpeg' => ['imagecreatefromjpeg', 'imagejpeg'],
+                    'image/png'  => ['imagecreatefrompng',  'imagepng'],
+                    'image/gif'  => ['imagecreatefromgif',  'imagegif'],
+                ];
+                [$createFn, $saveFn] = $gdMap[$realMime];
+                if (function_exists($createFn)) {
+                    $img = @$createFn($tmpName);
+                    if ($img === false) {
+                        mediaError('Uploaded image is corrupted or unreadable.', 400);
+                    }
+                    $reEncodedTmp = $tmpName . '.reencoded';
+                    if ($saveFn($img, $reEncodedTmp)) {
+                        rename($reEncodedTmp, $tmpName);
+                    } else {
+                        @unlink($reEncodedTmp);
+                        mediaError('Failed to re-encode uploaded image.', 500);
+                    }
+                    imagedestroy($img);
+                }
+            }
+
+            $destination = $targetDir . '/' . $safeName;
+            if (is_file($destination)) {
+                mediaError('A file named "' . htmlspecialchars($safeName) . '" already exists in this folder. Rename the new file before uploading it.', 409);
+            }
+            assertUserStorageCapacity($paths['userFsDir'], storageFileBytes($tmpName));
+            if (!move_uploaded_file($tmpName, $destination)) {
+                mediaError('Could not save uploaded file.', 500);
+            }
+            // S-05: Explicitly set file permissions regardless of server umask.
+            chmod($destination, 0644);
+
+            redirectToProjectMedia($project);
+        }
+
+        if ($action === 'delete') {
+            $filename = trim((string) ($_POST['filename'] ?? ''));
+            if ($filename === '') {
+                mediaError('Missing file name.', 400);
+            }
+
+            $safeName = basename($filename);
+            if ($safeName !== $filename) {
+                mediaError('Invalid file name.', 400);
+            }
+
+            $extension = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
+            if ($extension === '' || !in_array($extension, $allowedExtensions, true)) {
+                mediaError('File type not allowed.', 400);
+            }
+
+            $filePath = $targetDir . '/' . $safeName;
+            if (!is_file($filePath)) {
+                mediaError('File not found.', 404);
+            }
+
+            if (!unlink($filePath)) {
+                mediaError('Could not delete the file.', 500);
+            }
+
+            redirectToProjectMedia($project);
+        }
+
+    } catch (StorageQuotaException $e) {
+        mediaError($e->getMessage(), $e->getCode());
+    } finally {
+        // Redirect/error helpers exit; PHP also closes the lock handle at
+        // request shutdown. This path releases it if an exception is thrown.
+        releaseProjectLock($projectLock);
     }
-
-    if ($action === 'delete') {
-        $filename = trim((string) ($_POST['filename'] ?? ''));
-        if ($filename === '') {
-            mediaError('Missing file name.', 400);
-        }
-
-        $safeName = basename($filename);
-        if ($safeName !== $filename) {
-            mediaError('Invalid file name.', 400);
-        }
-
-        $extension = strtolower(pathinfo($safeName, PATHINFO_EXTENSION));
-        if ($extension === '' || !in_array($extension, $allowedExtensions, true)) {
-            mediaError('File type not allowed.', 400);
-        }
-
-        $filePath = $targetDir . '/' . $safeName;
-        if (!is_file($filePath)) {
-            mediaError('File not found.', 404);
-        }
-
-        if (!unlink($filePath)) {
-            mediaError('Could not delete the file.', 500);
-        }
-
-        redirectToProjectMedia($project);
-    }
-
-    mediaError('Unsupported action.', 400);
 }
 
 $imageFiles = listAllowedFiles($imgDir, $imageExtensions);

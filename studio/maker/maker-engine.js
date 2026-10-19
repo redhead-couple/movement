@@ -355,16 +355,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 : (document.getElementById('overrideContainer1') || document.getElementById('overrideContainer'));
 
             if (overrideContainer) {
-                overrideContainer.innerHTML = `<div id="${overrideId}" style="width:100%; font-size:0.85rem; color:${color}; margin-top:8px;"></div>`;
+                lbl = document.createElement('div');
+                overrideContainer.replaceChildren(lbl);
             } else if (inputEl && inputEl.parentNode) {
-                inputEl.parentNode.insertAdjacentHTML('beforeend', `<div id="${overrideId}" style="width:100%; font-size:0.85rem; color:${color}; margin-top:8px;"></div>`);
+                lbl = document.createElement('div');
+                inputEl.parentNode.appendChild(lbl);
             }
-            lbl = document.getElementById(overrideId);
+            if (lbl) {
+                lbl.id = overrideId;
+                lbl.style.cssText = 'width:100%; font-size:0.85rem; margin-top:8px;';
+            }
         }
 
         if (lbl) {
             lbl.style.color = color;
-            lbl.innerHTML = `✔ ${tag}: <br><strong style="color:white; word-break:break-all;">${filename}</strong>`;
+            lbl.textContent = `✔ ${tag}: `;
+            const name = document.createElement('strong');
+            name.style.cssText = 'color:white; word-break:break-all;';
+            name.textContent = filename;
+            lbl.append(document.createElement('br'), name);
         }
     }
 
@@ -410,7 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (type === 'img') {
                     const imgPath = resolveMediaUrl('img', filename);
-                    previewBox.innerHTML = `<img src="${imgPath}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">`;
+                    const image = document.createElement('img');
+                    image.src = imgPath;
+                    image.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+                    image.loading = 'lazy';
+                    previewBox.appendChild(image);
                 } else {
                     previewBox.innerHTML = `<div style="font-size: 1.2rem; margin-top: -4px; color: #2563eb;">🎵</div>`;
                 }

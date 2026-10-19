@@ -6,15 +6,26 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, '../studio/maker/maker-engine.js'), 'utf8');
 
-function bootMaker({ desktop = false, config = null, standalone = false, search = '' } = {}) {
+function element(id = '') {
+  return {
+    id, style: {}, listeners: new Map(), children: [],
+    addEventListener(type, listener) { this.listeners.set(type, listener); },
+    append(...children) { this.children.push(...children); },
+    appendChild(child) { this.append(child); },
+    replaceChildren(...children) { this.children = children; },
+    set textContent(value) { this.text = String(value); this.children = []; },
+    get textContent() { return (this.text || '') + this.children.map(child => child.textContent).join(''); }
+  };
+}
+
+function bootMaker({ desktop = false, config = null, standalone = false, search = '', files = [], existingLabels = true } = {}) {
   const elements = new Map();
   for (const id of ['media-library-modal', 'img1Input', 'img2Input', 'overrideLabel',
-    'overrideLabel2', 'makerMediaImportBtn', 'slideshowInput', 'framesInput']) {
-    elements.set(id, {
-      id, style: {}, listeners: new Map(),
-      addEventListener(type, listener) { this.listeners.set(type, listener); }
-    });
+    'overrideLabel2', 'overrideContainer1', 'overrideContainer2', 'mediaLibGrid',
+    'mediaLibTitle', 'makerMediaImportBtn', 'slideshowInput', 'framesInput']) {
+    elements.set(id, element(id));
   }
+  if (!existingLabels) { elements.delete('overrideLabel'); elements.delete('overrideLabel2'); }
   const requests = [];
   const previews = [];
   const imports = [];
@@ -22,7 +33,7 @@ function bootMaker({ desktop = false, config = null, standalone = false, search 
   const top = {
     PROJECT_CONTEXT: { desktopMode: desktop, csrfToken: 'test-token' },
     MAKER_ENDPOINT: '/json-maker.php?project=story',
-    getMakerMediaList: async () => [],
+    getMakerMediaList: async () => files,
     resolveMakerMediaUrl: (_type, name) => desktop
       ? 'movement-project://workspace/story/img/' + name.replace(/^img\//, '')
       : mediaUrl(name),
@@ -48,6 +59,7 @@ function bootMaker({ desktop = false, config = null, standalone = false, search 
     window, URLSearchParams, FormData, console,
     sessionStorage: { getItem: () => config ? JSON.stringify({ config }) : null },
     document: {
+      createElement: tag => Object.assign(element(), { tagName: tag.toUpperCase() }),
       getElementById: id => elements.get(id) || null,
       addEventListener: (_type, listener) => { ready = listener; }
     },
@@ -146,3 +158,32 @@ test('standalone relative paths avoid duplicate img directories and retain data 
   assert.equal(maker.previews[0][0], '/img/view1.webp');
   assert.equal(maker.previews[0][1], 'data:image/webp;base64,BBBB');
 });
+
+const markupName = '<img src=x onerror="globalThis.injected=true">\' & צילום.webp';
+
+for (const existingLabels of [true, false]) {
+  test(`URL image names are literal text (${existingLabels ? 'existing' : 'new'} label)`, () => {
+    const maker = bootMaker({ standalone: true, existingLabels,
+      search: '?img=' + encodeURIComponent(markupName) + '&imgUrl=data:image/png;base64,AAAA' });
+    const label = existingLabels ? maker.elements.get('overrideLabel')
+      : maker.elements.get('overrideContainer1').children[0];
+    assert.equal(label.children[1].tagName, 'STRONG');
+    assert.equal(label.children[1].textContent, markupName);
+    assert.equal(label.innerHTML, undefined);
+    assert.equal(maker.window.imgName, markupName);
+  });
+}
+
+for (const desktop of [false, true]) {
+  test(`${desktop ? 'desktop' : 'web'} saved effect filenames are text and library URLs cannot create attributes`, async () => {
+    const maker = bootMaker({ desktop, search: '?mode=edit',
+      config: { imgSrc: 'img/' + markupName, imgSrc2: 'img/' + markupName }, files: [markupName] });
+    assert.equal(maker.elements.get('overrideLabel2').children[1].textContent, markupName);
+    await maker.window.openMediaLibrary('img');
+    const image = maker.elements.get('mediaLibGrid').children[0].children[0].children[0];
+    assert.equal(image.tagName, 'IMG');
+    assert.ok(image.src.endsWith(markupName));
+    assert.equal(image.onerror, undefined);
+    assert.equal(image.loading, 'lazy');
+  });
+}

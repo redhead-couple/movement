@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/server/core/require-guest.php';
 require_once __DIR__ . '/server/core/db.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/login-throttle.php';
 $error = '';
 $login = '';
 $formId = 'login';
@@ -28,67 +29,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter your username or email and password.';
     } else {
         try {
-            $pdo = db();
-            $pdo->exec("
-                CREATE TABLE IF NOT EXISTS login_attempts (
-                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    login_identifier VARCHAR(190) NOT NULL,
-                    ip VARBINARY(16) NOT NULL,
-                    attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_login_attempts_ip_time (ip, attempted_at),
-                    INDEX idx_login_attempts_login_time (login_identifier, attempted_at)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-
-            $ip = clientIpBinary();
-
-            $attemptStmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM login_attempts
-                WHERE ip = ? AND attempted_at > (NOW() - INTERVAL 15 MINUTE)
-            ");
-            $attemptStmt->execute([$ip]);
-
-            if ((int)$attemptStmt->fetchColumn() >= 5) {
+            $attempt = authenticateWithLoginThrottle(db(), $login, $password, clientIpBinary());
+            if ($attempt['status'] === 'blocked') {
                 $error = 'Too many login attempts. Please wait a few minutes and try again.';
+            } elseif ($attempt['status'] === 'invalid') {
+                $error = 'Invalid login or password.';
             } else {
-                $stmt = $pdo->prepare('
-                    SELECT id, username, email, password_hash
-                    FROM users
-                    WHERE username = ? OR email = ?
-                    LIMIT 1
-                ');
-                $stmt->execute([$login, $login]);
-                $user = $stmt->fetch();
+                $user = $attempt['user'];
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = (int)$user['id'];
+                $_SESSION['username'] = $user['username'];
+                bindWebSessionToPassword($user['password_hash']);
+                $_SESSION['user'] = [
+                    'id' => (int)$user['id'],
+                    'username' => $user['username'],
+                    'email' => $user['email'],
+                ];
+                resetFormGuard($formId);
 
-                if (!$user || !password_verify($password, $user['password_hash'])) {
-                    $error = 'Invalid login or password.';
-
-                    $stmt = $pdo->prepare("
-                        INSERT INTO login_attempts (login_identifier, ip)
-                        VALUES (?, ?)
-                    ");
-                    $stmt->execute([mb_substr($login, 0, 190), $ip]);
-                } else {
-                    $stmt = $pdo->prepare("
-                        DELETE FROM login_attempts
-                        WHERE ip = ? OR login_identifier = ?
-                    ");
-                    $stmt->execute([$ip, mb_substr($login, 0, 190)]);
-
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = (int)$user['id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['user'] = [
-                        'id' => (int)$user['id'],
-                        'username' => $user['username'],
-                        'email' => $user['email'],
-                    ];
-                    resetFormGuard($formId);
-
-                    header('Location: /dashboard.php');
-                    exit;
-                }
+                header('Location: /dashboard.php');
+                exit;
             }
         } catch (Throwable $e) {
             $error = 'Something went wrong during login.';

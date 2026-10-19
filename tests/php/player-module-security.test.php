@@ -34,10 +34,21 @@ $applicationRoot = dirname(__DIR__, 2);
 $effects = loadApprovedPlayerModuleSlugs($applicationRoot, 'effects');
 $transitions = loadApprovedPlayerModuleSlugs($applicationRoot, 'transitions');
 
-assertPlayerPolicy(count($effects) === 25, 'Expected exactly 25 approved effects.');
-assertPlayerPolicy(count($transitions) === 6, 'Expected exactly 6 approved transitions.');
-assertPlayerPolicy(isset($effects['zoom']), 'Registered effect zoom was rejected.');
-assertPlayerPolicy(isset($transitions['soft-wipe']), 'Registered transition soft-wipe was rejected.');
+// Read expected membership independently of the policy loader. Registry growth
+// must not require editing tests, and equal counts must not hide wrong members.
+foreach (['effects' => $effects, 'transitions' => $transitions] as $folder => $approved) {
+    $registry = json_decode(file_get_contents($applicationRoot . '/' . $folder . '/registry.json'), true, 512, JSON_THROW_ON_ERROR);
+    $expected = [];
+    foreach ($registry as $group) {
+        foreach (explode(',', $group['engines']) as $name) {
+            $slug = trim($name);
+            if ($slug !== '') $expected[$slug] = true;
+        }
+    }
+    ksort($expected);
+    ksort($approved);
+    assertPlayerPolicy($approved === $expected, 'Approved modules differ from the current ' . $folder . ' registry.');
+}
 assertPlayerPolicy(!isset($effects['unregistered-effect']), 'Unregistered effect was approved.');
 assertPlayerPolicy(!isset($transitions['unregistered-transition']), 'Unregistered transition was approved.');
 

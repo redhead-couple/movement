@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/project-storage.php';
 $project = $_GET['project'] ?? '';
 if (!$project) {
     $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -123,10 +124,8 @@ function validateAndSanitizeUpload(
             $reEncodedTmp = $tmpName . '.reencoded';
             $saved = $saveFn($img, $reEncodedTmp);
             imagedestroy($img);
-            if ($saved) {
-                // Atomically replace tmp with the clean re-encoded version.
-                rename($reEncodedTmp, $tmpName);
-            } else {
+            // A failed preparation must never reach the live media replacement.
+            if (!$saved || !@rename($reEncodedTmp, $tmpName)) {
                 @unlink($reEncodedTmp);
                 respondErrorJson('Failed to re-encode uploaded image.', 500);
             }
@@ -240,9 +239,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     respondErrorJson('This project is already being saved. Please try again.', 409);
                 }
                 try {
-                    if (!is_dir($targetDir))
-                        mkdir($targetDir, 0755, true);
-
                     $destPath = $targetDir . $name;
 
                     if (file_exists($destPath) && !requestWantsReplaceExisting()) {
@@ -250,13 +246,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         respondJson(getUploadConflictResponse([$name]));
                     }
 
-                    if (file_exists($destPath) && !@unlink($destPath)) {
-                        respondErrorJson('Failed to replace existing file. Is it open elsewhere?', 500);
-                    }
-
-                    if (@move_uploaded_file($tmpName, $destPath)) {
-                        // S-05: Explicit file permission regardless of server umask.
-                        chmod($destPath, 0644);
+                    $uploads = [['tmpName' => $tmpName, 'destination' => $destPath]];
+                    assertUserStorageCapacity($paths['userFsDir'], uploadStoragePeakBytes($uploads));
+                    if (saveProjectUploadBatch($uploads)) {
                         respondJson(['status' => 'success', 'filename' => $name, 'type' => $validated['realMime']]);
                     } else {
                         respondErrorJson('Failed to move uploaded file. Is the file already open elsewhere?', 500);
@@ -288,10 +280,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // A full save must never silently replace different media. Immediate
             // uploads use the explicit replacement-confirmation route above.
             $conflictingMedia = [];
+            $uploads = [];
+            $mediaMessages = [];
             if (!empty($_FILES['media']['name']) && is_array($_FILES['media']['name'])) {
                 for ($i = 0; $i < count($_FILES['media']['name']); $i++) {
-                    if (($_FILES['media']['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) continue;
-                    if (($_FILES['media']['size'][$i] ?? 0) > MAX_UPLOAD_BYTES) continue;
+                    if (($_FILES['media']['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                        respondErrorJson('A media upload failed. The project was not saved.', 400);
+                    }
+                    if (($_FILES['media']['size'][$i] ?? 0) > MAX_UPLOAD_BYTES) {
+                        respondErrorJson('File exceeds maximum upload size of 50MB. The project was not saved.', 400);
+                    }
 
                     $origName  = basename((string) $_FILES['media']['name'][$i]);
                     $tmpName   = (string) $_FILES['media']['tmp_name'][$i];
@@ -302,6 +300,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $safeName    = $validated['safeName'];
                     $folder      = str_starts_with($validated['realMime'], 'image/') ? 'img' : ($mediaKind === 'audio' ? 'audio' : 'speech');
                     $destination = $projectFsDir . '/' . $folder . '/' . $safeName;
+                    $uploads[] = ['tmpName' => $tmpName, 'destination' => $destination];
+                    $mediaMessages[] = 'Saved ' . ($folder === 'img' ? 'image' : $folder) . ': ' . $safeName;
                     if (is_file($destination)) {
                         $conflictingMedia[] = $folder . '/' . $safeName;
                     }
@@ -341,6 +341,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 respondErrorJson('Failed to encode project JSON.', 500);
             }
 
+            assertUserStorageCapacity($paths['userFsDir'], uploadStoragePeakBytes($uploads)
+                + storageFileBytes($jsonFilePath) + strlen($jsonData));
+
             if (!is_dir($backupDir)) {
                 mkdir($backupDir, 0755, true);
             }
@@ -348,9 +351,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $timestamp = date('Y-m-d-His');
 
-                $backupFile = $backupDir . '/flow-' . $timestamp . '.json';
+                $backupFile = $backupDir . '/flow-' . $timestamp . '-' . bin2hex(random_bytes(4)) . '.json';
 
-                copy($jsonFilePath, $backupFile);
+                if (!copy($jsonFilePath, $backupFile)) {
+                    respondErrorJson('Failed to create a safety backup.', 500);
+                }
             }
             $files = glob($backupDir . '/flow-*.json');
 
@@ -364,133 +369,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     unlink($f);
                 }
             }
-            if (!saveJsonAtomically($jsonFilePath, $jsonData)) {
-                respondErrorJson('Failed to save project JSON.', 500);
+            if (!saveProjectUploadBatch($uploads, $jsonFilePath, $jsonData)) {
+                respondErrorJson('Failed to save the project or its media. Please try again.', 500);
             }
-            $response['messages'][] = "Saved flow.json";
-
-            // 2. Handle Media Files — S-04: Full validation via validateAndSanitizeUpload()
-            if (!empty($_FILES['media']['name']) && is_array($_FILES['media']['name'])) {
-                $imgDir    = $projectFsDir . '/img/';
-                $speechDir = $projectFsDir . '/speech/';
-                $audioDir  = $projectFsDir . '/audio/';
-
-                if (!is_dir($imgDir))    mkdir($imgDir,    0755, true);
-                if (!is_dir($speechDir)) mkdir($speechDir, 0755, true);
-                if (!is_dir($audioDir))  mkdir($audioDir,  0755, true);
-
-                for ($i = 0; $i < count($_FILES['media']['name']); $i++) {
-                    if ($_FILES['media']['error'][$i] !== UPLOAD_ERR_OK) continue;
-                    if (($_FILES['media']['size'][$i] ?? 0) > MAX_UPLOAD_BYTES) continue;
-
-                    $tmpName   = (string) $_FILES['media']['tmp_name'][$i];
-                    $origName  = basename((string) $_FILES['media']['name'][$i]);
-                    $mediaKind = (string) ($_POST['media_kind'][$i] ?? '');
-
-                    $validated = validateAndSanitizeUpload($tmpName, $origName, $mediaKind, $projectFsDir);
-                    $safeName  = $validated['safeName'];
-                    $realMime  = $validated['realMime'];
-
-                    if (str_starts_with($realMime, 'image/')) {
-                        $dest = $imgDir . $safeName;
-                        if (!file_exists($dest) || requestWantsReplaceExisting()) {
-                            if (file_exists($dest) && !@unlink($dest)) {
-                                $response['messages'][] = "Failed to replace image: {$safeName}";
-                                continue;
-                            }
-                            if (@move_uploaded_file($tmpName, $dest)) {
-                                chmod($dest, 0644); // S-05
-                                $response['messages'][] = "Saved image: {$safeName}";
-                            } else {
-                                $response['messages'][] = "Failed to save image: {$safeName}";
-                            }
-                        }
-                    } else {
-                        $audioTargetDir = $mediaKind === 'audio' ? $audioDir : $speechDir;
-                        $dest = $audioTargetDir . $safeName;
-                        if (!file_exists($dest) || requestWantsReplaceExisting()) {
-                            if (file_exists($dest) && !@unlink($dest)) {
-                                $response['messages'][] = "Failed to replace audio: {$safeName}";
-                                continue;
-                            }
-                            if (@move_uploaded_file($tmpName, $dest)) {
-                                chmod($dest, 0644); // S-05
-                                $response['messages'][] = ($mediaKind === 'audio' ? "Saved audio: {$safeName}" : "Saved speech: {$safeName}");
-                            } else {
-                                $response['messages'][] = "Failed to save audio: {$safeName}";
-                            }
-                        }
-                    }
-                }
-            }
-
+            $response['messages'] = array_merge(['Saved flow.json'], $mediaMessages);
             respondJson($response);
         } finally {
             releaseProjectLock($projectLock);
         }
+    } catch (StorageQuotaException $e) {
+        respondErrorJson($e->getMessage(), $e->getCode());
     } catch (Exception $e) {
         error_log($e->getMessage());
         respondErrorJson('An internal error occurred while saving.', 500);
     }
-}
-function acquireProjectLock(string $projectFsDir)
-{
-    $lockPath = $projectFsDir . '/.save.lock';
-    $handle = fopen($lockPath, 'c');
-
-    if ($handle === false) {
-        return false;
-    }
-
-    if (!flock($handle, LOCK_EX | LOCK_NB)) {
-        fclose($handle);
-        return false;
-    }
-
-    return $handle;
-}
-
-function releaseProjectLock($handle): void
-{
-    if (is_resource($handle)) {
-        flock($handle, LOCK_UN);
-        fclose($handle);
-    }
-}
-function saveJsonAtomically(string $targetPath, string $json): bool
-{
-    $dir = dirname($targetPath);
-
-    if (!is_dir($dir)) {
-        return false;
-    }
-
-    $tmpPath = $dir . '/flow.tmp.json';
-
-    $decoded = json_decode($json, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return false;
-    }
-
-    $normalizedJson = json_encode(
-        $decoded,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
-    );
-
-    if ($normalizedJson === false) {
-        return false;
-    }
-
-    if (file_put_contents($tmpPath, $normalizedJson, LOCK_EX) === false) {
-        return false;
-    }
-
-    if (!rename($tmpPath, $targetPath)) {
-        @unlink($tmpPath);
-        return false;
-    }
-
-    return true;
 }
 ?>
 <!DOCTYPE html>

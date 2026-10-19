@@ -67,14 +67,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/flash-engine.js';
         const ENGINE = 'flash';
         import { mount } from '/effects/flash-engine.js';
@@ -121,21 +113,13 @@
             onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
             run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
             getExportJSON: () => {
-                const code = `
-import { mount as runFlash } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runFlash(canvas, ctx, {
-        ...config,
-        imgSrc: 'img/${window.imgName}',
-        intensity: ${cfg.intensity}, speed: ${cfg.speed},
-        hold: ${cfg.hold}, decay: ${cfg.decay},
-        tint: '${cfg.tint}', bloom: ${cfg.bloom},
-        triggerAtStart: true
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: `img/${window.imgName}`,
+                    intensity: cfg.intensity, speed: cfg.speed,
+                    hold: cfg.hold, decay: cfg.decay,
+                    tint: cfg.tint, bloom: cfg.bloom,
+                    triggerAtStart: true
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

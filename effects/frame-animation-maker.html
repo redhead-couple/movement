@@ -355,7 +355,13 @@
             window.frameFileNames.forEach((name, index) => {
                 const item = document.createElement('div');
                 item.className = 'img-item';
-                item.innerHTML = `<span>${index + 1}. ${name}</span><span class="rm-btn" data-idx="${index}">×</span>`;
+                const label = document.createElement('span');
+                label.textContent = `${index + 1}. ${name}`;
+                const remove = document.createElement('span');
+                remove.className = 'rm-btn';
+                remove.dataset.idx = String(index);
+                remove.textContent = '×';
+                item.append(label, remove);
                 list.appendChild(item);
             });
 

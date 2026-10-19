@@ -12,6 +12,12 @@ $currentUser = $_SESSION['username'] ?? '';
 if (session_status() === PHP_SESSION_ACTIVE) {
     session_write_close();
 }
+// Publication and session identity can change between requests. Never let a
+// browser or shared cache reuse project data without reaching authorization.
+// Set this before validation so denied/missing responses cannot be cached either.
+header('Cache-Control: private, no-store, max-age=0, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 $p = $_GET['p'] ?? '';
 if ($p === '') {
     http_response_code(400);
@@ -59,9 +65,9 @@ $mime = MEDIA_MIME_MAP[$ext];
 
 $privatePaths = getProjectPaths($reqUser, $reqProject);
 $projectFsDir = $privatePaths['projectFsDir'];
-$fileFsPath = $projectFsDir . '/' . $subPath;
+$fileFsPath = realpath($projectFsDir . '/' . $subPath);
 
-if (!is_file($fileFsPath)) {
+if ($fileFsPath === false || !is_file($fileFsPath)) {
     http_response_code(404);
     die('File not found.');
 }
@@ -72,7 +78,16 @@ $isPublished = false;
 
 // If we are not the owner, we can only view if published, AND we cannot view backups
 if (!$isOwner) {
-    if (str_starts_with($subPath, 'backups/')) {
+    // Authorize the resolved file, not the URL spelling: repeated separators,
+    // ./ segments and Windows path aliases can all refer to the same backup.
+    $backupFsDir = realpath($privatePaths['backupsFsDir']);
+    $checkedFilePath = $fileFsPath;
+    if (DIRECTORY_SEPARATOR === '\\') {
+        // Windows realpath does not guarantee canonical letter casing.
+        $checkedFilePath = strtolower($checkedFilePath);
+        $backupFsDir = $backupFsDir === false ? false : strtolower($backupFsDir);
+    }
+    if ($backupFsDir !== false && str_starts_with($checkedFilePath, $backupFsDir . DIRECTORY_SEPARATOR)) {
         http_response_code(403);
         die('Backups are private.');
     }
@@ -95,12 +110,6 @@ if (!$isOwner) {
 // Serve the file safely
 header('Content-Type: ' . $mime);
 header('Content-Length: ' . filesize($fileFsPath));
-
-if ($isPublished) {
-    header('Cache-Control: public, max-age=3600');
-} else {
-    header('Cache-Control: private, max-age=0, must-revalidate');
-}
 
 readfile($fileFsPath);
 exit;

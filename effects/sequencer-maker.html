@@ -80,14 +80,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         // ENGINE PATH
         const ENGINE_PATH = '/effects/sequencer-engine.js';
         const ENGINE = 'sequencer';
@@ -168,18 +160,6 @@
         });
 
         // Image preloading and upload wiring are handled centrally by maker-engine.js.
-        /*
-
-
-
-
-
-
-            if (overrideContainer) overrideContainer.innerHTML = '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>';
-            else { const inputGroup = document.getElementById('imgInput').parentNode;
-            inputGroup.insertAdjacentHTML('beforeend', '<div id="overrideLabel" style="font-size:0.85rem; color:#10b981; margin-top:8px;">✔ Linked to slide: <br><strong style="color:white; word-break:break-all;">' + prefilledImg + '</strong></div>'); }
-
-        */
         window.MakerAPI = {
             onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
             run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
@@ -197,28 +177,19 @@
                 run();
             },
             getExportJSON: () => {
-                const pointsStr = JSON.stringify(points);
                 const imgSrc = window.imgName ? `img/${window.imgName}` : '';
-                const code = `
-import { mount as runSeq } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runSeq(canvas, ctx, {
-        ...config,
-        imgSrc: '${imgSrc}',
-        points: ${pointsStr},
-        interval: ${cfg.interval},
-        startDelay: ${cfg.startDelay},
-        color: '${cfg.color}',
-        size: ${cfg.size},
-        intensity: ${cfg.intensity},
-        darken: ${cfg.darken},
-        dispersion: ${cfg.dispersion},
-        fadeSpeed: ${cfg.fadeSpeed}
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: imgSrc,
+                    points: points.map(point => ({ ...point })),
+                    interval: cfg.interval,
+                    startDelay: cfg.startDelay,
+                    color: cfg.color,
+                    size: cfg.size,
+                    intensity: cfg.intensity,
+                    darken: cfg.darken,
+                    dispersion: cfg.dispersion,
+                    fadeSpeed: cfg.fadeSpeed
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

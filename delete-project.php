@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/storage-quota.php';
 
 $formId = 'delete_project';
 $guard = ensureFormGuard($formId);
@@ -58,21 +59,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($guardError !== null) {
         $error = $guardError;
     } else {
-    $confirm = $_POST['confirm'] ?? '';
-
-    if ($confirm === 'yes') {
-        $deleted = deleteProjectFolder($projectDir);
-
-        if ($deleted) {
-            header('Location: /dashboard.php?deleted=' . rawurlencode($project));
+        $confirm = $_POST['confirm'] ?? '';
+        if ($confirm !== 'yes') {
+            header('Location: /dashboard.php');
             exit;
         }
 
-        $error = 'Could not delete project folder.';
-    } else {
-        header('Location: /dashboard.php');
-        exit;
-    }
+        // Every project writer holds this account lock first. Keep the lock
+        // outside the directory being deleted; an open .save.lock inside the
+        // project would prevent deletion on Windows. No quota check for deletion.
+        $userStorageLock = acquireUserStorageLock($userProjectsDir);
+        if ($userStorageLock === false) {
+            http_response_code(409);
+            $error = 'Another project or media operation is in progress. Please try again.';
+        } else {
+            try {
+                clearstatcache();
+                if (!is_dir($projectDir) || !is_file($flowFile)) {
+                    respondNotFoundPage();
+                }
+                if (deleteProjectFolder($projectDir)) {
+                    header('Location: /dashboard.php?deleted=' . rawurlencode($project));
+                    exit;
+                }
+                $error = 'Could not delete project folder.';
+            } finally {
+                // Exit responses also release this object's lock at shutdown.
+                $userStorageLock = null;
+            }
+        }
     }
 }
 ?>

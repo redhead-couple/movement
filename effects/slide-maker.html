@@ -69,14 +69,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/slide-engine.js';
         const ENGINE = 'slide';
         import { mount } from '/effects/slide-engine.js';
@@ -132,21 +124,13 @@
             onImageLoaded: () => { if(typeof run === 'function') run(); },
             run: () => { if(typeof run === 'function') run(); },
             getExportJSON: () => {
-                const code = `
-import { mount as runSlide } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runSlide(canvas, ctx, {
-        ...config,
-        imgSrc: 'img/${window.name1}',
-        imgSrc2: 'img/${window.name2}',
-        startDelay: ${cfg.startDelay},
-        duration: ${cfg.duration},
-        direction: '${cfg.direction}'
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: `img/${window.name1}`,
+                    imgSrc2: `img/${window.name2}`,
+                    startDelay: cfg.startDelay,
+                    duration: cfg.duration,
+                    direction: cfg.direction
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

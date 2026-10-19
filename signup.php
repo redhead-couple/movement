@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $userId;
                 $_SESSION['username'] = $username;
+                bindWebSessionToPassword($passwordHash);
                 $_SESSION['user'] = [
                     'id' => $userId,
                     'username' => $username,
