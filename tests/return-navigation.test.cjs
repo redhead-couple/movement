@@ -52,7 +52,7 @@ test('standard application pages expose the shared home brand', () => {
 
   const login = read('login.php');
   const signup = read('signup.php');
-  assert.match(login, /class="app-nav__link" href="\/signup\.php">Create account<\/a>/);
+  assert.match(login, /class="app-nav__link" href="\/signup\.php"/);
   assert.match(signup, /class="app-nav__link" href="\/login\.php">Log in<\/a>/);
 });
 

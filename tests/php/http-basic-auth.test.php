@@ -48,7 +48,7 @@ basicAuthAssert(is_string($apacheRules), 'Could not read Apache rules.');
 basicAuthAssert(is_string($adminEndpoint), 'Could not read the admin endpoint.');
 basicAuthAssert(
     str_contains($apacheRules, 'RewriteCond %{HTTP:Authorization} ^(.+)$')
-        && str_contains($apacheRules, 'RewriteRule ^admin-messages\.php$ - [E=HTTP_AUTHORIZATION:%1]'),
+        && str_contains($apacheRules, 'RewriteRule ^admin-(?:messages|invitations)\.php$ - [E=HTTP_AUTHORIZATION:%1]'),
     'Apache does not forward the admin Authorization header.'
 );
 basicAuthAssert(

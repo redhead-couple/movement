@@ -13,7 +13,7 @@ function fixture(t) {
   const root = path.join(parent, 'public_html');
   fs.mkdirSync(path.join(root, 'server/core'), { recursive: true });
   fs.mkdirSync(path.join(root, 'sessions'));
-  for (const file of ['config-loader.php', 'db.php', 'web-session.php', 'security-helpers.php', 'http-basic-auth.php']) {
+  for (const file of ['config-loader.php', 'db.php', 'web-session.php', 'security-helpers.php', 'http-basic-auth.php', 'admin-login-throttle.php']) {
     fs.copyFileSync(path.join(applicationRoot, 'server/core', file), path.join(root, 'server/core', file));
   }
   fs.copyFileSync(path.join(applicationRoot, 'admin-messages.php'), path.join(root, 'admin-messages.php'));

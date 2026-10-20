@@ -8,6 +8,8 @@ require_once __DIR__ . '/server/core/require-guest.php';
 require_once __DIR__ . '/server/core/db.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
 require_once __DIR__ . '/server/core/login-throttle.php';
+require_once __DIR__ . '/server/core/registration-invitations.php';
+$inviteOnly = inviteOnlyRegistration();
 $error = '';
 $login = '';
 $formId = 'login';
@@ -72,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="wrap app-site-header__inner">
             <a class="app-brand" href="/" aria-label="Early Formation home">Early Formation</a>
             <nav class="app-nav" aria-label="Authentication navigation">
-                <a class="app-nav__link" href="/signup.php">Create account</a>
+                <a class="app-nav__link" href="/signup.php"><?= $inviteOnly ? "Invitation access" : "Create account" ?></a>
             </nav>
         </div>
     </header>
@@ -82,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="auth-card">
                     <div class="auth-intro">
                         <div class="auth-copy">
-                            <p class="eyebrow">Slideshow Post Login</p>
-                            <h1>Sign in to create slideshow posts</h1>
-                            <p class="muted">Speak your mind, define your vision, and let AI-generated images bring your intentions to life in standout slideshow posts.</p>
+                            <p class="eyebrow">Welcome Back</p>
+                            <h1>Continue your creative work</h1>
+                            <p class="muted"><?= $inviteOnly ? "Early Formation is in private beta with a small group of testers. Log in to create, explore, and share your feedback." : "Log in to create, manage, and publish your slideshows." ?></p>
                             <div class="auth-pills">
-                                <span class="auth-pill">Local Access</span>
+                                <span class="auth-pill">Your Projects</span>
                                 <span class="auth-pill">Editor Tools</span>
                                 <span class="auth-pill">Backup Control</span>
                             </div>
@@ -96,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="section-head">
                             <div>
                                 <h2>Sign in</h2>
-                                <p class="muted">Use your local username to continue into the dashboard.</p>
+                                <p class="muted">Use your username or email and password to continue.</p>
                             </div>
                         </div>
 
@@ -144,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="auth-links">
                             <a class="button-secondary" href="/forgot-password.php">Forgot password?</a>
-                            <a class="button-secondary" href="/signup.php">Don't have an account? Sign up</a>
+                            <a class="button-secondary" href="/signup.php"><?= $inviteOnly ? "Have an invitation?" : "Don’t have an account? Sign up" ?></a>
                         </div>
 
                         <div class="auth-legal">

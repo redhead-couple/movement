@@ -562,6 +562,7 @@ $rows = $stmt->fetchAll();
         <div class="wrap app-site-header__inner">
             <a class="app-brand" href="/" aria-label="Early Formation home">Early Formation</a>
             <nav class="app-nav" aria-label="Admin navigation">
+                <a class="app-nav__link" href="/admin-invitations.php">Invitations</a>
                 <a class="app-nav__link" href="/dashboard.php">My Library</a>
                 <a class="app-nav__link" href="/contact.php">Contact Page</a>
                 <a class="app-nav__link" href="/privacy.php">Privacy</a>

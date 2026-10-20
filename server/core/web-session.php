@@ -27,6 +27,7 @@ function setWebPageDiscovery(bool $publicDiscovery): void
 function isWebPageIndexable(): bool
 {
     return !empty($GLOBALS['movementPublicDiscovery'])
+        && ($GLOBALS['ALLOW_SEARCH_INDEXING'] ?? false) === true
         && isProductionWebEnvironment()
         && (http_response_code() ?: 200) === 200
         && in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true);

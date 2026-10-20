@@ -79,6 +79,6 @@ test('web-server entry points deny direct access to server internals', () => {
 
   assert.match(apacheRules, /RewriteRule \^server\(\?:\/\|\$\) - \[F,L\]/);
   assert.match(serverRules, /Require all denied/);
-  assert.match(router, /preg_match\('#\^\/server\(\?:\/\|\$\)#', \$path\)/);
+  assert.ok(router.includes("preg_match('#^/(?:private-data|server)(?:/|$)#i', $path)"));
   assert.match(router, /http_response_code\(403\)/);
 });

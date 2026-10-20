@@ -24,7 +24,7 @@ test('password changes revoke old sessions at every web authorization boundary',
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, content);
   };
-  for (const file of ['login.php', 'server/core/login-throttle.php', 'signup.php', 'account-settings.php', 'reset-password.php',
+  for (const file of ['login.php', 'server/core/login-throttle.php', 'server/core/registration-invitations.php', 'signup.php', 'account-settings.php', 'reset-password.php',
     'player.php', 'media.php', 'server/core/app-init.php', 'server/core/auth-check.php',
     'server/core/current-user.php', 'server/core/current-user-record.php',
     'server/core/require-guest.php', 'server/core/security-helpers.php',
@@ -52,7 +52,7 @@ function db(): PDO {
     return $pdo ??= new SessionTestPdo('sqlite:' . dirname(__DIR__, 2) . '/test.sqlite', null, null,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
 }`);
-  write('server/core/app-config.php', "<?php $APP_ENVIRONMENT = 'development'; $APP_HTTPS_ORIGIN = 'https://accounts.example.test';");
+  write('server/core/app-config.php', "<?php $INVITE_ONLY_REGISTRATION = false; $APP_ENVIRONMENT = 'development'; $APP_HTTPS_ORIGIN = 'https://accounts.example.test';");
   write('guard.php', `<?php require 'server/core/security-helpers.php';
     $form = $_GET['form']; $guard = ensureFormGuard($form);
     $_SESSION['form_guards'][$form]['started_at'] = time() - 5;
@@ -155,8 +155,8 @@ function db(): PDO {
       assert.equal((await identity(jar)).status, 200);
     }
     const newcomer = {};
-    const response = await form(newcomer, '/signup.php', 'signup', { username: 'newcomer', email: 'new@example.test', password: 'new-password' });
-    assert.equal(response.status, 302, response.body);
+    const response = await form(newcomer, '/signup.php', 'signup', { username: 'newcomer', email: 'new@example.test', password: 'new-password', confirm_password: 'new-password' });
+    assert.equal(response.status, 303, response.body);
     assert.equal((await identity(newcomer)).body, '{"username":"newcomer"}');
     assert.deepEqual((await request(a, media('draft', 'img/pixel.png'))).bytes, png);
   });
