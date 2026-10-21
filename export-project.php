@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/server/core/auth-check.php';
 require_once __DIR__ . '/server/core/current-user.php';
 require_once __DIR__ . '/server/core/player-module-policy.php';
+require_once __DIR__ . '/server/core/storage-quota.php';
 require_once __DIR__ . '/templates/player/offline-player-template.php';
 
 function normalizeEngineName(string $raw): string
@@ -160,6 +161,20 @@ $userProjectsDir = __DIR__ . '/private-data/slidedeck/' . $currentUser;
 $projectDir = $userProjectsDir . '/' . $project;
 $flowJsonPath = $projectDir . '/flow.json';
 
+// The export is read-only. Do not keep PHP's session mutex during ZIP creation
+// or download; writers coordinate through the same stable account lock instead.
+if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+if (!is_dir($userProjectsDir)) {
+    http_response_code(404);
+    exit('Project not found.');
+}
+$userStorageLock = acquireUserStorageLock($userProjectsDir);
+if ($userStorageLock === false) {
+    http_response_code(409);
+    exit('Another project or media operation is in progress. Please try again.');
+}
+clearstatcache();
+
 $realUserProjectsDir = realpath($userProjectsDir);
 $realProjectDir = realpath($projectDir);
 $realFlowJsonPath = realpath($flowJsonPath);
@@ -206,101 +221,103 @@ $transitionSources = loadOfflineTransitionSources(
     collectProjectTransitionEngines($flowData),
     $approvedTransitionEngines
 );
-$offlinePlayerHtml = buildOfflinePlayerHtml($flowJson, $appCss, $engineSources, $transitionSources);
 
-$tempZipPath = tempnam(sys_get_temp_dir(), 'project_export_');
-if ($tempZipPath === false) {
+$zipTempFile = @tempnam(sys_get_temp_dir(), 'project_export_');
+if ($zipTempFile === false) {
     http_response_code(500);
     exit('Could not create temporary export file.');
 }
 
-$zipTempFile = $tempZipPath . '.zip';
-if (!@rename($tempZipPath, $zipTempFile)) {
-    @unlink($tempZipPath);
-    http_response_code(500);
-    exit('Could not prepare temporary export file.');
-}
+$zip = null;
+$zipOpen = false;
+$downloadHandle = null;
+$cleanupExport = static function () use (&$zip, &$zipOpen, &$downloadHandle, $zipTempFile): void {
+    if (is_resource($downloadHandle)) fclose($downloadHandle);
+    $downloadHandle = null;
+    if ($zipOpen && $zip !== null) {
+        try { @$zip->close(); } catch (Throwable $ignored) {}
+    }
+    $zipOpen = false;
+    $zip = null;
+    if (is_file($zipTempFile)) @unlink($zipTempFile);
+};
+// Also clean up when PHP exits after a client disconnect or fatal error.
+register_shutdown_function($cleanupExport);
 
-$zip = new ZipArchive();
-if ($zip->open($zipTempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-    @unlink($zipTempFile);
-    http_response_code(500);
-    exit('Could not create ZIP archive.');
-}
-
-$archiveRoot = $project . '/';
-$zip->addEmptyDir($archiveRoot);
-$zip->addFromString($archiveRoot . 'player.html', $offlinePlayerHtml);
-$zip->addFromString($archiveRoot . 'flow.json', $flowJson);
-
-$includeDirs = ['img', 'speech', 'audio'];
-
-foreach ($includeDirs as $dirName) {
-    $sourceDir = $realProjectDir . DIRECTORY_SEPARATOR . $dirName;
-    if (!is_dir($sourceDir)) {
-        continue;
+try {
+    $offlinePlayerHtml = buildOfflinePlayerHtml($flowJson, $appCss, $engineSources, $transitionSources);
+    $zip = new ZipArchive();
+    if (@$zip->open($zipTempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException('Could not open export archive.');
+    }
+    $zipOpen = true;
+    $archiveRoot = $project . '/';
+    if (!@$zip->addEmptyDir($archiveRoot)
+        || !@$zip->addFromString($archiveRoot . 'player.html', $offlinePlayerHtml)
+        || !@$zip->addFromString($archiveRoot . 'flow.json', $flowJson)) {
+        throw new RuntimeException('Could not add project data to export.');
     }
 
-    $zip->addEmptyDir($archiveRoot . $dirName . '/');
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($sourceDir, FilesystemIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
-    );
-
-    foreach ($iterator as $item) {
-        $basename = $item->getBasename();
-        if ($basename !== '' && $basename[0] === '.') {
-            continue;
+    foreach (['img', 'speech', 'audio'] as $dirName) {
+        $sourceDir = $realProjectDir . DIRECTORY_SEPARATOR . $dirName;
+        if (!is_dir($sourceDir)) continue;
+        if (!@$zip->addEmptyDir($archiveRoot . $dirName . '/')) {
+            throw new RuntimeException('Could not add media directory to export.');
         }
-
-        $fullPath = $item->getPathname();
-        $relativePath = substr($fullPath, strlen($realProjectDir) + 1);
-        $archivePath = $archiveRoot . str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
-
-        if (strpos('/' . str_replace('\\', '/', $relativePath), '/backups/') !== false) {
-            continue;
-        }
-
-        if (strcasecmp($basename, 'index.php') === 0) {
-            continue;
-        }
-
-        if ($item->isDir()) {
-            $zip->addEmptyDir(rtrim($archivePath, '/') . '/');
-            continue;
-        }
-
-        if ($item->isFile()) {
-            $zip->addFile($fullPath, $archivePath);
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($sourceDir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($iterator as $item) {
+            $basename = $item->getBasename();
+            if ($basename !== '' && $basename[0] === '.') continue;
+            $fullPath = $item->getPathname();
+            $relativePath = substr($fullPath, strlen($realProjectDir) + 1);
+            $archivePath = $archiveRoot . str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+            if (strpos('/' . str_replace('\\', '/', $relativePath), '/backups/') !== false) continue;
+            if (strcasecmp($basename, 'index.php') === 0) continue;
+            if ($item->isDir()) {
+                if (!@$zip->addEmptyDir(rtrim($archivePath, '/') . '/')) {
+                    throw new RuntimeException('Could not add media directory to export.');
+                }
+            } elseif ($item->isFile()) {
+                if (!@$zip->addFile($fullPath, $archivePath)) {
+                    throw new RuntimeException('Could not add media file to export.');
+                }
+            }
         }
     }
-}
 
-$zip->close();
-
-if (!is_file($zipTempFile)) {
+    // addFile may defer reading media until close: keep the lock until close
+    // succeeds, and never send ZIP headers or bytes for an unfinished archive.
+    if (!@$zip->close()) throw new RuntimeException('Could not finalize export archive.');
+    $zipOpen = false;
+    $downloadHandle = @fopen($zipTempFile, 'rb');
+    if ($downloadHandle === false) throw new RuntimeException('Could not open completed export.');
+    $downloadStat = fstat($downloadHandle);
+    if ($downloadStat === false || $downloadStat['size'] <= 0) {
+        throw new RuntimeException('Export archive is empty or unreadable.');
+    }
+} catch (Throwable $error) {
+    $cleanupExport();
+    $userStorageLock = null;
+    error_log('ZIP export failed: ' . $error->getMessage());
     http_response_code(500);
-    exit('ZIP archive could not be finalized.');
+    header('Content-Type: text/plain; charset=UTF-8');
+    exit('Could not create a complete ZIP archive. Please try again.');
 }
 
-header('Content-Type: application/zip');
-header('Content-Disposition: attachment; filename="' . rawurlencode($project) . '.zip"');
-header('Content-Length: ' . (string) filesize($zipTempFile));
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-
-$handle = fopen($zipTempFile, 'rb');
-if ($handle === false) {
-    @unlink($zipTempFile);
-    http_response_code(500);
-    exit('Could not open ZIP archive for download.');
+// The completed ZIP is independent of live project files. A slow download
+// must not prevent the owner from saving, changing media or renaming a project.
+$userStorageLock = null;
+try {
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="' . rawurlencode($project) . '.zip"');
+    header('Content-Length: ' . (string) $downloadStat['size']);
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    if (@fpassthru($downloadHandle) === false) error_log('Could not finish streaming ZIP export.');
+} finally {
+    $cleanupExport();
 }
-
-while (!feof($handle)) {
-    echo fread($handle, 8192);
-}
-
-fclose($handle);
-@unlink($zipTempFile);
 exit;

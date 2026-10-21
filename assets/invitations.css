@@ -1,0 +1,12 @@
+.invitations-shell { display: grid; gap: 24px; max-width: 1100px; }
+.invitation-panel { padding: clamp(18px, 3vw, 30px); display: grid; gap: 16px; }
+.invitation-panel h2, .invitation-panel p { margin: 0; }
+.invitation-create { display: grid; gap: 16px; }
+.invitation-create button { justify-self: start; }
+.invitation-notice { border: 1px solid currentColor; border-radius: 12px; padding: 18px; }
+.invitation-table-scroll { overflow-x: auto; }
+.invitation-table { width: 100%; border-collapse: collapse; text-align: left; }
+.invitation-table th, .invitation-table td { padding: 14px 12px; border-bottom: 1px solid #d5d5d5; }
+.invitation-table th { font-weight: 600; white-space: nowrap; }
+.invitation-table td:first-child { overflow-wrap: anywhere; min-width: 150px; }
+.invitation-table td:nth-child(3), .invitation-table td:nth-child(4) { min-width: 150px; }

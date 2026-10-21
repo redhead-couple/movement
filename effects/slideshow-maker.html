@@ -171,14 +171,6 @@
     </div>
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = 'effects/slideshow-engine.js';
         const ENGINE = 'slideshow';
         import { mount } from './effects/slideshow-engine.js';
@@ -363,23 +355,13 @@
             run: () => { if (typeof run === 'function') run(); },
             getExportJSON: () => {
                 const pathArray = window.fileNames.map(name => `img/${name}`);
-                const jsonImages = JSON.stringify(pathArray);
-
-                const code = `
-import { mount as runSlide } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runSlide(canvas, ctx, {
-        ...config,
-        images: ${jsonImages},
-        interval: ${cfg.interval},
-        transDuration: ${cfg.transDuration},
-        transition: '${cfg.transition}',
-        fit: 'cover'
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    images: pathArray,
+                    interval: cfg.interval,
+                    transDuration: cfg.transDuration,
+                    transition: cfg.transition,
+                    fit: 'cover'
+                };
                 return {
                     engine: ENGINE,
                     config: configObj,

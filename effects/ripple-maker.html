@@ -109,14 +109,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/ripple-engine.js';
         const ENGINE = 'ripple';
         import { runRipple } from '/effects/ripple-engine.js';
@@ -253,33 +245,18 @@
                 updateMarkerPosition();
             },
             getExportJSON: () => {
-                const code = `
-import { runRipple } from '${ENGINE_PATH}';
-
-export function mount(canvas, ctx, config) { // <-- Allow config to be passed in
-    return runRipple(canvas, ctx, {
-        ...config, // <-- Merge incoming config (which contains the resize helper)
-        imgSrc: 'img/${window.imgName}',
-        x: ${config.x.toFixed(3)},
-        y: ${config.y.toFixed(3)},
-        startTime: ${config.startTime},
-        count: ${config.count},
-        interval: ${config.interval},
-        freq: ${config.freq},
-        speed: ${config.speed},
-        amp: ${config.amp},
-        decay: ${config.decay}
-    });
-}`;
-                // Look aggressively for an object return signature
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                let configObj = {};
-                if (match) {
-                    const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                    configObj = (new Function("return (" + objExpr + ");"))();
-                } else {
-                     console.error("Could not parse exported config!");
-                }
+                const configObj = {
+                    imgSrc: `img/${window.imgName}`,
+                    x: Number(config.x.toFixed(3)),
+                    y: Number(config.y.toFixed(3)),
+                    startTime: config.startTime,
+                    count: config.count,
+                    interval: config.interval,
+                    freq: config.freq,
+                    speed: config.speed,
+                    amp: config.amp,
+                    decay: config.decay
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

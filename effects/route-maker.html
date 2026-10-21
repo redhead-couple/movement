@@ -81,14 +81,6 @@
     </div>
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/route-engine.js';
         const ENGINE = 'route';
         import { mount } from '/effects/route-engine.js';
@@ -158,27 +150,19 @@
             onImageLoaded: () => { if (typeof run === 'function') run(); },
             run: () => { if (typeof run === 'function') run(); },
             getExportJSON: () => {
-                const code = `
-import { mount as runRoute } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runRoute(canvas, ctx, {
-        ...config,
-        imgSrc: 'img/${window.imgName}',
-        symbol: '${String(cfg.symbol).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}',
-        color: '${cfg.color}',
-        opacity: ${cfg.opacity},
-        size: ${cfg.size},
-        count: ${cfg.count},
-        speed: ${cfg.speed},
-        spread: ${cfg.spread},
-        startDelay: ${cfg.startDelay},
-        duration: ${cfg.duration},
-        shape: '${cfg.shape}'
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: `img/${window.imgName}`,
+                    symbol: String(cfg.symbol),
+                    color: cfg.color,
+                    opacity: cfg.opacity,
+                    size: cfg.size,
+                    count: cfg.count,
+                    speed: cfg.speed,
+                    spread: cfg.spread,
+                    startDelay: cfg.startDelay,
+                    duration: cfg.duration,
+                    shape: cfg.shape
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

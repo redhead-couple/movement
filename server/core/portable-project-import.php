@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/storage-quota.php';
 
 const PORTABLE_IMPORT_MAX_ARCHIVE_BYTES = 40 * 1024 * 1024;
 const PORTABLE_IMPORT_MAX_EXPANDED_BYTES = 512 * 1024 * 1024;
@@ -406,6 +407,7 @@ function importPortableProjectZip(string $zipPath, string $originalFilename, str
 
     $stagingRoot = '';
     $lockHandle = null;
+    $userStorageLock = null;
     try {
         $inspection = portableImportInspectArchive($zip);
         $rawFlow = $zip->getFromIndex($inspection['flowEntry']['index']);
@@ -425,6 +427,17 @@ function importPortableProjectZip(string $zipPath, string $originalFilename, str
         if ($fallbackTitle === '') $fallbackTitle = 'Imported slideshow';
         $flow = portableImportNormalizeFlow($rawFlow, $fallbackTitle, $imageNames);
         $baseSlug = portableImportSlug($inspection['rootName'] !== '' ? $inspection['rootName'] : $flow['title']);
+
+        $userStorageLock = acquireUserStorageLock($userProjectsDir);
+        if ($userStorageLock === false) portableImportError('Another storage operation is in progress. Please try again.');
+
+        $serializedFlow = json_encode($flow, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
+        $additionalBytes = strlen($serializedFlow) + 1024; // includes generated .htaccess
+        foreach ($inspection['entries'] as $entry) {
+            if (in_array($entry['type'], ['img', 'speech', 'audio'], true)) $additionalBytes += $entry['size'];
+        }
+        assertUserStorageCapacity($userProjectsDir, $additionalBytes);
 
         $lockHandle = @fopen($userProjectsDir . DIRECTORY_SEPARATOR . '.portable-import.lock', 'c');
         if (!is_resource($lockHandle) || !flock($lockHandle, LOCK_EX)) {
@@ -490,6 +503,8 @@ HTACCESS;
                 static fn(array $entry): bool => in_array($entry['type'], ['img', 'speech', 'audio'], true)
             )),
         ];
+    } catch (StorageQuotaException $error) {
+        portableImportError($error->getMessage());
     } catch (JsonException) {
         portableImportError('Could not normalize flow.json.');
     } finally {
@@ -499,5 +514,6 @@ HTACCESS;
             @flock($lockHandle, LOCK_UN);
             fclose($lockHandle);
         }
+        $userStorageLock = null;
     }
 }

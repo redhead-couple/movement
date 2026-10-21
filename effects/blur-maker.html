@@ -112,24 +112,15 @@
                 if (c.blurIntensity !== undefined) { cfg.blurIntensity = c.blurIntensity; document.getElementById('blurIntensity').value = c.blurIntensity; }
                 if (c.mode !== undefined) { cfg.mode = c.mode; document.getElementById('modeSelect').value = c.mode; }
             },
-                        getExportJSON: () => {
+            getExportJSON: () => {
                 const path1 = window.name1 ? `img/${window.name1}` : '';
-                const code = `
-import { mount as runBlur } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runBlur(canvas, ctx, {
-        ...config,
-        imgSrc: '${path1}',
-        duration: ${cfg.duration},
-        startDelay: ${cfg.startDelay},
-        blurIntensity: ${cfg.blurIntensity},
-        mode: '${cfg.mode}'
-    });
-}`;
-                // Helper parser
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: path1,
+                    duration: cfg.duration,
+                    startDelay: cfg.startDelay,
+                    blurIntensity: cfg.blurIntensity,
+                    mode: cfg.mode
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

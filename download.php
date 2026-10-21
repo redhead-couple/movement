@@ -5,14 +5,17 @@ require_once __DIR__ . '/server/core/web-session.php';
 enforceProductionHttps();
 setWebPageDiscovery(true);
 
-// Keep the website download pinned to the published release.
-$version = '0.1.0-alpha.2';
+// Deploy this page together with the versioned files in downloads/.
+$version = '0.1.0-alpha.8';
 $repositoryUrl = 'https://github.com/redhead-couple/movement';
-$releaseTag = 'v' . $version;
-$releaseName = "Movement.Timeline.Studio-Authoring-Kit-{$version}-x64.zip";
-$releaseUrl = $repositoryUrl . '/releases/download/' . $releaseTag . '/' . rawurlencode($releaseName);
+$downloadBase = '/downloads/' . $version . '/';
+$releaseName = "Movement Timeline Studio-Authoring-Kit-{$version}-x64.zip";
+$installerName = "Movement Timeline Studio-Setup-{$version}-x64.exe";
+$releaseUrl = $downloadBase . rawurlencode($releaseName);
+$installerUrl = $downloadBase . rawurlencode($installerName);
 $checksumUrl = $releaseUrl . '.sha256';
-$releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
+$installerChecksumUrl = $installerUrl . '.sha256';
+$releasePageUrl = $downloadBase . 'release-notes.txt';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -140,6 +143,10 @@ $releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
             content: "\2193";
             font-size: 19px;
             line-height: 1;
+        }
+
+        .download-button + .download-button {
+            margin-top: 12px;
         }
 
         .release-links {
@@ -360,12 +367,17 @@ $releasePageUrl = $repositoryUrl . '/releases/tag/' . $releaseTag;
                     <a class="button-primary download-button" href="<?= htmlspecialchars($releaseUrl, ENT_QUOTES, 'UTF-8') ?>">
                         Download the Windows x64 Authoring Kit
                     </a>
+                    <a class="button-secondary download-button" href="<?= htmlspecialchars($installerUrl, ENT_QUOTES, 'UTF-8') ?>">
+                        Download the Windows x64 Installer
+                    </a>
                     <p class="release-note">The recommended Windows download. Extract the complete ZIP, then run <strong>Movement Timeline Studio.exe</strong>.</p>
+                    <p class="release-note">Prefer an installed app? Run the Installer to install or update Movement on your computer.</p>
                     <div class="release-links">
-                        <a href="<?= htmlspecialchars($checksumUrl, ENT_QUOTES, 'UTF-8') ?>">SHA-256 checksum</a>
+                        <a href="<?= htmlspecialchars($checksumUrl, ENT_QUOTES, 'UTF-8') ?>">Authoring Kit checksum</a>
+                        <a href="<?= htmlspecialchars($installerChecksumUrl, ENT_QUOTES, 'UTF-8') ?>">Installer checksum</a>
                         <a href="<?= htmlspecialchars($releasePageUrl, ENT_QUOTES, 'UTF-8') ?>">Release notes</a>
                     </div>
-                    <p class="release-note">Compare your ZIP's SHA-256 hash with the value in this file. GitHub uses dots instead of spaces in download filenames; the checksum file retains the original name with spaces. For filename-based verification, rename the ZIP to match the filename in the checksum file.</p>
+                    <p class="release-note">Each download has a SHA-256 checksum file for verifying its integrity.</p>
                     <p class="release-note">This Windows Alpha build is currently unsigned. Windows may show an Unknown Publisher or SmartScreen warning.</p>
                 </aside>
             </div>

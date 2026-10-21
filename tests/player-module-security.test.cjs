@@ -121,8 +121,10 @@ test('only registered local effects and transitions are approved', async () => {
   const effects = await policy.loadApprovedModuleSlugs('/effects/', {}, false, 'effect');
   const transitions = await policy.loadApprovedModuleSlugs('/transitions/', {}, false, 'transition');
 
-  assert.equal(effects.size, 25);
-  assert.equal(transitions.size, 6);
+  // Compare membership, not a historical count: registry additions/removals
+  // are valid, but missing or extra approvals must still fail this test.
+  assert.deepEqual([...effects].sort(), [...new Set(registryEngines('effects'))].sort());
+  assert.deepEqual([...transitions].sort(), [...new Set(registryEngines('transitions'))].sort());
   assert.equal(effects.has('unregistered-effect'), false);
   assert.equal(transitions.has('unregistered-transition'), false);
   assert.deepEqual(fetched, ['/effects/registry.json', '/transitions/registry.json']);

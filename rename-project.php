@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/storage-quota.php';
 
 $formId = 'rename_project';
 $guard = ensureFormGuard($formId);
@@ -37,27 +38,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($guardError !== null) {
         $error = $guardError;
     } else {
-    $newSlug = $_POST['new_slug'] ?? '';
-    $newSlug = basename(trim($newSlug));
+        $newSlug = $_POST['new_slug'] ?? '';
+        $newSlug = basename(trim($newSlug));
 
-    if ($newSlug === '') {
-        $error = 'Please enter a new slug.';
-    } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $newSlug)) {
-        $error = 'Use only letters, numbers, hyphens, and underscores.';
-    } elseif ($newSlug === $currentProject) {
-        $error = 'The new slug is the same as the current slug.';
-    } elseif (file_exists($userProjectsDir . '/' . $newSlug)) {
-        $error = 'That slug already exists.';
-    } else {
-        $newDir = $userProjectsDir . '/' . $newSlug;
-
-        if (rename($currentDir, $newDir)) {
-            header('Location: /edit/' . rawurlencode($newSlug) . '/?renamed=1');
-            exit;
+        if ($newSlug === '') {
+            $error = 'Please enter a new slug.';
+        } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $newSlug)) {
+            $error = 'Use only letters, numbers, hyphens, and underscores.';
+        } elseif ($newSlug === $currentProject) {
+            $error = 'The new slug is the same as the current slug.';
         } else {
-            $error = 'Could not rename the project folder.';
+            // The shared account lock stays at a stable path while the project
+            // moves, and also protects the destination name from other writers.
+            $userStorageLock = acquireUserStorageLock($userProjectsDir);
+            if ($userStorageLock === false) {
+                http_response_code(409);
+                $error = 'Another project or media operation is in progress. Please try again.';
+            } else {
+                try {
+                    clearstatcache();
+                    if (!is_dir($currentDir) || !is_file($flowFile)) {
+                        respondNotFoundPage();
+                    }
+                    $newDir = $userProjectsDir . '/' . $newSlug;
+                    if (file_exists($newDir)) {
+                        $error = 'That slug already exists.';
+                    } elseif (rename($currentDir, $newDir)) {
+                        header('Location: /edit/' . rawurlencode($newSlug) . '/?renamed=1');
+                        exit;
+                    } else {
+                        $error = 'Could not rename the project folder.';
+                    }
+                } finally {
+                    $userStorageLock = null;
+                }
+            }
         }
-    }
     }
 }
 ?>

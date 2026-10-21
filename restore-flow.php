@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/server/core/app-init.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/project-storage.php';
 
 $formId = 'restore_flow';
 $guard = ensureFormGuard($formId);
@@ -10,16 +11,44 @@ function ensureBackupDirectory(string $backupDir): bool
     return is_dir($backupDir) || mkdir($backupDir, 0755, true);
 }
 
-function createSafetyBackup(string $flowFile, string $backupDir, string $prefix = 'flow-before-restore-'): bool
+function createSafetyBackup(string $flowFile, string $backupDir, string $restoredJson, string $prefix = 'flow-before-restore-'): bool
 {
+    assertUserStorageCapacity(dirname(dirname($flowFile)), storageFileBytes($flowFile) + strlen($restoredJson));
     if (!is_file($flowFile) || !ensureBackupDirectory($backupDir)) {
         return false;
     }
 
     $timestamp = date('Y-m-d-His');
-    $destination = $backupDir . '/' . $prefix . $timestamp . '.json';
+    $destination = $backupDir . '/' . $prefix . $timestamp . '-' . bin2hex(random_bytes(4)) . '.json';
 
     return copy($flowFile, $destination);
+}
+
+function prepareRestoredFlowJson(string $flowFile, string $incomingJson): ?string
+{
+    $currentJson = @file_get_contents($flowFile);
+    $current = is_string($currentJson) ? json_decode($currentJson) : null;
+    $incoming = json_decode($incomingJson);
+    if (!($current instanceof stdClass) || !($incoming instanceof stdClass)) {
+        return null;
+    }
+
+    // Restoring content must not restore historical/imported access decisions.
+    // A missing publication flag means private, as it does in the player.
+    if (property_exists($current, 'isPublished') && !is_bool($current->isPublished)) {
+        return null;
+    }
+    $incoming->isPublished = $current->isPublished ?? false;
+    if (property_exists($current, 'publishedAt')) {
+        $incoming->publishedAt = $current->publishedAt;
+    } else {
+        unset($incoming->publishedAt);
+    }
+
+    // Decode as objects to preserve empty objects and numeric-keyed objects in
+    // effect/transition configuration when re-encoding a restored backup.
+    $json = json_encode($incoming, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    return is_string($json) ? $json : null;
 }
 
 function validateFlowStructure(array $data): ?string
@@ -109,77 +138,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($guardError !== null) {
         $error = $guardError;
     } else {
-    $action = trim((string) ($_POST['action'] ?? 'restore'));
-
-    if ($action === 'restore') {
-        $backupName = $_POST['backup'] ?? '';
-        $backupName = basename(trim($backupName));
-        $selectedBackup = $backupDir . '/' . $backupName;
-
-        if ($backupName === '' || !is_file($selectedBackup)) {
-            $error = 'Invalid backup selected.';
-        } elseif (!createSafetyBackup($flowFile, $backupDir)) {
-            $error = 'Could not create a safety backup before restore.';
-        } elseif (copy($selectedBackup, $flowFile)) {
-            header('Location: /edit/' . rawurlencode($project) . '/?restored=1');
-            exit;
+        $projectLock = acquireProjectLock($projectDir);
+        if ($projectLock === false) {
+            http_response_code(409);
+            $error = 'This project is already being saved. Please try again.';
         } else {
-            $error = 'Could not restore backup.';
-        }
-    } elseif ($action === 'upload') {
-        $upload = $_FILES['flow_file'] ?? null;
+            try {
+                $action = trim((string) ($_POST['action'] ?? 'restore'));
 
-        if (!is_array($upload)) {
-            $error = 'Please choose a flow.json file to upload.';
-        } elseif ((int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            $error = 'The upload failed. Please try again.';
-        } else {
-            $originalName = basename((string) ($upload['name'] ?? ''));
-            $tmpName = (string) ($upload['tmp_name'] ?? '');
-            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+                if ($action === 'restore') {
+                    $backupName = $_POST['backup'] ?? '';
+                    $backupName = basename(trim($backupName));
+                    $selectedBackup = $backupDir . '/' . $backupName;
 
-            if ($tmpName === '' || !is_uploaded_file($tmpName)) {
-                $error = 'The uploaded file is invalid.';
-            } elseif ($extension !== 'json') {
-                $error = 'Only .json files can be uploaded.';
-            } else {
-                // S-04: Validate MIME type server-side via finfo before buffering to memory
-                $finfo = new finfo(FILEINFO_MIME_TYPE);
-                $realMime = (string) $finfo->file($tmpName);
-                if (!in_array($realMime, ['application/json', 'text/plain'], true)) {
-                    $error = 'File content is not valid JSON text: ' . $realMime;
-                } else {
-                    $uploadedJson = file_get_contents($tmpName);
-                $decoded = is_string($uploadedJson) ? json_decode($uploadedJson, true) : null;
-
-                if (!is_string($uploadedJson) || trim($uploadedJson) === '') {
-                    $error = 'The uploaded file is empty.';
-                } elseif (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
-                    $error = 'The uploaded file does not contain valid JSON.';
-                } else {
-                    $structureError = validateFlowStructure($decoded);
-                    if ($structureError !== null) {
-                        $error = $structureError;
-                    } elseif (!createSafetyBackup($flowFile, $backupDir, 'flow-before-upload-')) {
-                        $error = 'Could not create a safety backup before upload.';
-                    } elseif (file_put_contents(
-                        $flowFile,
-                        json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-                    ) === false) {
-                        $error = 'Could not save the uploaded flow.json.';
+                    if ($backupName === '' || !is_file($selectedBackup)) {
+                        $error = 'Invalid backup selected.';
                     } else {
-                        // S-05: Explicitly set file permissions regardless of server umask.
-                        chmod($flowFile, 0644);
-                        header('Location: /edit/' . rawurlencode($project) . '/?restored=1');
-                        exit;
+                        $backupJson = @file_get_contents($selectedBackup);
+                        $restoredJson = is_string($backupJson) ? prepareRestoredFlowJson($flowFile, $backupJson) : null;
+                        if ($restoredJson === null) {
+                            $error = 'Could not read valid project data and preserve its current publication settings.';
+                        } elseif (!createSafetyBackup($flowFile, $backupDir, $restoredJson)) {
+                            $error = 'Could not create a safety backup before restore.';
+                        } elseif (saveJsonAtomically($flowFile, $restoredJson)) {
+                            header('Location: /edit/' . rawurlencode($project) . '/?restored=1');
+                            exit;
+                        } else {
+                            http_response_code(500);
+                            $error = 'Could not restore backup.';
+                        }
                     }
+                } elseif ($action === 'upload') {
+                    $upload = $_FILES['flow_file'] ?? null;
+
+                    if (!is_array($upload)) {
+                        $error = 'Please choose a flow.json file to upload.';
+                    } elseif ((int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                        $error = 'The upload failed. Please try again.';
+                    } else {
+                        $originalName = basename((string) ($upload['name'] ?? ''));
+                        $tmpName = (string) ($upload['tmp_name'] ?? '');
+                        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+                        if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+                            $error = 'The uploaded file is invalid.';
+                        } elseif ($extension !== 'json') {
+                            $error = 'Only .json files can be uploaded.';
+                        } else {
+                            // S-04: Validate MIME type server-side via finfo before buffering to memory
+                            $finfo = new finfo(FILEINFO_MIME_TYPE);
+                            $realMime = (string) $finfo->file($tmpName);
+                            if (!in_array($realMime, ['application/json', 'text/plain'], true)) {
+                                $error = 'File content is not valid JSON text: ' . $realMime;
+                            } else {
+                                $uploadedJson = file_get_contents($tmpName);
+                                $decoded = is_string($uploadedJson) ? json_decode($uploadedJson, true) : null;
+
+                                if (!is_string($uploadedJson) || trim($uploadedJson) === '') {
+                                    $error = 'The uploaded file is empty.';
+                                } elseif (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+                                    $error = 'The uploaded file does not contain valid JSON.';
+                                } else {
+                                    $structureError = validateFlowStructure($decoded);
+                                    $restoredJson = prepareRestoredFlowJson($flowFile, $uploadedJson);
+                                    if ($structureError !== null) {
+                                        $error = $structureError;
+                                    } elseif ($restoredJson === null) {
+                                        $error = 'Could not read valid project data and preserve its current publication settings.';
+                                    } elseif (!createSafetyBackup($flowFile, $backupDir, $restoredJson, 'flow-before-upload-')) {
+                                        $error = 'Could not create a safety backup before upload.';
+                                    } elseif (!saveJsonAtomically($flowFile, $restoredJson)) {
+                                        http_response_code(500);
+                                        $error = 'Could not save the uploaded flow.json.';
+                                    } else {
+                                        // S-05: Explicitly set file permissions regardless of server umask.
+                                        chmod($flowFile, 0644);
+                                        header('Location: /edit/' . rawurlencode($project) . '/?restored=1');
+                                        exit;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    $error = 'Unsupported action.';
                 }
+            } catch (StorageQuotaException $e) {
+                http_response_code($e->getCode());
+                $error = $e->getMessage();
+            } finally {
+                releaseProjectLock($projectLock);
             }
         }
-        }
-    } else {
-        $error = 'Unsupported action.';
-    }
     }
 }
 ?>

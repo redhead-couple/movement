@@ -185,6 +185,36 @@ function invalidatePasswordResetToken(PDO $pdo, int $tokenId, DateTimeImmutable 
     $stmt->execute([passwordResetTimestamp($now), $tokenId]);
 }
 
+// Password changes, reset issuance and reset completion lock the same user
+// before touching tokens. Keep this lock until the surrounding transaction ends.
+function lockPasswordResetUser(PDO $pdo, int $userId): ?array
+{
+    if (!$pdo->inTransaction()) {
+        throw new LogicException('Password operations require a transaction.');
+    }
+
+    $sqlite = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    if ($sqlite) {
+        // SQLite has no SELECT FOR UPDATE; reserve its write lock first.
+        $lock = $pdo->prepare('UPDATE users SET id = id WHERE id = ?');
+        $lock->execute([$userId]);
+    }
+    $stmt = $pdo->prepare('SELECT id, password_hash FROM users WHERE id = ?' . ($sqlite ? '' : ' FOR UPDATE'));
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    return is_array($user) ? $user : null;
+}
+
+function invalidateUserPasswordResetTokens(PDO $pdo, int $userId, DateTimeImmutable $now): void
+{
+    $stmt = $pdo->prepare('
+        UPDATE password_reset_tokens
+        SET used_at = ?
+        WHERE user_id = ? AND used_at IS NULL
+    ');
+    $stmt->execute([passwordResetTimestamp($now), $userId]);
+}
+
 function requestPasswordReset(
     PDO $pdo,
     string $email,
@@ -232,12 +262,11 @@ function requestPasswordReset(
 
     $pdo->beginTransaction();
     try {
-        $invalidate = $pdo->prepare('
-            UPDATE password_reset_tokens
-            SET used_at = ?
-            WHERE user_id = ? AND used_at IS NULL
-        ');
-        $invalidate->execute([$createdAt, (int) $user['id']]);
+        if (lockPasswordResetUser($pdo, (int) $user['id']) === null) {
+            $pdo->rollBack();
+            return $result;
+        }
+        invalidateUserPasswordResetTokens($pdo, (int) $user['id'], $now);
 
         $insert = $pdo->prepare('
             INSERT INTO password_reset_tokens
@@ -322,8 +351,19 @@ function consumePasswordResetToken(
     $nowString = passwordResetTimestamp($now);
     $hash = passwordResetTokenHash($token);
 
+    // Identify the account before the transaction, then recheck the token after
+    // acquiring the user lock. An earlier inspection must not authorize a reset
+    // after a concurrent password change has invalidated the link.
+    $candidate = findUsablePasswordResetToken($pdo, $token, $now);
+    if ($candidate === null) return 'invalid';
+
     $pdo->beginTransaction();
     try {
+        $user = lockPasswordResetUser($pdo, (int) $candidate['user_id']);
+        if ($user === null || !is_string($user['password_hash'] ?? null)) {
+            $pdo->rollBack();
+            return 'invalid';
+        }
         $find = $pdo->prepare('
             SELECT id, user_id, token_hash, expires_at, used_at
             FROM password_reset_tokens
@@ -356,14 +396,6 @@ function consumePasswordResetToken(
             return 'invalid';
         }
 
-        $findUser = $pdo->prepare('SELECT password_hash FROM users WHERE id = ? LIMIT 1');
-        $findUser->execute([(int) $row['user_id']]);
-        $user = $findUser->fetch(PDO::FETCH_ASSOC);
-        if (!is_array($user) || !is_string($user['password_hash'] ?? null)) {
-            $pdo->rollBack();
-            return 'invalid';
-        }
-
         if (password_verify($newPassword, $user['password_hash'])) {
             $pdo->rollBack();
             return 'same_password';
@@ -377,12 +409,7 @@ function consumePasswordResetToken(
         $updateUser = $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
         $updateUser->execute([$newHash, (int) $row['user_id']]);
 
-        $invalidate = $pdo->prepare('
-            UPDATE password_reset_tokens
-            SET used_at = ?
-            WHERE user_id = ? AND used_at IS NULL
-        ');
-        $invalidate->execute([$nowString, (int) $row['user_id']]);
+        invalidateUserPasswordResetTokens($pdo, (int) $row['user_id'], $now);
 
         $pdo->commit();
         return 'success';

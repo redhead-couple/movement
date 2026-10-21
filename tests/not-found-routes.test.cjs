@@ -7,6 +7,7 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { once } = require('node:events');
 const test = require('node:test');
+const { sessionData, databaseSource } = require('./helpers/session-fixture.cjs');
 
 const applicationRoot = path.resolve(__dirname, '..');
 const diagnostics = /\b(?:fatal error|warning|notice|deprecated|parse error)(?:<\/b>)?:|\b(?:stack trace:|uncaught (?:error|exception)|undefined constant)\b/i;
@@ -66,8 +67,9 @@ test('M06 actual PHP not-found routes', async t => {
     "<?php\n$APP_ENVIRONMENT = 'development';\n$DB_PASS = 'M06_CONFIG_SECRET';\n");
   const sessions = path.join(fixtureRoot, 'sessions');
   fs.mkdirSync(sessions);
-  fs.writeFileSync(path.join(sessions, 'sess_m06owner'), 'username|s:9:"m06-owner";');
-  fs.writeFileSync(path.join(sessions, 'sess_m06other'), 'username|s:9:"m06-other";');
+  fs.writeFileSync(path.join(fixtureRoot, 'server/core/db.php'), databaseSource({ 1: 'm06-owner', 2: 'm06-other' }));
+  fs.writeFileSync(path.join(sessions, 'sess_m06owner'), sessionData('m06-owner', 1));
+  fs.writeFileSync(path.join(sessions, 'sess_m06other'), sessionData('m06-other', 2));
   for (const [project, published] of [['draft', false], ['published', true]]) {
     const folder = path.join(fixtureRoot, 'private-data/slidedeck/m06-owner', project);
     fs.mkdirSync(folder, { recursive: true });

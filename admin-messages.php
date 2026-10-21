@@ -7,13 +7,33 @@ movementRequireConfig();
 require_once __DIR__ . '/server/core/db.php';
 require_once __DIR__ . '/server/core/http-basic-auth.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/admin-login-throttle.php';
 
-if (
-    !isset($ADMIN_USER, $ADMIN_PASS)
-    || !is_string($ADMIN_USER)
-    || !is_string($ADMIN_PASS)
-    || !httpBasicCredentialsMatch($ADMIN_USER, $ADMIN_PASS)
-) {
+header('Cache-Control: no-store');
+
+$adminCredentialsConfigured = isset($ADMIN_USER, $ADMIN_PASS)
+    && is_string($ADMIN_USER) && is_string($ADMIN_PASS);
+$adminAuthenticated = false;
+// An initial visit without credentials must still show the browser's login
+// prompt, without consuming a failed password attempt.
+if ($adminCredentialsConfigured && httpBasicCredentials() !== null) {
+    $adminAuthenticated = httpBasicCredentialsMatch($ADMIN_USER, $ADMIN_PASS);
+    try {
+        $retryAfter = recordAdminLoginAttempt(db(), clientIpBinary(), $adminAuthenticated);
+    } catch (Throwable $error) {
+        // Do not grant admin access if the shared throttle cannot be enforced.
+        http_response_code(503);
+        header('Retry-After: 60');
+        exit('Admin sign-in is temporarily unavailable. Please try again later.');
+    }
+    if ($retryAfter > 0) {
+        http_response_code(429);
+        header('Retry-After: ' . $retryAfter);
+        exit('Too many admin sign-in attempts. Please try again later.');
+    }
+}
+
+if (!$adminAuthenticated) {
     header('WWW-Authenticate: Basic realm="Messages"');
     header('HTTP/1.0 401 Unauthorized');
     echo 'Unauthorized';
@@ -542,6 +562,7 @@ $rows = $stmt->fetchAll();
         <div class="wrap app-site-header__inner">
             <a class="app-brand" href="/" aria-label="Early Formation home">Early Formation</a>
             <nav class="app-nav" aria-label="Admin navigation">
+                <a class="app-nav__link" href="/admin-invitations.php">Invitations</a>
                 <a class="app-nav__link" href="/dashboard.php">My Library</a>
                 <a class="app-nav__link" href="/contact.php">Contact Page</a>
                 <a class="app-nav__link" href="/privacy.php">Privacy</a>

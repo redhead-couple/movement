@@ -24,6 +24,17 @@ $APP_ENVIRONMENT = 'development';
 $APP_HTTPS_ORIGIN = '';
 $APP_TRUST_PROXY = false;
 
+// Set to true to allow eligible public pages to be indexed in production.
+// Missing or false keeps indexing disabled without changing HTTPS/session policy.
+$ALLOW_SEARCH_INDEXING = false;
+
+// Only invited testers can register. Set false to open public registration.
+$INVITE_ONLY_REGISTRATION = true;
+
+// Total file bytes per user, including backups and peak temporary copies.
+// Default when omitted: 1 GiB. Existing content is never automatically deleted.
+$USER_STORAGE_QUOTA_BYTES = 1024 * 1024 * 1024;
+
 // Required for account-recovery email delivery. The web server/PHP mail
 // transport must also be configured to send mail for this address.
 $PASSWORD_RESET_FROM_EMAIL = 'CHANGE_ME_NO_REPLY_EMAIL';

@@ -1,0 +1,16 @@
+-- Already created manually on local and live databases. Do not rerun there.
+-- All invitation timestamps are written in UTC by the application.
+CREATE TABLE registration_invitations (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    email VARCHAR(190) NOT NULL,
+    token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    created_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    revoked_at DATETIME NULL,
+    used_by_user_id INT UNSIGNED NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_invitation_token_hash (token_hash),
+    INDEX idx_invitation_email (email),
+    INDEX idx_invitation_expiry (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

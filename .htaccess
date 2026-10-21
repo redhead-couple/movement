@@ -5,7 +5,7 @@ Options -Indexes -MultiViews
     # Keep the concept page behind the environment policy, including old URLs.
     RewriteRule ^concept/(?:index\.html)?$ concept/index.php [L]
     RewriteCond %{HTTP:Authorization} ^(.+)$
-    RewriteRule ^admin-messages\.php$ - [E=HTTP_AUTHORIZATION:%1]
+    RewriteRule ^admin-(?:messages|invitations)\.php$ - [E=HTTP_AUTHORIZATION:%1]
     RewriteRule ^private-data(?:/|$) - [F,L,NC]
     RewriteRule ^server(?:/|$) - [F,L]
     RewriteRule ^examples/[^/]+/(?:backups(?:/|$)|\.movement-media-trash(?:/|$)|.*\.save\.lock$) - [F,L,NC]

@@ -7,6 +7,9 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/server/core/require-guest.php';
 require_once __DIR__ . '/server/core/db.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
+require_once __DIR__ . '/server/core/login-throttle.php';
+require_once __DIR__ . '/server/core/registration-invitations.php';
+$inviteOnly = inviteOnlyRegistration();
 $error = '';
 $login = '';
 $formId = 'login';
@@ -28,67 +31,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter your username or email and password.';
     } else {
         try {
-            $pdo = db();
-            $pdo->exec("
-                CREATE TABLE IF NOT EXISTS login_attempts (
-                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    login_identifier VARCHAR(190) NOT NULL,
-                    ip VARBINARY(16) NOT NULL,
-                    attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_login_attempts_ip_time (ip, attempted_at),
-                    INDEX idx_login_attempts_login_time (login_identifier, attempted_at)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-
-            $ip = clientIpBinary();
-
-            $attemptStmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM login_attempts
-                WHERE ip = ? AND attempted_at > (NOW() - INTERVAL 15 MINUTE)
-            ");
-            $attemptStmt->execute([$ip]);
-
-            if ((int)$attemptStmt->fetchColumn() >= 5) {
+            $attempt = authenticateWithLoginThrottle(db(), $login, $password, clientIpBinary());
+            if ($attempt['status'] === 'blocked') {
                 $error = 'Too many login attempts. Please wait a few minutes and try again.';
+            } elseif ($attempt['status'] === 'invalid') {
+                $error = 'Invalid login or password.';
             } else {
-                $stmt = $pdo->prepare('
-                    SELECT id, username, email, password_hash
-                    FROM users
-                    WHERE username = ? OR email = ?
-                    LIMIT 1
-                ');
-                $stmt->execute([$login, $login]);
-                $user = $stmt->fetch();
+                $user = $attempt['user'];
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = (int)$user['id'];
+                $_SESSION['username'] = $user['username'];
+                bindWebSessionToPassword($user['password_hash']);
+                $_SESSION['user'] = [
+                    'id' => (int)$user['id'],
+                    'username' => $user['username'],
+                    'email' => $user['email'],
+                ];
+                resetFormGuard($formId);
 
-                if (!$user || !password_verify($password, $user['password_hash'])) {
-                    $error = 'Invalid login or password.';
-
-                    $stmt = $pdo->prepare("
-                        INSERT INTO login_attempts (login_identifier, ip)
-                        VALUES (?, ?)
-                    ");
-                    $stmt->execute([mb_substr($login, 0, 190), $ip]);
-                } else {
-                    $stmt = $pdo->prepare("
-                        DELETE FROM login_attempts
-                        WHERE ip = ? OR login_identifier = ?
-                    ");
-                    $stmt->execute([$ip, mb_substr($login, 0, 190)]);
-
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = (int)$user['id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['user'] = [
-                        'id' => (int)$user['id'],
-                        'username' => $user['username'],
-                        'email' => $user['email'],
-                    ];
-                    resetFormGuard($formId);
-
-                    header('Location: /dashboard.php');
-                    exit;
-                }
+                header('Location: /dashboard.php');
+                exit;
             }
         } catch (Throwable $e) {
             $error = 'Something went wrong during login.';
@@ -112,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="wrap app-site-header__inner">
             <a class="app-brand" href="/" aria-label="Early Formation home">Early Formation</a>
             <nav class="app-nav" aria-label="Authentication navigation">
-                <a class="app-nav__link" href="/signup.php">Create account</a>
+                <a class="app-nav__link" href="/signup.php"><?= $inviteOnly ? "Invitation access" : "Create account" ?></a>
             </nav>
         </div>
     </header>
@@ -122,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="auth-card">
                     <div class="auth-intro">
                         <div class="auth-copy">
-                            <p class="eyebrow">Slideshow Post Login</p>
-                            <h1>Sign in to create slideshow posts</h1>
-                            <p class="muted">Speak your mind, define your vision, and let AI-generated images bring your intentions to life in standout slideshow posts.</p>
+                            <p class="eyebrow">Welcome Back</p>
+                            <h1>Continue your creative work</h1>
+                            <p class="muted"><?= $inviteOnly ? "Early Formation is in private beta with a small group of testers. Log in to create, explore, and share your feedback." : "Log in to create, manage, and publish your slideshows." ?></p>
                             <div class="auth-pills">
-                                <span class="auth-pill">Local Access</span>
+                                <span class="auth-pill">Your Projects</span>
                                 <span class="auth-pill">Editor Tools</span>
                                 <span class="auth-pill">Backup Control</span>
                             </div>
@@ -136,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="section-head">
                             <div>
                                 <h2>Sign in</h2>
-                                <p class="muted">Use your local username to continue into the dashboard.</p>
+                                <p class="muted">Use your username or email and password to continue.</p>
                             </div>
                         </div>
 
@@ -184,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="auth-links">
                             <a class="button-secondary" href="/forgot-password.php">Forgot password?</a>
-                            <a class="button-secondary" href="/signup.php">Don't have an account? Sign up</a>
+                            <a class="button-secondary" href="/signup.php"><?= $inviteOnly ? "Have an invitation?" : "Don’t have an account? Sign up" ?></a>
                         </div>
 
                         <div class="auth-legal">

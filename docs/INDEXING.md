@@ -5,7 +5,18 @@ access, release files, and tags are unchanged.
 
 ## Policy
 
-- In the configured production environment, successful GET/HEAD responses for
+- Indexing is disabled by default, including in production. Set the following
+  line in the active private `app-config.php` (`server/core/app-config.php`
+  locally, or the file above the document root on hosting):
+  ```php
+  $ALLOW_SEARCH_INDEXING = false;
+  ```
+  Change only `false` to `true` when ready to allow public indexing on the
+  production site. Only the boolean `true` enables the switch; a missing or
+  invalid setting leaves indexing disabled. This does not change HTTPS or
+  session settings. Development pages remain excluded even with the switch on.
+- With `$ALLOW_SEARCH_INDEXING = true` in the configured production environment,
+  successful GET/HEAD responses for
   `/`, `/index.php`, `/concept/`, `/concept/index.php`, `/concept/index.html`,
   `/download.php`, `/feed.php` (including public user feeds), `/privacy.php`, and
   `/terms.php` contain no indexing restriction and no explicit `index` directive.
@@ -81,8 +92,9 @@ Tools, tests, this document, and all temporary fixtures/previews stay local.
 
 Local Apache/PHP tests use synthetic external configuration, projects, sessions,
 and media; they do not change real credentials, accounts, or project data.
-They inspect response status, HTML meta tags, and X-Robots-Tag headers for both
-production and development, including a conflicting process environment,
+They inspect response status, HTML meta tags, and X-Robots-Tag headers with the
+production switch enabled, disabled, and absent, and with it enabled in
+development, including a conflicting process environment,
 query-parameter spoofing, stale concept HTML, HEAD/POST, published/draft/missing/
 invalid players, owner drafts, auth/editor routes, static previews, 403/404/500,
 and configuration failures. Offline exports retain their default noindex.
@@ -114,6 +126,8 @@ template; the final responses confirmed those issues were resolved.
 
 Before future deployments, privately confirm the external hosting configuration
 uses `$APP_ENVIRONMENT = 'production'` and the correct HTTPS origin/proxy policy.
+Keep `$ALLOW_SEARCH_INDEXING = false` there until public indexing is wanted;
+after deploying the updated helper, an absent switch also disables indexing.
 The private live configuration was not inspected. Local development configuration
 must remain separate and unchanged by uploads.
 If production has not been selected, the new pages intentionally remain noindex.
@@ -122,7 +136,9 @@ After the reviewed upload, clear stale OPcache/page/CDN caches as appropriate an
 check both GET HTML and HEAD headers on the actual HTTPS host: home, concept
 (including the legacy URL), download, feed, a published example, a published user
 project, an owner draft, a guest draft, a missing player, login, admin challenge,
-editor redirect, and an arbitrary missing file. Public pages must have no
+editor redirect, and an arbitrary missing file. With the switch disabled, public
+pages must return both HTML and HTTP noindex directives. When enabled in
+production, eligible public pages must have no
 remaining noindex from PHP, Apache, parent configuration, CDN, or hosting tools;
 adding `index` would not cancel one. Verify `/robots.txt` has no blocking rule
 that prevents reading a noindex page. Keep existing private/media denials intact.

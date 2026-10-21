@@ -40,6 +40,12 @@ const desktopApi = Object.freeze({
   copyExample: (exampleId, targetWorkspaceId) => (
     ipcRenderer.invoke('project:copy-example', exampleId, targetWorkspaceId)
   ),
+  listProjectBackups: (workspaceId, projectId) => (
+    ipcRenderer.invoke('project:list-backups', workspaceId, projectId)
+  ),
+  restoreProjectBackup: (workspaceId, projectId, backupName, expectedRevision) => (
+    ipcRenderer.invoke('project:restore-backup', workspaceId, projectId, backupName, expectedRevision)
+  ),
   duplicateProject: (workspaceId, projectId) => (
     ipcRenderer.invoke('project:duplicate', workspaceId, projectId)
   ),
@@ -72,6 +78,15 @@ const desktopApi = Object.freeze({
   ),
   chooseProjectMedia: (workspaceId, projectId, type) => (
     ipcRenderer.invoke('project:choose-media', workspaceId, projectId, type)
+  ),
+  trashUnusedMedia: (workspaceId, projectId, type, token) => (
+    ipcRenderer.invoke('project:trash-unused-media', workspaceId, projectId, type, token)
+  ),
+  emptyProjectMediaTrash: (workspaceId, projectId, token) => (
+    ipcRenderer.invoke('project:empty-media-trash', workspaceId, projectId, token)
+  ),
+  restoreProjectMedia: (workspaceId, projectId, trashId, type, filename) => (
+    ipcRenderer.invoke('project:restore-media', workspaceId, projectId, trashId, type, filename)
   ),
   removeUnusedProjectMedia: (workspaceId, projectId, type, filename, expectedRevision) => (
     ipcRenderer.invoke(

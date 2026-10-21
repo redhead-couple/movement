@@ -57,14 +57,6 @@
 
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/affection-engine.js';
         const ENGINE = 'affection';
         import { runAffection } from '/effects/affection-engine.js';
@@ -185,23 +177,15 @@
             onImageLoaded: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); }},
             run: () => { if(typeof run === 'function') { run(); } else { window.runPreview && window.runPreview(); } },
             getExportJSON: () => {
-                const code = `
-import { runAffection } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runAffection(canvas, ctx, {
-        ...config,
-        imgSrc: 'img/${window.imgName}',
-        startX: ${config.startX.toFixed(3)}, startY: ${config.startY.toFixed(3)},
-        endX: ${config.endX.toFixed(3)}, endY: ${config.endY.toFixed(3)},
-        shape: '${config.shape}', color: '${config.color}',
-        size: ${config.size}, speed: ${config.speed},
-        flowRate: ${config.flowRate}, spread: ${config.spread},
-        curveHeight: ${config.curveHeight}
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: `img/${window.imgName}`,
+                    startX: Number(config.startX.toFixed(3)), startY: Number(config.startY.toFixed(3)),
+                    endX: Number(config.endX.toFixed(3)), endY: Number(config.endY.toFixed(3)),
+                    shape: config.shape, color: config.color,
+                    size: config.size, speed: config.speed,
+                    flowRate: config.flowRate, spread: config.spread,
+                    curveHeight: config.curveHeight
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

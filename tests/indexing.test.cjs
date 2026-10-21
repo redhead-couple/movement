@@ -7,6 +7,7 @@ const net = require('node:net');
 const { once } = require('node:events');
 const { spawn, spawnSync } = require('node:child_process');
 const test = require('node:test');
+const { sessionData, databaseSource } = require('./helpers/session-fixture.cjs');
 const { websiteFiles } = require('../tools/web-files.cjs');
 const root = path.resolve(__dirname, '..');
 const slash = value => value.replaceAll('\\', '/');
@@ -29,7 +30,7 @@ function request(port, url, options = {}) {
   });
 }
 
-async function server(t, environment) {
+async function server(t, environment, allowSearchIndexing) {
   const apache = process.env.MOVEMENT_TEST_APACHE || 'C:/xampp/apache/bin/httpd.exe';
   if (!fs.existsSync(apache)) {
     t.skip('Set MOVEMENT_TEST_APACHE to a local Apache with PHP module');
@@ -48,9 +49,11 @@ async function server(t, environment) {
   for (const file of websiteFiles(root)) write(documentRoot, file, fs.readFileSync(path.join(root, file)));
   write(parent, 'app-config.php', `<?php
 $APP_ENVIRONMENT='${environment}'; $APP_HTTPS_ORIGIN='https://redhead-couple.org'; $APP_TRUST_PROXY=true;
+${allowSearchIndexing === undefined ? '' : `$ALLOW_SEARCH_INDEXING=${allowSearchIndexing};`}
 $DB_PASS='SYNTHETIC_ONLY'; $ADMIN_USER='test'; $ADMIN_PASS='synthetic-password';`);
   // Conflicting process environment must not override the existing private config.
-  write(parent, 'sessions/sess_indexowner', 'username|s:5:"owner";user_id|i:1;');
+  write(documentRoot, 'server/core/db.php', databaseSource({ 1: 'owner' }));
+  write(parent, 'sessions/sess_indexowner', sessionData('owner', 1));
   for (const [name, published] of [['published', true], ['draft', false]]) {
     const flow = JSON.stringify({ schemaVersion: 2, isPublished: published,
       title: published ? 'Public slideshow' : 'PRIVATE_DRAFT', slides: [{ text: 'Fixture' }] });
@@ -121,22 +124,24 @@ function assertPolicy(response, indexable, html = true) {
   assert.doesNotMatch(response.body, /SYNTHETIC_ONLY|PRIVATE_BACKUP|Fatal error|Warning:/);
 }
 
-for (const environment of ['production', 'development']) {
-  test(`${environment}: real Apache/PHP indexing and access responses`, async t => {
-    const fixture = await server(t, environment);
+for (const [environment, allowSearchIndexing] of [
+  ['production', true], ['production', false], ['production', undefined], ['development', true],
+]) {
+  test(`${environment}, indexing=${allowSearchIndexing ?? 'unset'}: real Apache/PHP indexing and access responses`, async t => {
+    const fixture = await server(t, environment, allowSearchIndexing);
     if (!fixture) return;
     const { port, parent } = fixture;
-    const production = environment === 'production';
-    await t.test('public pages and published players use the configured environment', async () => {
+    const indexable = environment === 'production' && allowSearchIndexing === true;
+    await t.test('public pages and published players use the configured indexing switch and environment', async () => {
       for (const url of ['/', '/index.php', '/concept/', '/concept/index.html', '/concept/index.php',
         '/download.php', '/feed.php', '/feed.php?user=owner', '/privacy.php', '/terms.php',
         '/player.php?example=published', '/player.php?username=owner&project=published', '/slidedeck/owner/published/']) {
         const response = await request(port, url);
-        assert.equal(response.status, 200, url); assertPolicy(response, production);
+        assert.equal(response.status, 200, url); assertPolicy(response, indexable);
         assert.doesNotMatch(response.body, /STALE_CONCEPT/);
       }
-      assertPolicy(await request(port, '/?APP_ENVIRONMENT=production&environment=production&index=1'), production);
-      assertPolicy(await request(port, '/', { method: 'HEAD' }), production, false);
+      assertPolicy(await request(port, '/?APP_ENVIRONMENT=production&environment=production&index=1&ALLOW_SEARCH_INDEXING=true'), indexable);
+      assertPolicy(await request(port, '/', { method: 'HEAD' }), indexable, false);
       assertPolicy(await request(port, '/', { method: 'POST' }), false);
     });
     await t.test('drafts, private previews, missing and invalid projects remain excluded', async () => {

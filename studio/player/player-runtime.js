@@ -264,6 +264,7 @@
     let advancedTransitionRequestId = 0;
     let activeAudioElements = [];
     let activeGlobalAudioElements = new Map();
+    let audioPlaybackRequestId = 0;
 
     async function waitForImageDecode(img) {
         if (!img || !img.complete || !img.naturalWidth) return;
@@ -387,28 +388,92 @@
     function loadAudioPromise(url) {
         if (!url) return Promise.resolve();
         if (audioPreloadPromises.has(url)) return audioPreloadPromises.get(url);
-
-        const promise = new Promise(resolve => {
+        const promise = (async () => {
+            // Private web media deliberately uses no-store. A different <audio>
+            // cannot reuse its preload through the HTTP cache. Keep the complete
+            // response in this player session and play that same data instead.
+            const resolved = new URL(url, document.baseURI);
+            const protocol = resolved.protocol;
+            let source = url;
+            let objectUrl = null;
+            if (protocol === 'http:' || protocol === 'https:') {
+                try {
+                    const response = await fetch(url, { cache: 'no-store' });
+                    if (!response.ok) throw new Error('Audio could not be downloaded.');
+                    objectUrl = URL.createObjectURL(await response.blob());
+                    source = objectUrl;
+                } catch (error) {
+                    // External media without CORS can still be played natively.
+                    // Never use this fallback for failed private project media.
+                    if (resolved.origin === new URL(document.baseURI).origin || !(error instanceof TypeError)) throw error;
+                }
+            }
             const audio = new Audio();
             audio.preload = 'auto';
-            let settled = false;
-            let timeout = null;
-            const done = () => {
-                if (settled) return;
-                settled = true;
-                clearTimeout(timeout);
-                resolve();
-            };
-            timeout = setTimeout(done, 15000);
-            audio.addEventListener('canplaythrough', done, { once: true });
-            audio.addEventListener('loadeddata', done, { once: true });
-            audio.addEventListener('error', done, { once: true });
-            audio.src = url;
-            audioPreloadCache.set(url, audio);
-            try { audio.load(); } catch (e) { done(); }
+            try {
+                await new Promise((resolve, reject) => {
+                    const cleanup = () => {
+                        audio.removeEventListener('canplaythrough', ready);
+                        audio.removeEventListener('error', failed);
+                    };
+                    const ready = () => { cleanup(); resolve(); };
+                    const failed = () => { cleanup(); reject(new Error('Audio could not be decoded.')); };
+                    audio.addEventListener('canplaythrough', ready);
+                    audio.addEventListener('error', failed);
+                    audio.src = source;
+                    audio.load();
+                });
+                audioPreloadCache.set(url, { source, objectUrl });
+                return source;
+            } catch (error) {
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
+                throw error;
+            } finally {
+                audio.removeAttribute('src');
+                audio.load();
+            }
+        })().catch(error => {
+            // A failed background request must not poison a later explicit retry.
+            audioPreloadPromises.delete(url);
+            throw error;
         });
         audioPreloadPromises.set(url, promise);
         return promise;
+    }
+
+    function preparedAudioSource(url) {
+        return audioPreloadCache.get(url)?.source || url;
+    }
+
+    async function prepareSlideAudio(slideIndex) {
+        const slide = state.slides[slideIndex];
+        const layers = [...(slide?.audioLayers || []),
+            ...(state.globalAudioLayers || []).filter(layer => isGlobalAudioActiveOnSlide(layer, slideIndex))];
+        await Promise.all(layers.filter(layer => layer.src).map(layer => loadAudioPromise(layer.src)));
+    }
+
+    function trimAudioPreloads() {
+        const timelineUrls = new Set();
+        const keep = new Set();
+        state.slides.forEach((slide, index) => {
+            (slide.audioLayers || []).forEach(layer => {
+                timelineUrls.add(layer.src);
+                if (index >= state.i - 1 && index <= state.i + PRELOAD_AHEAD_SLIDES) keep.add(layer.src);
+            });
+        });
+        (state.globalAudioLayers || []).forEach(layer => {
+            timelineUrls.add(layer.src);
+            for (let index = state.i; index <= Math.min(state.slides.length - 1, state.i + PRELOAD_AHEAD_SLIDES); index++) {
+                if (isGlobalAudioActiveOnSlide(layer, index)) keep.add(layer.src);
+            }
+        });
+        // Keep the current window, not an entire long slideshow's decoded audio.
+        audioPreloadCache.forEach((entry, url) => {
+            if (!timelineUrls.has(url) || keep.has(url)) return;
+            if (entry.objectUrl) URL.revokeObjectURL(entry.objectUrl);
+            audioPreloadCache.delete(url);
+            audioPreloadPromises.delete(url);
+        });
     }
 
     function resolveEffectSpec(spec) {
@@ -951,7 +1016,7 @@
             }
 
             const audio = new Audio();
-            audio.src = layer.src;
+            audio.src = preparedAudioSource(layer.src);
             audio.volume = Math.max(0, Math.min(1, Number(layer.volume ?? 1)));
             audio.loop = layer.loop !== false;
             activeGlobalAudioElements.set(key, audio);
@@ -980,18 +1045,19 @@
             audioLayers.forEach((layer, index) => {
                 if (!layer || !layer.src) return;
                 const audio = index === 0 ? el.speech : new Audio();
-                audio.src = layer.src;
+                audio.src = preparedAudioSource(layer.src);
                 audio.currentTime = 0;
                 audio.volume = Math.max(0, Math.min(1, Number(layer.volume ?? 1)));
                 activeAudioElements.push(audio);
+                const requestId = audioPlaybackRequestId;
                 audio.play().catch(() => {
-                    if (index === 0) scheduleNext(s.seconds || 5);
+                    if (index === 0 && requestId === audioPlaybackRequestId && state.playing) {
+                        pause();
+                        el.status.textContent = 'Audio could not start. Press Resume to retry.';
+                    }
                 });
-                if (index === 0) {
-                    audio.onloadedmetadata = () => {
-                        if (isFinite(audio.duration)) scheduleNext(audio.duration + PAD_AFTER_SPEECH);
-                    };
-                }
+                // Advance from the actual ended event, never from metadata time:
+                // decoding, buffering and pauses must not cut narration short.
             });
         } else {
             scheduleNext((s.seconds != null) ? s.seconds : 5);
@@ -999,16 +1065,32 @@
     }
 
     async function playFrom(i, first = false) {
+        const requestId = ++audioPlaybackRequestId;
+        clearTimer();
+        stopActiveAudio(true);
         state.playing = true;
         el.playPause.textContent = 'Pause';
         state.i = i;
+        el.status.textContent = 'Loading audio…';
+        try {
+            await prepareSlideAudio(i);
+        } catch (error) {
+            if (requestId !== audioPlaybackRequestId) return;
+            pause();
+            el.status.textContent = 'Audio could not load. Press Resume to retry.';
+            return;
+        }
+        if (requestId !== audioPlaybackRequestId || !state.playing) return;
+        el.status.textContent = '';
         const rendered = first
             ? await renderSlideInstant(i)
             : await transitionTo(i);
-        if (rendered && state.playing && state.i === i) startTimingForCurrent();
+        if (rendered && requestId === audioPlaybackRequestId && state.playing && state.i === i) startTimingForCurrent();
     }
 
     function pause() {
+        ++audioPlaybackRequestId;
+        el.status.textContent = '';
         state.playing = false;
         el.playPause.textContent = 'Resume';
         stopActiveAudio(false);
@@ -1017,7 +1099,11 @@
     }
 
     function onSpeechEnded() { if (state.playing) scheduleNext(PAD_AFTER_SPEECH); }
-    function onSpeechError() { scheduleNext(state.slides[state.i].seconds || 5); }
+    function onSpeechError() {
+        if (!state.playing) return;
+        pause();
+        el.status.textContent = 'Audio could not play. Press Resume to retry.';
+    }
 
     function nextSlide() {
         if (!state.playing) return;
@@ -1032,6 +1118,8 @@
     }
 
     function jumpTo(i, auto = true) {
+        ++audioPlaybackRequestId;
+        el.status.textContent = '';
         i = Math.max(0, Math.min(state.slides.length - 1, i));
         state.i = i;
         stopActiveAudio(false);
@@ -1084,10 +1172,10 @@
             if (layer.effect) promises.push(preloadEffectAssets(layer.effect));
         });
         (s.audioLayers || []).forEach(layer => {
-            if (layer.src) promises.push(loadAudioPromise(layer.src));
+            if (layer.src) promises.push(loadAudioPromise(layer.src).catch(() => null));
         });
         (state.globalAudioLayers || []).forEach(layer => {
-            if (isGlobalAudioActiveOnSlide(layer, slideIndex)) promises.push(loadAudioPromise(layer.src));
+            if (isGlobalAudioActiveOnSlide(layer, slideIndex)) promises.push(loadAudioPromise(layer.src).catch(() => null));
         });
 
         const advancedTransition = normalizeTransitionConfig(s);
@@ -1108,7 +1196,7 @@
             if (j >= state.slides.length) break;
             promises.push(preloadSlide(j));
         }
-        Promise.all(promises).catch(() => {});
+        Promise.all(promises).then(trimAudioPreloads).catch(() => {});
     }
 
     async function preloadInitialBatch(startIndex) {

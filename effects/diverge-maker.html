@@ -74,14 +74,6 @@
     </div>
 
     <script type="module">
-        function effectCodeToDefinition(code, engine) {
-            const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-            if (!match) throw new Error("Could not parse generated effect code");
-            const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-            const config = (new Function("return (" + objExpr + ");"))();
-            return { engine, config };
-        }
-
         const ENGINE_PATH = '/effects/diverge-engine.js';
         const ENGINE = 'diverge';
         import { mount } from '/effects/diverge-engine.js';
@@ -148,24 +140,16 @@
             loadEditConfig,
             getExportJSON: () => {
                 const imagePath = window.imgName ? `img/${window.imgName}` : '';
-                const code = `
-import { mount as runDiverge } from '${ENGINE_PATH}';
-export function mount(canvas, ctx, config) {
-    return runDiverge(canvas, ctx, {
-        ...config,
-        imgSrc: '${imagePath}',
-        axis: '${cfg.axis}',
-        color1: '${cfg.color1}',
-        color2: '${cfg.color2}',
-        thickness: ${cfg.thickness},
-        intensity: ${cfg.intensity},
-        duration: ${cfg.duration},
-        startDelay: ${cfg.startDelay}
-    });
-}`;
-                const match = code.match(/return\s+\w+\s*\(\s*canvas\s*,\s*ctx\s*,\s*(\{[\s\S]*?\})\s*\)\s*;/);
-                const objExpr = match[1].replace(/^\s*\.\.\.config\s*,?\s*/m, "");
-                const configObj = (new Function("return (" + objExpr + ");"))();
+                const configObj = {
+                    imgSrc: imagePath,
+                    axis: cfg.axis,
+                    color1: cfg.color1,
+                    color2: cfg.color2,
+                    thickness: cfg.thickness,
+                    intensity: cfg.intensity,
+                    duration: cfg.duration,
+                    startDelay: cfg.startDelay
+                };
                 return { engine: ENGINE, config: configObj };
             }
         };

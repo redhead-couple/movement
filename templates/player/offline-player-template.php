@@ -18,9 +18,10 @@ function buildOfflinePlayerHtml(string $flowJson, string $appCss, array $engineS
 
 function buildOfflineBootstrapScript(string $flowJson, array $engineSources, array $transitionSources = []): string
 {
-    $safeFlowJson = str_replace('</', '<\/', $flowJson);
+    // Escape every '<' so project strings cannot close the script element or
+    // enter HTML's script-comment parsing states. Keep the original JSON types.
+    $safeFlowJson = str_replace('<', '\u003C', $flowJson);
     $config = [
-        'flowData' => json_decode($flowJson, true),
         'imgBase' => 'img/',
         'speechBase' => 'speech/',
         'audioBase' => 'audio/',

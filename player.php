@@ -65,7 +65,9 @@ setWebPageDiscovery(is_array($data) && !empty($data['isPublished'])
 $bootstrapConfig = [
     'projectBase' => $projectWebDir,
     'flowUrl' => $mediaBase . 'flow.json',
-    'imgBase' => $mediaBase . 'img/',
+    // Only the hosted player opts into disposable optimized image copies.
+    // Speech/audio and authoring/export URLs continue to use original media.
+    'imgBase' => ($example === '' ? str_replace('/media.php?p=', '/media.php?variant=player&p=', $mediaBase) : $mediaBase) . 'img/',
     'speechBase' => $mediaBase . 'speech/',
     'audioBase' => $mediaBase . 'audio/',
     'engineBase' => '/effects/',
