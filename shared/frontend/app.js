@@ -43,6 +43,11 @@ const elements = {
   recoveryList: document.querySelector('#recovery-list'),
   recoveryEmpty: document.querySelector('#recovery-empty'),
   recoveryItemTemplate: document.querySelector('#recovery-item-template'),
+  backupsDialog: document.querySelector('#backups-dialog'),
+  backupsProjectTitle: document.querySelector('#backups-project-title'),
+  backupsStatus: document.querySelector('#backups-status'),
+  backupsList: document.querySelector('#backups-list'),
+  backupsRefresh: document.querySelector('#backups-refresh'),
   conceptSlideshowCards: Array.from(document.querySelectorAll('[data-concept-project]'))
 };
 
@@ -55,6 +60,7 @@ const state = {
   workspaceContinuation: null,
   toastTimer: null
 };
+let backupSelection = null;
 
 function setRoute(route) {
   const safeRoute = route === 'library' ? 'library' : route === 'concept' ? 'concept' : 'home';
@@ -152,6 +158,7 @@ function createProjectCard(project) {
   const card = elements.projectTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.projectId = project.id;
   card.classList.toggle('project-card-readonly', project.readOnly);
+  card.querySelector('.backups-action').hidden = project.readOnly;
   card.querySelector('h2').textContent = project.title;
   card.querySelector('.project-description').textContent = project.description
     || `Project folder: ${project.id}`;
@@ -540,6 +547,82 @@ async function deleteTrashedProject(item, button) {
   }
 }
 
+async function refreshProjectBackups() {
+  const selection = backupSelection;
+  if (!selection) return;
+  elements.backupsList.replaceChildren();
+  elements.backupsStatus.textContent = 'Reading backups…';
+  resetDialog(elements.backupsDialog);
+  elements.backupsRefresh.disabled = true;
+  try {
+    const backups = await api.listProjectBackups(selection.workspaceId, selection.project.id);
+    if (backupSelection !== selection || !elements.backupsDialog.open) return;
+    selection.backups = backups;
+    elements.backupsStatus.textContent = backups.length
+      ? `${backups.length} backups. Each backup contains the version before a save. Up to 20 are kept.`
+      : 'No backups yet. A backup is created before each save.';
+    for (const backup of backups) {
+      const row = document.createElement('article');
+      row.className = 'recovery-item';
+      const copy = document.createElement('div');
+      copy.className = 'recovery-item-copy';
+      const title = document.createElement('strong');
+      title.textContent = backup.valid ? backup.title : 'Unavailable backup';
+      const detail = document.createElement('span');
+      detail.textContent = backup.valid
+        ? `${new Date(backup.savedAt).toLocaleString()} · ${backup.slideCount} slides`
+        : backup.reason;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'button';
+      button.dataset.backupName = backup.name;
+      button.textContent = 'Restore as Copy';
+      button.disabled = !backup.valid;
+      copy.append(title, detail);
+      row.append(copy, button);
+      elements.backupsList.append(row);
+    }
+  } catch (error) {
+    if (backupSelection === selection) {
+      elements.backupsStatus.textContent = 'Could not load backups.';
+      showDialogError(elements.backupsDialog, error);
+    }
+  } finally {
+    elements.backupsRefresh.disabled = false;
+  }
+}
+
+function openProjectBackups(project) {
+  if (!state.selectedWorkspace || project.readOnly) return;
+  backupSelection = { workspaceId: state.selectedWorkspace.id, project, backups: [] };
+  elements.backupsProjectTitle.textContent = project.title;
+  openDialog(elements.backupsDialog);
+  void refreshProjectBackups();
+}
+
+async function restoreSelectedBackup(backup) {
+  const selection = backupSelection;
+  if (!selection || !backup.valid || selection.restoring) return;
+  selection.restoring = true;
+  setDialogBusy(elements.backupsDialog, true);
+  try {
+    const restored = await api.restoreProjectBackup(
+      selection.workspaceId, selection.project.id, backup.name, backup.revision
+    );
+    closeDialog(elements.backupsDialog);
+    await refreshLibrary(selection.workspaceId);
+    showToast(`“${restored.title}” was restored as a separate slideshow. Open it with Edit to review it.`);
+  } catch (error) {
+    showDialogError(elements.backupsDialog, error);
+  } finally {
+    selection.restoring = false;
+    setDialogBusy(elements.backupsDialog, false);
+    for (const button of elements.backupsList.querySelectorAll('[data-backup-name]')) {
+      button.disabled = !selection.backups.find(item => item.name === button.dataset.backupName)?.valid;
+    }
+  }
+}
+
 async function duplicateProject(project, button) {
   if (!state.selectedWorkspace) return;
   button.disabled = true;
@@ -749,6 +832,17 @@ elements.recoveryList.addEventListener('click', event => {
     void deleteTrashedProject(item, button);
   }
 });
+elements.backupsRefresh.addEventListener('click', () => void refreshProjectBackups());
+elements.backupsDialog.addEventListener('close', () => { backupSelection = null; });
+elements.backupsDialog.addEventListener('cancel', event => {
+  if (backupSelection?.restoring) event.preventDefault();
+});
+elements.backupsList.addEventListener('click', event => {
+  const button = event.target.closest('[data-backup-name]');
+  if (!button || button.disabled) return;
+  const backup = backupSelection?.backups.find(item => item.name === button.dataset.backupName);
+  if (backup) void restoreSelectedBackup(backup);
+});
 
 elements.projectGrid.addEventListener('click', event => {
   const actionButton = event.target.closest('[data-project-action]');
@@ -785,6 +879,9 @@ elements.projectGrid.addEventListener('click', event => {
       break;
     case 'duplicate':
       void duplicateProject(project, actionButton);
+      break;
+    case 'backups':
+      openProjectBackups(project);
       break;
     case 'trash':
       prepareTrashDialog(project);

@@ -755,8 +755,11 @@ function buildPortablePlayerHtml(applicationRoot, flow) {
     preloadAheadSlides: 6,
     desktopMode: false
   };
+  // Escape all '<' in project data, including HTML script-comment openers.
+  // JavaScript decodes the escapes back to the original strings at runtime.
+  const bootstrapJson = JSON.stringify(bootstrap).replace(/</g, '\\u003C');
   const bootstrapSource = [
-    `window.PLAYER_BOOTSTRAP = ${JSON.stringify(bootstrap)};`,
+    `window.PLAYER_BOOTSTRAP = ${bootstrapJson};`,
     inlineEngineRegistry(applicationRoot, 'effects', engines.effects, 'inlineEngines'),
     inlineEngineRegistry(
       applicationRoot,

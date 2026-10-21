@@ -53,14 +53,17 @@ installation, or an internet connection. Projects live in the kit's
 unknown-publisher warning. See the [Authoring Kit guide](docs/DESKTOP_AUTHORING_KIT.md)
 for source editing and the distribution boundary.
 
-**Movement Public Alpha 0.1**, version **`0.1.0-alpha.1`**, is available as
-[release `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+**Movement Public Alpha 0.1**, version **`0.1.0-alpha.8`**, is available as
+[prerelease `v0.1.0-alpha.8`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.8),
+with the Windows Authoring Kit and installer.
 The [public repository](https://github.com/redhead-couple/movement) contains
 the source. Use the Windows download page above for the recommended Authoring Kit.
 
-The current development source is **`0.1.0-alpha.2`**, prepared locally with
-desktop component sharing. It is not yet published; the public alpha.1 download
-above is unchanged. See the [alpha.2 release notes](docs/RELEASE_NOTES_0.1.0-alpha.2.md).
+The current desktop version is **`0.1.0-alpha.8`**, including recoverable media
+cleanup, image/audio previews in Media Trash, safer saving and export, and complete
+audio/speech preloading. See the [alpha.8 release notes](docs/RELEASE_NOTES_0.1.0-alpha.8.md).
+The hosted player additionally serves optimized image copies while preserving
+originals. That server-only change does not require a new desktop version.
 
 ## Develop from source with Electron
 

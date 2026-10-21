@@ -12,7 +12,7 @@
       ],
       "hostContract": "movement-effect-host-1",
       "assets": [],
-      "makerSha256": "04bf6be573c8a783a6f17b7e7b05742b233ce60743d0edcd9ad72fe408448db9",
+      "makerSha256": "2d277b8f27255ff2824f875d0194aa93207eb9c1bf409d18a76739318c3a86ea",
       "engineSha256": "3dc66f7c91ad9622447298e6771066e249de22e83a3ede0b36652142c6a88b3a",
       "license": {
         "source": "LICENSE",

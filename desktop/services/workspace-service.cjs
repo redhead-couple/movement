@@ -314,8 +314,11 @@ function compareMediaReferences(a, b) {
   return a.role.localeCompare(b.role, undefined, { numeric: true });
 }
 
+const { mediaReferenceText, cleanupToken, assertPlainPath, mediaTrashSnapshot, emptyMediaTrash, restoreMediaTrash, resolveTrashPreview } = require('./media-trash-service.cjs');
+
 function buildProjectMediaOverview(projectRoot, flow, revision, readOnly) {
   const usage = collectProjectMediaUsage(flow);
+  const referenceText = mediaReferenceText(flow);
   const media = { img: [], speech: [], audio: [] };
   const missing = { img: [], speech: [], audio: [] };
 
@@ -326,7 +329,9 @@ function buildProjectMediaOverview(projectRoot, flow, revision, readOnly) {
         .filter(entry => entry.isFile() && !entry.name.startsWith('.'))
         .map(entry => {
           const stats = fs.statSync(path.join(mediaRoot, entry.name));
-          const usageEntry = usage[type].get(entry.name.toLowerCase());
+          const usageEntry = usage[type].get(entry.name.toLowerCase())
+            || (referenceText.includes(entry.name.toLowerCase())
+              ? { references: [{ scope: 'global', slideNumber: null, role: 'Project reference' }] } : null);
           return {
             type,
             filename: entry.name,
@@ -811,6 +816,82 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
     };
   }
 
+  function readProjectBackup(projectRoot, backupName) {
+    if (typeof backupName !== 'string' || !/^flow-[a-z0-9-]+\.json$/i.test(backupName)) {
+      throw workspaceError('INVALID_BACKUP', 'Choose a valid slideshow backup.');
+    }
+    const directory = path.join(projectRoot, 'backups');
+    const filename = path.join(directory, backupName);
+    if (!fs.existsSync(directory) || fs.lstatSync(directory).isSymbolicLink()
+      || !fs.existsSync(filename)) {
+      throw workspaceError('INVALID_BACKUP', 'This backup is no longer available.');
+    }
+    const stats = fs.lstatSync(filename);
+    if (!stats.isFile() || stats.isSymbolicLink() || stats.size > MAX_FLOW_BYTES) {
+      throw workspaceError('INVALID_BACKUP', 'This backup cannot be restored.');
+    }
+    const raw = fs.readFileSync(filename, 'utf8');
+    let flow;
+    try {
+      flow = JSON.parse(raw);
+      validateAndSerializeFlow(flow);
+    } catch {
+      throw workspaceError('INVALID_BACKUP', 'This backup does not contain a valid slideshow.');
+    }
+    return { flow, revision: revisionForRaw(raw), savedAt: stats.mtime.toISOString() };
+  }
+
+  function listProjectBackups(workspaceId, projectId) {
+    const projectRoot = resolveProjectRoot(workspaceId, projectId, true);
+    const directory = path.join(projectRoot, 'backups');
+    if (!fs.existsSync(directory)) return [];
+    if (fs.lstatSync(directory).isSymbolicLink() || !isDirectory(directory)) {
+      throw workspaceError('INVALID_BACKUP', 'The backup folder cannot be read safely.');
+    }
+    return fs.readdirSync(directory)
+      .filter(name => /^flow-[a-z0-9-]+\.json$/i.test(name))
+      .sort().reverse()
+      .map(name => {
+        try {
+          const backup = readProjectBackup(projectRoot, name);
+          return { name, revision: backup.revision, savedAt: backup.savedAt,
+            title: backup.flow.title, slideCount: backup.flow.slides.length, valid: true };
+        } catch (error) {
+          return { name, valid: false, reason: error.message };
+        }
+      });
+  }
+
+  function restoreProjectBackup(workspaceId, projectId, backupName, expectedRevision) {
+    const workspace = resolveUserWorkspace(workspaceId);
+    const sourceRoot = resolveProjectRoot(workspaceId, projectId, true);
+    if (!isDirectory(sourceRoot) || fs.lstatSync(sourceRoot).isSymbolicLink()) {
+      throw workspaceError('INVALID_BACKUP', 'The source project cannot be copied safely.');
+    }
+    const backup = readProjectBackup(sourceRoot, backupName);
+    if (!expectedRevision || backup.revision !== expectedRevision) {
+      throw workspaceError('REVISION_CONFLICT', 'This backup changed. Refresh the backup list before restoring.');
+    }
+    const slug = nextAvailableSlug(workspace.rootPath, `${projectId}-restored`);
+    const destinationRoot = path.join(workspace.rootPath, slug);
+    const temporaryRoot = path.join(workspace.rootPath, `.movement-tmp-restore-${crypto.randomUUID()}`);
+    const flow = { ...backup.flow, title: `${backup.flow.title} (Restored)`, isPublished: false };
+    delete flow.publishedAt;
+    const serialized = validateAndSerializeFlow(flow);
+    try {
+      // Restore as a new project: preserve the current project and its history,
+      // even when its flow is corrupt or it has unsaved edits in another window.
+      copyProjectTree(sourceRoot, temporaryRoot);
+      atomicWrite(path.join(temporaryRoot, 'flow.json'), serialized);
+      fs.mkdirSync(path.join(temporaryRoot, 'backups'), { recursive: true });
+      fs.renameSync(temporaryRoot, destinationRoot);
+    } catch (error) {
+      removeTemporaryProject(workspace.rootPath, temporaryRoot);
+      throw error;
+    }
+    return projectSummary(workspace.rootPath, slug, false);
+  }
+
   function copyProject(sourceRoot, workspace, title, preferredSlug) {
     const slug = nextAvailableSlug(workspace.rootPath, preferredSlug);
     const destinationRoot = path.join(workspace.rootPath, slug);
@@ -1034,6 +1115,10 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
     return assetPath;
   }
 
+  function resolveProjectTrashPreview(workspaceId, projectId, trashId, type, filename) {
+    return resolveTrashPreview(resolveProjectRoot(workspaceId, projectId), trashId, type, filename);
+  }
+
   function listProjectMedia(workspaceId, projectId, requestedType) {
     const type = mediaTypeOrThrow(requestedType);
     const projectRoot = resolveProjectRoot(workspaceId, projectId);
@@ -1048,12 +1133,54 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
   function getProjectMediaOverview(workspaceId, projectId) {
     const projectRoot = resolveProjectRoot(workspaceId, projectId);
     const loaded = loadProjectFlow(workspaceId, projectId);
-    return buildProjectMediaOverview(
+    validateAndSerializeFlow(loaded.flow);
+    const overview = buildProjectMediaOverview(
       projectRoot,
       loaded.flow,
       loaded.revision,
       loaded.readOnly
     );
+    overview.cleanup = Object.fromEntries(['img', 'audio', 'speech'].map(type => [type, {
+      token: cleanupToken(overview, type),
+      files: overview.media[type].filter(item => item.references.length === 0
+        && MEDIA_EXTENSIONS[type].has(path.extname(item.filename).toLowerCase()))
+    }]));
+    overview.cleanupToken = overview.cleanup.img.token;
+    overview.cleanupImages = overview.cleanup.img.files;
+    const trash = mediaTrashSnapshot(projectRoot);
+    overview.trash = trash.files;
+    overview.trashToken = trash.token;
+    return overview;
+  }
+
+  function moveUnusedImagesToTrash(workspaceId, projectId, expectedToken) {
+    return moveUnusedMediaToTrash(workspaceId, projectId, 'img', expectedToken);
+  }
+
+  function moveUnusedMediaToTrash(workspaceId, projectId, requestedType, expectedToken) {
+    const type = mediaTypeOrThrow(requestedType);
+    resolveProjectRoot(workspaceId, projectId, true);
+    const overview = getProjectMediaOverview(workspaceId, projectId);
+    if (!expectedToken || expectedToken !== overview.cleanup[type].token) {
+      throw workspaceError('REVISION_CONFLICT', 'The project or media list changed. Refresh and review the list again.');
+    }
+    const moved = [];
+    for (const item of overview.cleanup[type].files) {
+      try {
+        moved.push(moveUnusedProjectMediaToTrash(workspaceId, projectId, type, item.filename, overview.revision));
+      } catch (error) {
+        return { moved: moved.length, error: error.message };
+      }
+    }
+    return { moved: moved.length };
+  }
+
+  function restoreProjectMedia(workspaceId, projectId, trashId, type, filename) {
+    return restoreMediaTrash(resolveProjectRoot(workspaceId, projectId, true), trashId, type, filename);
+  }
+
+  function emptyProjectMediaTrash(workspaceId, projectId, token) {
+    return emptyMediaTrash(resolveProjectRoot(workspaceId, projectId, true), token);
   }
 
   function moveUnusedProjectMediaToTrash(
@@ -1076,6 +1203,7 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
 
     const projectRoot = resolveProjectRoot(workspaceId, projectId, true);
     const loaded = loadProjectFlow(workspaceId, projectId);
+    validateAndSerializeFlow(loaded.flow);
     if (expectedRevision && expectedRevision !== loaded.revision) {
       throw workspaceError(
         'REVISION_CONFLICT',
@@ -1099,15 +1227,14 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
       );
     }
 
-    const sourcePath = path.join(projectRoot, type, item.filename);
+    const sourcePath = assertPlainPath(projectRoot, type, item.filename);
     if (!isFile(sourcePath)) throw workspaceError('MEDIA_NOT_FOUND', 'The project media file was not found.');
     const removedAt = new Date().toISOString();
     const trashId = `${removedAt.replace(/[:.]/g, '-')}--${crypto.randomUUID().slice(0, 8)}`;
-    const trashEntryRoot = path.join(projectRoot, '.movement-media-trash', trashId);
+    const trashEntryRoot = assertPlainPath(projectRoot, '.movement-media-trash', trashId);
     const trashFolder = path.join(trashEntryRoot, type);
     const destinationPath = path.join(trashFolder, item.filename);
     fs.mkdirSync(trashFolder, { recursive: true });
-    fs.renameSync(sourcePath, destinationPath);
     try {
       atomicWrite(
         path.join(trashEntryRoot, 'metadata.json'),
@@ -1119,9 +1246,11 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
           removedAt
         }, null, 2)}\n`
       );
+      // Record recovery information before the atomic move, including on process termination.
+      fs.renameSync(sourcePath, destinationPath);
     } catch (error) {
-      fs.renameSync(destinationPath, sourcePath);
-      fs.rmSync(trashEntryRoot, { recursive: true, force: true });
+      // Never delete a moved file if a later operation failed.
+      if (!fs.existsSync(destinationPath)) fs.rmSync(trashEntryRoot, { recursive: true, force: true });
       throw error;
     }
 
@@ -1265,26 +1394,12 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
     fs.mkdirSync(mediaRoot, { recursive: true });
     const token = crypto.randomUUID();
     const temporaryPath = path.join(mediaRoot, `.${filename}.${token}.import`);
-    const rollbackPath = path.join(mediaRoot, `.${filename}.${token}.previous`);
-    fs.copyFileSync(sourcePath, temporaryPath, fs.constants.COPYFILE_EXCL);
 
     try {
-      if (exists) {
-        fs.renameSync(destinationPath, rollbackPath);
-        try {
-          fs.renameSync(temporaryPath, destinationPath);
-        } catch (error) {
-          fs.renameSync(rollbackPath, destinationPath);
-          throw error;
-        }
-        try {
-          fs.rmSync(rollbackPath, { force: true });
-        } catch {
-          // A hidden rollback copy is safer than failing after the replacement succeeded.
-        }
-      } else {
-        fs.renameSync(temporaryPath, destinationPath);
-      }
+      fs.copyFileSync(sourcePath, temporaryPath, fs.constants.COPYFILE_EXCL);
+      // Commit from the same directory in one rename. Keep the original at its
+      // public name until replacement succeeds, including if the process exits.
+      fs.renameSync(temporaryPath, destinationPath);
     } finally {
       try {
         fs.rmSync(temporaryPath, { force: true });
@@ -1333,6 +1448,8 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
     createProject,
     loadProjectFlow,
     saveProjectFlow,
+    listProjectBackups,
+    restoreProjectBackup,
     copyExample,
     duplicateProject,
     renameProject,
@@ -1341,9 +1458,14 @@ function createWorkspaceService({ examplesRoot, storageRoot }) {
     restoreProjectFromTrash,
     deleteTrashedProject,
     resolveProjectAssetPath,
+    resolveProjectTrashPreview,
     listProjectMedia,
     getProjectMediaOverview,
     moveUnusedProjectMediaToTrash,
+    moveUnusedImagesToTrash,
+    moveUnusedMediaToTrash,
+    emptyProjectMediaTrash,
+    restoreProjectMedia,
     exportPortableProject,
     inspectPortableProject,
     importPortableProject,

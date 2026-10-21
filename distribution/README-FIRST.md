@@ -7,13 +7,13 @@ Studio. Extract the complete ZIP before using it, then start
 Movement is the project/medium; Early Formation is the website and umbrella
 brand; Redhead Couple is the maintainer and publisher.
 
-This locally prepared Kit is version **`0.1.0-alpha.2`**, with desktop component
-export, inspection and installation. It has not yet been published. Read
-`resources/app/docs/RELEASE_NOTES_0.1.0-alpha.2.md` and the creation-to-sharing guide
+This Kit is version **`0.1.0-alpha.8`**, incorporating the
+previous fixes, Media Trash improvements, and complete audio/speech preloading.
+Read `resources/app/docs/RELEASE_NOTES_0.1.0-alpha.8.md` and the creation-to-sharing guide
 at `resources/app/docs/COMPONENT_EXPORT.md`. Inspection does not certify code safety.
 
-Movement Public Alpha 0.1, version `0.1.0-alpha.1`, is published as
-[prerelease `v0.1.0-alpha.1`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.1).
+The Authoring Kit and installer are published as
+[prerelease `v0.1.0-alpha.8`](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.8).
 The actual kit version is in `resources/app/package.json`. The public repository
 is [redhead-couple/movement](https://github.com/redhead-couple/movement).
 This Windows Alpha build is unsigned, so Windows may show a SmartScreen or

@@ -108,6 +108,23 @@ transfers all code; FileZilla supports incremental upload.
 
 ## Checks and rollback
 
+The hosted project player can request optimized presentation images through
+`media.php?variant=player&p=...`. This requires PHP GD with WebP encoding and a
+writable `private-data/player-image-cache` directory (created on demand). If GD,
+decoding, or cache writes are unavailable, the original image is served instead.
+Verify the improvement on the hosting environment after deploying; local results
+do not establish that the host has this extension enabled.
+
+Copies keep the original pixel dimensions and transparency, use WebP quality 90,
+and are used only when at least 15% smaller. Already-lossy WebP, animated images,
+and images with unsupported color/orientation metadata stay original. Originals,
+editing, exports, example players and desktop/offline players are unchanged.
+The cache is outside account projects, never included in project backups/exports,
+and is disposable: old copies are pruned during generation with a seven-day age
+policy, 128 MiB size budget and 2,000-entry budget. File-content hashes invalidate
+copies after replacement. Every image request still authorizes the original;
+copies cannot bypass publication, deletion or Media Trash restrictions.
+
 For production/development crawler policy and the concept page's PHP entry,
 see [Public indexing controls](INDEXING.md).
 

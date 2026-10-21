@@ -6,7 +6,8 @@ const vm = require('node:vm');
 // Captured from the pre-fix exporters with ordinary inputs. No legacy evaluator
 // is kept in the test or application; these pin keys, types and rounding.
 const fixtures = require('./fixtures/effect-maker-exports.json');
-const root = path.resolve(__dirname, '..');
+// The distribution verifier supplies a temporary copy of the packaged makers.
+const root = path.resolve(process.env.MOVEMENT_EFFECT_TEST_ROOT || path.join(__dirname, '..'));
 
 function exportEffect(engine, parameters, names = ['one.webp', 'two.webp']) {
   const source = fs.readFileSync(path.join(root, 'effects', engine + '-maker.html'), 'utf8');

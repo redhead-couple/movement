@@ -305,6 +305,9 @@
           <button class="card-action duplicate-action" type="button" data-project-action="duplicate">
             Duplicate
           </button>
+          <button class="card-action backups-action" type="button" data-project-action="backups">
+            Backups
+          </button>
           <button class="card-action card-action-danger trash-action" type="button" data-project-action="trash">
             Move to trash
           </button>
@@ -312,6 +315,30 @@
       </div>
     </article>
   </template>
+
+  <dialog class="app-dialog recovery-dialog" id="backups-dialog" aria-labelledby="backups-title">
+    <div class="recovery-dialog-content">
+      <header class="recovery-dialog-header">
+        <div>
+          <div class="dialog-kicker">Slideshow history</div>
+          <h2 id="backups-title">Backups</h2>
+          <p class="dialog-copy" id="backups-project-title"></p>
+          <p class="dialog-copy">
+            Restore a previous version as a separate slideshow. Your current slideshow stays unchanged.
+            Backups contain slideshow content and settings, not older media files.
+            The restored copy uses your current images and audio; missing media will still need to be added.
+          </p>
+        </div>
+      </header>
+      <p id="backups-status" role="status"></p>
+      <div class="recovery-list" id="backups-list"></div>
+      <p class="dialog-error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button class="button" type="button" id="backups-refresh">Refresh</button>
+        <button class="button" type="button" data-close-dialog>Close</button>
+      </div>
+    </div>
+  </dialog>
 
   <dialog class="app-dialog recovery-dialog" id="recovery-dialog">
     <div class="recovery-dialog-content">

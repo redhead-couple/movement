@@ -24,6 +24,7 @@ const { createRegistryService } = require('./services/registry-service.cjs');
 const { createComponentExportService } = require('./services/component-export-service.cjs');
 const { createComponentInstallService } = require('./services/component-install-service.cjs');
 const { createWorkspaceService } = require('./services/workspace-service.cjs');
+const { trashPreviewResponse } = require('./services/media-trash-service.cjs');
 const {
   loadWindowState,
   saveWindowState
@@ -138,6 +139,7 @@ const ROOT_APP_RESOURCES = new Set([
   'studio/editor/editor-layout.css',
   'studio/editor/editor-layout.js',
   'studio/editor/json-maker-logic.js',
+  'studio/editor/media-trash-preview.js',
   'studio/player/local-player.html',
   'studio/maker/maker-engine.js',
   'studio/maker/maker-scroll-guard.css',
@@ -479,6 +481,19 @@ function registerIpcHandlers() {
     }
   );
 
+  ipcMain.handle('project:list-backups', (event, workspaceId, projectId) => {
+    assertTrustedIpcSender(event);
+    return workspaceService.listProjectBackups(String(workspaceId || ''), String(projectId || ''));
+  });
+
+  ipcMain.handle('project:restore-backup', (event, workspaceId, projectId, backupName, expectedRevision) => {
+    assertTrustedIpcSender(event);
+    return workspaceService.restoreProjectBackup(
+      String(workspaceId || ''), String(projectId || ''),
+      String(backupName || ''), String(expectedRevision || '')
+    );
+  });
+
   ipcMain.handle('project:copy-example', (event, exampleId, targetWorkspaceId) => {
     assertTrustedIpcSender(event);
     return workspaceService.copyExample(
@@ -716,6 +731,50 @@ function registerIpcHandlers() {
       );
     }
   );
+
+  ipcMain.handle('project:trash-unused-media', async (event, workspaceId, projectId, type, token) => {
+    assertTrustedIpcSender(event);
+    if (!['img', 'audio', 'speech'].includes(type)) throw new Error('Invalid media type.');
+    const overview = workspaceService.getProjectMediaOverview(workspaceId, projectId);
+    if (overview.readOnly || token !== overview.cleanup[type].token) throw new Error('Refresh the media list before continuing.');
+    const files = overview.cleanup[type].files;
+    if (!files.length) return { moved: 0 };
+    const singular = { img: 'image', audio: 'audio file', speech: 'speech file' }[type];
+    const plural = { img: 'images', audio: 'audio files', speech: 'speech files' }[type];
+    const options = {
+      type: 'warning', title: `Delete all unused ${plural}`,
+      message: files.length === 1 ? `Delete 1 unused ${singular}?` : `Delete all ${files.length} unused ${plural}?`,
+      detail: 'You can restore them from Trash.',
+      buttons: ['Cancel', type === 'img' ? 'Delete Images' : type === 'audio' ? 'Delete Audio Files' : 'Delete Speech Files'], defaultId: 0, cancelId: 0, noLink: true
+    };
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const choice = owner ? await dialog.showMessageBox(owner, options) : await dialog.showMessageBox(options);
+    if (choice.response !== 1) return { cancelled: true };
+    return workspaceService.moveUnusedMediaToTrash(workspaceId, projectId, type, token);
+  });
+
+  ipcMain.handle('project:restore-media', (event, workspaceId, projectId, trashId, type, filename) => {
+    assertTrustedIpcSender(event);
+    return workspaceService.restoreProjectMedia(workspaceId, projectId, trashId, type, filename);
+  });
+
+  ipcMain.handle('project:empty-media-trash', async (event, workspaceId, projectId, token) => {
+    assertTrustedIpcSender(event);
+    const overview = workspaceService.getProjectMediaOverview(workspaceId, projectId);
+    if (overview.readOnly || token !== overview.trashToken) throw new Error('Media Trash changed. Refresh and review it again.');
+    const count = overview.trash.length;
+    if (!count) return { deleted: 0 };
+    const options = {
+      type: 'warning', title: 'Empty Media Trash',
+      message: `Permanently delete ${count} ${count === 1 ? 'file' : 'files'} from Media Trash?`,
+      detail: 'This cannot be undone.', buttons: ['Cancel', 'Empty Trash'],
+      defaultId: 0, cancelId: 0, noLink: true
+    };
+    const owner = BrowserWindow.fromWebContents(event.sender);
+    const choice = owner ? await dialog.showMessageBox(owner, options) : await dialog.showMessageBox(options);
+    if (choice.response !== 1) return { cancelled: true };
+    return workspaceService.emptyProjectMediaTrash(workspaceId, projectId, token);
+  });
 
   ipcMain.handle('project:choose-media', async (event, workspaceId, projectId, requestedType) => {
     assertTrustedIpcSender(event);
@@ -1251,16 +1310,20 @@ async function handleProjectProtocol(request) {
   projectProtocolStats.requests += 1;
   try {
     const requestedUrl = new URL(request.url);
-    if (requestedUrl.host !== 'asset') throw new Error('Unknown project resource.');
+    if (!['asset', 'trash'].includes(requestedUrl.host)) throw new Error('Unknown project resource.');
     const parts = requestedUrl.pathname.split('/').filter(Boolean).map(decodeURIComponent);
     if (parts.length < 4) throw new Error('Incomplete project resource.');
     const [workspaceId, projectId, ...assetParts] = parts;
-    const assetPath = workspaceService.resolveProjectAssetPath(
+    if (requestedUrl.host === 'trash' && assetParts.length !== 3) throw new Error('Invalid trash resource.');
+    const assetPath = requestedUrl.host === 'trash'
+      ? workspaceService.resolveProjectTrashPreview(workspaceId, projectId, ...assetParts)
+      : workspaceService.resolveProjectAssetPath(
       workspaceId,
       projectId,
       assetParts.join('/')
     );
     projectProtocolStats.served += 1;
+    if (requestedUrl.host === 'trash') return trashPreviewResponse(assetPath, request);
     return net.fetch(pathToFileURL(assetPath).href, { headers: request.headers });
   } catch {
     projectProtocolStats.notFound += 1;

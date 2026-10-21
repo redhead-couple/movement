@@ -35,6 +35,12 @@
       copyExample: (exampleId, targetWorkspaceId) => (
         desktop.copyExample(exampleId, targetWorkspaceId)
       ),
+      listProjectBackups: (workspaceId, projectId) => (
+        desktop.listProjectBackups(workspaceId, projectId)
+      ),
+      restoreProjectBackup: (workspaceId, projectId, backupName, expectedRevision) => (
+        desktop.restoreProjectBackup(workspaceId, projectId, backupName, expectedRevision)
+      ),
       duplicateProject: (workspaceId, projectId) => (
         desktop.duplicateProject(workspaceId, projectId)
       ),

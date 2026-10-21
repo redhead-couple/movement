@@ -29,7 +29,7 @@ test('website ZIP export is a locked snapshot and fails before sending download 
     'server/core/app-init.php', 'server/core/auth-check.php', 'server/core/current-user.php',
     'server/core/current-user-record.php', 'server/core/config-loader.php', 'server/core/web-session.php',
     'server/core/security-helpers.php', 'server/core/response.php', 'server/core/project-paths.php',
-    'server/core/project-storage.php', 'server/core/storage-quota.php', 'templates/player/player-page-template.php',
+    'server/core/project-storage.php', 'server/core/media-trash.php', 'templates/media-trash-view.php', 'studio/editor/media-trash-preview.js', 'server/core/storage-quota.php', 'templates/player/player-page-template.php',
     'studio/player/player-runtime.js', 'effects/effect-media.js', 'assets/app.css']) write(file, fs.readFileSync(path.join(root, file)));
   write('server/core/db.php', databaseSource({ 1: 'owner', 2: 'other' }));
   write('quota.txt', '1073741824');

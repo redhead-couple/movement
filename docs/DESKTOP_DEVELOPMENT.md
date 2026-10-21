@@ -32,9 +32,9 @@ an inherited `ELECTRON_RUN_AS_NODE` variable before launching Electron.
 The desktop product name and version come from `package.json`:
 
 - product name: **Movement Timeline Studio**
-- current development version: **0.1.0-alpha.2** (prepared locally, not published)
+- current desktop version: **0.1.0-alpha.8** (published prerelease)
 - human-facing release label: **Movement Public Alpha 0.1**
-- existing published Git tag: `v0.1.0-alpha.1` (unchanged)
+- published Authoring Kit and installer tag: `v0.1.0-alpha.8`
 - publisher: **Redhead Couple**
 - Windows application ID: `org.movement.timelinestudio`
 
@@ -109,7 +109,7 @@ npm.cmd run dist:windows
 
 The distributable is written to:
 
-`dist/Movement Timeline Studio-Setup-0.1.0-alpha.2-x64.exe`
+`dist/Movement Timeline Studio-Setup-0.1.0-alpha.8-x64.exe`
 
 The build also leaves `dist/win-unpacked` for packaged-runtime validation. The
 installer is per-user by default, does not require administrator access for its
@@ -139,14 +139,27 @@ checksum beside it. See `docs/DESKTOP_AUTHORING_KIT.md` for the end-user and AI
 authoring workflow.
 
 The current source would produce
-`Movement Timeline Studio-Authoring-Kit-0.1.0-alpha.2-x64.zip`. The kit derives
+`Movement Timeline Studio-Authoring-Kit-0.1.0-alpha.8-x64.zip`. The kit derives
 its application version from `package.json`; the distribution manifest does
-not define a separate version. Existing `0.1.0` and `0.1.0-alpha.1` artifacts are
-earlier builds, not the alpha.2 candidate. Updating metadata does not rebuild or
-publish a ZIP. The website download page still links directly to the published alpha.1 GitHub
-release assets, independently of local build output. GitHub's published filename
-is `Movement.Timeline.Studio-Authoring-Kit-0.1.0-alpha.1-x64.zip`, with a matching
-`.zip.sha256` asset.
+not define a separate version. Existing `0.1.0`, alpha.1 and alpha.2 artifacts are
+earlier builds. Updating metadata does not rebuild or publish a ZIP. The public
+download remains independent of local build output; the previous published
+Authoring Kit and installer are alpha.8. Hosted image optimization is a separate
+server-only change and does not require rebuilding those binaries.
+
+Verify the effect security fixes in both distribution layouts:
+
+```powershell
+node tools/verify-desktop-effects.cjs dist/desktop-authoring-kit/win-unpacked
+node tools/verify-desktop-effects.cjs dist/win-unpacked
+```
+
+This compares packaged source bytes, runs the effect regression tests against
+those bytes, and checks hostile ZIP import plus normal editing, Apply, saving,
+preview, playback and export in an isolated Electron host. The generated
+`effects-verification.json` records the tested source hashes. Native selections
+and storage locations are provided by the harness; the packaged application
+code and renderer security settings are unchanged.
 
 Run the packaged library and writable-registry smoke checks with:
 
@@ -189,6 +202,13 @@ The safe-write slice adds:
 - revision-checked `flow.json` saves;
 - an automatic backup before every flow replacement;
 - retention of the newest 20 backups, matching the PHP application.
+
+The Library's **Backups** action lists dated slideshow snapshots and restores a
+selected version with **Restore as Copy**. The original project, its backup
+history and any editor still open on it remain unchanged. The copy is editable
+and uses the project's current media files; flow backups do not contain old
+media bytes. Invalid backups are unavailable, and a selected backup is checked
+again before copying. A failed copy does not publish a partial project.
 
 The recovery slice completes project-level recoverable deletion:
 
@@ -238,6 +258,61 @@ The editor’s top-level **Media** manager completes the project-wide workflow:
   native picker;
 - moves only verified-unused files to hidden, recoverable project media trash;
 - rejects removal when the slideshow revision changed or a file is still used.
+
+Each unused-media column ends with its own **Delete all unused images**,
+**Delete all unused audio files**, or **Delete all unused speech files** button.
+The confirmation shows that type's actual count and ability to restore from
+Trash (Cancel is the default). Empty lists have disabled cleanup buttons.
+Closing editor windows is not required.
+The desktop editor blocks it while edits are unsaved. The service checks the saved
+flow and that media type's list snapshot again after confirmation. Opening
+images, image/effect layers, narration, slide audio layers, global music,
+URL-encoded paths and even references in unknown fields are retained
+conservatively. Files outside the supported media types are untouched. Tokens
+are bound to the media type and cannot authorize cleanup of a different folder.
+
+**Media Trash → Restore** returns each file without overwriting an existing
+name. Trash entries are recorded before atomic moves and discovered from files
+on disk, so an interrupted batch can still be recovered. A failed batch reports
+how many files moved and leaves the remaining files in place. A failed restore
+keeps the trash source. Trash uses disk space; this action does not permanently
+delete files or purge them automatically. Backups may reference trashed media:
+restore those files before using an older flow. Media Trash is excluded from
+portable ZIP exports.
+
+The media page now shows a trash icon and total file count instead of inline
+trash rows. It opens a separate Media Trash screen with Back to Media, per-file
+Restore and Empty Trash. Empty Trash requires a count-specific permanent-delete
+confirmation (Cancel by default), then rechecks the reviewed trash snapshot.
+Files added or restored since that snapshot require a fresh review. It deletes
+only listed trash files; partial failures report progress and leave remaining
+files recoverable. No live media or flow data is deleted. These changes are included in the locally prepared alpha.7 distributions.
+
+Trash rows include image thumbnails with an enlarged dialog and native audio
+controls for Audio/Speech, using `studio/editor/media-trash-preview.js` in both
+editions. Playback stops when another preview starts or the user leaves the
+trash screen. Unsupported/unreadable media shows a fallback without disabling
+Restore. Desktop previews use the separate `movement-project://trash/` resource
+host, restricted to supported media files and rejecting linked paths. Online
+previews use an explicit owner-only `media.php?…&trash_preview=1` request;
+publication never grants access to trash. Both serve noncached, ranged responses
+for audio duration and seeking, without changing or restoring the source file.
+
+The web equivalent lives in `project-media.php`, with a separate cleanup button
+below each unused-file list, a short confirmation with the count and recovery
+reminder, and the separate `project-media.php?project=…&view=trash` screen.
+Its POST handlers share the save/upload project
+lock, owner authorization and CSRF guard. Trashed media is not publicly served,
+even for published projects. The web page cannot inspect unsaved edits in other
+windows. Its existing individual Delete actions remain separate from this new
+recoverable bulk action.
+
+Regression coverage: `tests/unused-images-trash.test.cjs`,
+`tests/unused-images-trash-php.test.cjs`, and `tests/project-media-lock.test.cjs`.
+Set `MOVEMENT_TEST_MEDIA_TRASH_BROWSER=1` and
+`MOVEMENT_TEST_WEB_TRASH_BROWSER=1` to include isolated Electron/Chromium UI tests.
+Source changes require a new desktop build before installed copies receive
+them; this feature was implemented without rebuilding distributions.
 
 The portable-project slice uses one ZIP for publishing and backup:
 

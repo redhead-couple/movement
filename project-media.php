@@ -4,9 +4,11 @@ require_once __DIR__ . '/server/core/current-user.php';
 require_once __DIR__ . '/server/core/project-paths.php';
 require_once __DIR__ . '/server/core/security-helpers.php';
 require_once __DIR__ . '/server/core/project-storage.php';
+require_once __DIR__ . '/server/core/media-trash.php';
 
 $formId = 'project_media';
 $guard = ensureFormGuard($formId);
+$showMediaTrash = ($_GET['view'] ?? '') === 'trash';
 
 function renderProjectMediaCsrfFields(array $guard): void
 {
@@ -23,7 +25,7 @@ function mediaError(string $message, int $statusCode = 400): void
 
     <head>
         <meta charset="UTF-8">
-        <title>Project Media</title>
+        <title><?php echo !empty($showMediaTrash) ? 'Media Trash' : 'Project Media'; ?></title>
         <meta name="robots" content="noindex, nofollow">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +39,7 @@ function mediaError(string $message, int $statusCode = 400): void
             <div class="wrap">
                 <section class="panel">
                     <div class="panel-body">
-                        <p class="eyebrow">Project Media</p>
+                        <p class="eyebrow"><?php echo !empty($showMediaTrash) ? 'Media Trash' : 'Project Media'; ?></p>
                         <h1><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></h1>
                         <div class="actions" style="margin-top: 18px;">
                             <a class="button button-secondary" href="/dashboard.php">Back to dashboard</a>
@@ -53,9 +55,38 @@ function mediaError(string $message, int $statusCode = 400): void
     exit;
 }
 
+function renderMediaCleanupControls(string $type, array $snapshot, string $error, array $guard): void
+{
+    $prefix = ['img' => 'unusedImages', 'audio' => 'unusedAudio', 'speech' => 'unusedSpeech'][$type];
+    $singular = ['img' => 'image', 'audio' => 'audio file', 'speech' => 'speech file'][$type];
+    $plural = ['img' => 'images', 'audio' => 'audio files', 'speech' => 'speech files'][$type];
+    $buttonLabel = ['img' => 'Delete Images', 'audio' => 'Delete Audio Files', 'speech' => 'Delete Speech Files'][$type];
+    $count = count($snapshot['files']);
+    ?>
+    <?php if ($error !== ''): ?><p role="alert"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
+    <form id="<?php echo $prefix; ?>Form" data-cleanup-type="<?php echo $type; ?>" method="post" onsubmit="document.getElementById('<?php echo $prefix; ?>Confirmation').showModal(); return false;">
+        <?php renderProjectMediaCsrfFields($guard); ?>
+        <input type="hidden" name="action" value="trash_unused_media">
+        <input type="hidden" name="folder" value="<?php echo $type; ?>">
+        <input type="hidden" name="cleanup_token" value="<?php echo htmlspecialchars($snapshot['token'], ENT_QUOTES, 'UTF-8'); ?>">
+        <button type="submit" class="button button-secondary" <?php echo $count === 0 || $error !== '' ? 'disabled' : ''; ?>>Delete all unused <?php echo $plural; ?> (<?php echo $count; ?>)…</button>
+    </form>
+    <dialog id="<?php echo $prefix; ?>Confirmation" aria-labelledby="<?php echo $prefix; ?>Question" aria-describedby="<?php echo $prefix; ?>Recovery" style="max-width: min(440px, 90vw); border: 1px solid #ccc; border-radius: 12px; padding: 24px;">
+        <form method="dialog">
+            <h2 id="<?php echo $prefix; ?>Question"><?php echo $count === 1 ? 'Delete 1 unused ' . $singular . '?' : 'Delete all ' . $count . ' unused ' . $plural . '?'; ?></h2>
+            <p id="<?php echo $prefix; ?>Recovery">You can restore them from Trash.</p>
+            <div class="actions">
+                <button type="submit" class="button button-secondary" autofocus>Cancel</button>
+                <button type="button" class="button button-primary" data-confirm-cleanup="<?php echo $type; ?>" onclick="this.disabled = true; document.getElementById('<?php echo $prefix; ?>Form').submit();"><?php echo $buttonLabel; ?></button>
+            </div>
+        </form>
+    </dialog>
+    <?php
+}
+
 function redirectToProjectMedia(string $project): void
 {
-    header('Location: /project-media.php?project=' . rawurlencode($project));
+    header('Location: /project-media.php?project=' . rawurlencode($project) . ((($_GET['view'] ?? '') === 'trash') ? '&view=trash' : ''));
     exit;
 }
 
@@ -517,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $action = (string) ($_POST['action'] ?? '');
-    $folder = (string) ($_POST['folder'] ?? '');
+    $folder = $action === 'empty_media_trash' ? 'img' : (string) ($_POST['folder'] ?? '');
 
     if (!isset($allowedFolders[$folder])) {
         mediaError('Invalid folder.', 400);
@@ -526,7 +557,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $targetDir = $allowedFolders[$folder]['dir'];
     $allowedExtensions = $allowedFolders[$folder]['extensions'];
 
-    if (!in_array($action, ['upload', 'delete'], true)) {
+    if (!in_array($action, ['upload', 'delete', 'empty_media_trash', 'trash_unused_media', 'restore_media', 'trash_unused_images', 'restore_image'], true)) {
         mediaError('Unsupported action.', 400);
     }
 
@@ -541,6 +572,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_dir($directory) && !@mkdir($directory, 0755, true) && !is_dir($directory)) {
                 mediaError('Unable to prepare the media folder.', 500);
             }
+        }
+
+        if (in_array($action, ['empty_media_trash', 'trash_unused_media', 'restore_media', 'trash_unused_images', 'restore_image'], true)) {
+            if (in_array($action, ['trash_unused_images', 'restore_image'], true) && $folder !== 'img') mediaError('Invalid folder.', 400);
+            try {
+                if ($action === 'empty_media_trash') {
+                    $result = emptyMediaTrash($projectDir, (string) ($_POST['trash_token'] ?? ''));
+                    $_SESSION['mediaTrashNotice'] = 'Permanently deleted ' . $result['deleted'] . ' files. ' . ($result['error'] ?? 'Media Trash is empty.');
+                } elseif ($action === 'trash_unused_images' || $action === 'trash_unused_media') {
+                    $result = trashUnusedMedia($projectDir, $flowPath, $folder, (string) ($_POST['cleanup_token'] ?? ''));
+                    $label = ['img' => 'images', 'audio' => 'audio files', 'speech' => 'speech files'][$folder];
+                    $_SESSION['mediaTrashNotice'] = 'Moved ' . $result['moved'] . ' ' . $label . ' to Media Trash. ' . ($result['error'] ?? 'You can restore them in Media Trash.');
+                } else {
+                    restoreTrashedMedia($projectDir, $folder, (string) ($_POST['trash_id'] ?? ''), (string) ($_POST['filename'] ?? ''));
+                    $_SESSION['mediaTrashNotice'] = 'File restored to the media library.';
+                }
+            } catch (RuntimeException $e) {
+                $_SESSION['mediaTrashNotice'] = $e->getMessage();
+            }
+            redirectToProjectMedia($project);
         }
 
         if ($action === 'upload') {
@@ -679,13 +730,30 @@ $unusedImageItems = filterUnusedItems($imageItems);
 $unusedSpeechItems = filterUnusedItems($speechItems);
 $unusedAudioItems = filterUnusedItems($audioItems);
 $openingImageItem = findOpeningImageItem($imageItems);
+$cleanups = [];
+$cleanupErrors = [];
+foreach (['img', 'audio', 'speech'] as $type) {
+    $cleanups[$type] = ['files' => [], 'token' => ''];
+    $cleanupErrors[$type] = '';
+    try { $cleanups[$type] = unusedMediaSnapshot($projectDir, $flowPath, $type); }
+    catch (RuntimeException $e) { $cleanupErrors[$type] = $e->getMessage(); }
+}
+$trashSnapshot = ['files' => [], 'token' => ''];
+$trashError = '';
+try { $trashSnapshot = mediaTrashSnapshot($projectDir); }
+catch (RuntimeException $e) { $trashError = $e->getMessage(); }
+$trashNotice = (string) ($_SESSION['mediaTrashNotice'] ?? '');
+unset($_SESSION['mediaTrashNotice']);
+$unusedImageItems = array_values(array_filter($imageItems, fn(array $item): bool => in_array($item['filename'], $cleanups['img']['files'], true)));
+$unusedAudioItems = array_values(array_filter($audioItems, fn(array $item): bool => in_array($item['filename'], $cleanups['audio']['files'], true)));
+$unusedSpeechItems = array_values(array_filter($speechItems, fn(array $item): bool => in_array($item['filename'], $cleanups['speech']['files'], true)));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Project Media</title>
+    <title><?php echo !empty($showMediaTrash) ? 'Media Trash' : 'Project Media'; ?></title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -830,6 +898,11 @@ $openingImageItem = findOpeningImageItem($imageItems);
             }
         }
 
+        .project-media-page .media-trash-item {
+            grid-template-columns: minmax(140px, 260px) minmax(0, 1fr) auto;
+            align-items: center;
+        }
+
         @media (max-width: 640px) {
             .project-media-page .file-item {
                 grid-template-columns: 1fr;
@@ -857,11 +930,14 @@ $openingImageItem = findOpeningImageItem($imageItems);
         <section class="page-intro page-intro--compact" aria-labelledby="media-title">
             <div class="wrap page-intro__inner">
                 <div class="page-intro__copy">
-                    <p class="eyebrow">Project Media</p>
+                    <p class="eyebrow"><?php echo !empty($showMediaTrash) ? 'Media Trash' : 'Project Media'; ?></p>
                     <h1 id="media-title"><?php echo htmlspecialchars($project, ENT_QUOTES, 'UTF-8'); ?></h1>
-                    <p class="page-intro__description">Manage this project's image, speech, and audio files.</p>
+                    <p class="page-intro__description"><?php echo $showMediaTrash ? 'Restore deleted files or empty this project’s Media Trash.' : 'Manage this project’s image, speech, and audio files.'; ?></p>
                 </div>
                 <div class="page-intro__actions">
+                    <?php if ($showMediaTrash): ?>
+                        <a class="button button-secondary" id="backToProjectMedia" href="/project-media.php?project=<?php echo rawurlencode($project); ?>">Back to Media</a>
+                    <?php endif; ?>
                     <a class="button button-primary" href="/edit/<?php echo rawurlencode($project); ?>/">Edit Project</a>
                 </div>
             </div>
@@ -869,6 +945,18 @@ $openingImageItem = findOpeningImageItem($imageItems);
         <div class="wrap media-shell">
             <section class="panel">
                 <div class="panel-body">
+                    <?php if ($showMediaTrash): ?>
+                        <?php require __DIR__ . '/templates/media-trash-view.php'; ?>
+                    <?php else: ?>
+                    <?php $trashCount = count($trashSnapshot['files']); ?>
+                    <a class="media-trash-card<?php echo $trashCount ? ' has-files' : ''; ?>" id="openMediaTrash" title="<?php echo $trashCount ? 'Restore deleted files or empty the trash.' : 'Trash is empty. You can restore deleted files here.'; ?>" data-trash-count="<?php echo $trashCount; ?>" href="/project-media.php?project=<?php echo rawurlencode($project); ?>&amp;view=trash">
+                        <span class="media-trash-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></span>
+                        <span class="media-trash-card__body">
+                            <span class="media-trash-card__heading"><strong>Media Trash</strong><span class="media-trash-card__count"><?php echo $trashCount . ($trashCount === 1 ? ' file' : ' files'); ?></span></span>
+                            <span class="media-trash-card__description"><?php echo $trashCount ? 'Restore deleted files or empty the trash.' : 'Trash is empty. You can restore deleted files here.'; ?></span>
+                        </span>
+                        <span class="media-trash-card__action">Open Trash <span aria-hidden="true">→</span></span>
+                    </a>
                     <div class="media-layout">
                         <section class="media-section">
                             <div class="upload-card">
@@ -887,6 +975,9 @@ $openingImageItem = findOpeningImageItem($imageItems);
 
                             <div class="file-list">
                                 <h2>Unused Images</h2>
+                                <?php if ($trashNotice !== ''): ?>
+                                    <p role="status"><?php echo htmlspecialchars($trashNotice, ENT_QUOTES, 'UTF-8'); ?></p>
+                                <?php endif; ?>
                                 <?php if ($unusedImageItems === []): ?>
                                     <p class="empty-state">No unused image files.</p>
                                 <?php else: ?>
@@ -916,6 +1007,7 @@ $openingImageItem = findOpeningImageItem($imageItems);
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
+                                <?php renderMediaCleanupControls('img', $cleanups['img'], $cleanupErrors['img'], $guard); ?>
                             </div>
                         </section>
 
@@ -962,6 +1054,7 @@ $openingImageItem = findOpeningImageItem($imageItems);
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
+                                <?php renderMediaCleanupControls('audio', $cleanups['audio'], $cleanupErrors['audio'], $guard); ?>
                             </div>
                         </section>
 
@@ -1008,6 +1101,7 @@ $openingImageItem = findOpeningImageItem($imageItems);
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
+                                <?php renderMediaCleanupControls('speech', $cleanups['speech'], $cleanupErrors['speech'], $guard); ?>
                             </div>
                         </section>
 
@@ -1162,6 +1256,7 @@ $openingImageItem = findOpeningImageItem($imageItems);
                             </div>
                         </section>
                     </div>
+                    <?php endif; ?>
                 </div>
             </section>
         </div>

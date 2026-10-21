@@ -216,6 +216,14 @@ or executable-code safety. Review declarations and hashes are not signatures.
 
 ### 5. Calculate hashes and add the exact review declaration
 
+Ripple's declaration was rechecked on 2026-10-20 after the maker security fix.
+The changed maker builds its configuration as data instead of evaluating generated
+JavaScript. Its dependencies remain its packaged `ripple-engine.js` and the three
+declared effect-host files above; it adds no bundled assets or remote libraries.
+The engine and root MIT license bytes still match their existing declarations.
+Only Ripple's maker hash was updated. The normal source-change export guard
+remains enabled. Existing alpha.5 distributions still contain the older review.
+
 Open PowerShell at the application root defined above. These read-only commands
 work in Windows PowerShell and PowerShell 7, without npm or additional tools:
 

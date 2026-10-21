@@ -32,12 +32,14 @@ let state = {
 let activeSlideIndex = 0;
 let activeEffectTarget = null; // 'bg' or 'fg' - tracks which effect input opened the modal
 let unsavedChanges = false; // Track if the user has made changes since last save/load
+let changeVersion = 0;
 let pendingLocalPlayerPayload = null;
 let activeProjectRevision = null;
 let activePublicationState = { isPublished: false, publishedAt: null };
 
 // Helper to mark changes
 function markUnsaved() {
+    changeVersion += 1;
     unsavedChanges = true;
     const saveBtn = document.getElementById('saveProjectBtn');
     if (saveBtn && saveBtn.textContent === "Save Slideshow") {
@@ -80,6 +82,16 @@ function clearUnsaved() {
         playCurrentBtn.textContent = 'Play from Current Slide';
         playCurrentBtn.title = 'Play the slideshow starting from the current slide';
     }
+}
+
+function completeProjectSave(savedChangeVersion, message) {
+    // A successful response acknowledges only the snapshot sent in that request.
+    // Edits made while awaiting IPC, HTTP, or replacement confirmation still need saving.
+    if (changeVersion === savedChangeVersion) clearUnsaved();
+    els.saveStatus.textContent = unsavedChanges
+        ? `${message}. New changes are not saved yet.`
+        : message;
+    setTimeout(() => els.saveStatus.textContent = '', 5000);
 }
 
 // --- Utils ---
@@ -2740,6 +2752,7 @@ async function saveProject() {
         }
     }
 
+    const savedChangeVersion = changeVersion;
     els.saveBtn.textContent = "Saving...";
     els.saveBtn.disabled = true;
 
@@ -2764,14 +2777,12 @@ async function saveProject() {
                 activeProjectRevision
             );
             activeProjectRevision = result.revision;
-            els.saveStatus.textContent = "Saved to flow.json at " + new Date().toLocaleTimeString();
-            setTimeout(() => els.saveStatus.textContent = '', 5000);
-            clearUnsaved();
+            completeProjectSave(savedChangeVersion, "Saved to flow.json at " + new Date().toLocaleTimeString());
         } catch (err) {
             console.error(err);
             alert(err && err.message ? err.message : "Could not save this project.");
         } finally {
-            els.saveBtn.textContent = "Save Slideshow";
+            els.saveBtn.textContent = unsavedChanges ? "* Save Slideshow" : "Save Slideshow";
             els.saveBtn.disabled = false;
         }
         return;
@@ -2838,14 +2849,12 @@ async function saveProject() {
         if (!res.ok || data.status === 'error') {
             throw new Error(data.message || 'Could not save the project.');
         }
-        els.saveStatus.textContent = "Saved " + new Date().toLocaleTimeString();
-        setTimeout(() => els.saveStatus.textContent = '', 5000);
-        clearUnsaved(); // Mark as saved!
+        completeProjectSave(savedChangeVersion, "Saved " + new Date().toLocaleTimeString());
     } catch (err) {
         console.error(err);
         alert(err && err.message ? err.message : "Error saving project. Check console.");
     } finally {
-        els.saveBtn.textContent = "Save Slideshow";
+        els.saveBtn.textContent = unsavedChanges ? "* Save Slideshow" : "Save Slideshow";
         els.saveBtn.disabled = false;
     }
 }
@@ -3172,12 +3181,16 @@ function bindProjectMediaManagerEvents() {
     });
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && modal && modal.classList.contains('open')) {
+            if (document.querySelector('.media-trash-image-dialog[open]')) return;
             closeProjectMediaManager();
         }
     });
 }
 
+let projectMediaScreen = 'media';
+
 async function openProjectMediaManager() {
+    projectMediaScreen = 'media';
     if (
         !DESKTOP_MODE
         || !DESKTOP_BRIDGE
@@ -3194,6 +3207,7 @@ async function openProjectMediaManager() {
 }
 
 function closeProjectMediaManager() {
+    window.MediaTrashPreview?.stop(document.getElementById('projectMediaManagerContent'));
     const modal = document.getElementById('project-media-manager-modal');
     if (modal) modal.classList.remove('open');
 }
@@ -3202,6 +3216,7 @@ async function refreshProjectMediaManager(message = '') {
     const content = document.getElementById('projectMediaManagerContent');
     const status = document.getElementById('projectMediaManagerStatus');
     if (!content || !status) return;
+    window.MediaTrashPreview?.stop(content);
     content.replaceChildren(createMediaManagerEmpty('Scanning the saved project…'));
     status.className = 'media-manager-status';
     status.textContent = message;
@@ -3211,9 +3226,17 @@ async function refreshProjectMediaManager(message = '') {
             PROJECT_CONTEXT.project
         );
         renderProjectMediaManager(currentProjectMediaOverview);
+        const title = document.getElementById('projectMediaManagerTitle');
+        if (title) title.textContent = `${state.title || PROJECT_CONTEXT.project || 'Project'} · ${projectMediaScreen === 'trash' ? 'Media Trash' : 'Media'}`;
+        if (title?.nextElementSibling) title.nextElementSibling.textContent = projectMediaScreen === 'trash'
+            ? 'Restore deleted files or empty this project’s Media Trash.'
+            : 'See unused files and every saved media connection in slideshow order.';
+        document.querySelectorAll('[data-media-manager-import]').forEach(button => { button.style.display = projectMediaScreen === 'trash' ? 'none' : ''; });
         const notes = [];
         if (message) notes.push(message);
-        if (unsavedChanges) {
+        if (projectMediaScreen === 'trash') {
+            notes.push('Files in Media Trash can be restored until you permanently delete them.');
+        } else if (unsavedChanges) {
             notes.push('Usage is based on the last saved flow.json. Save the slideshow before removing media.');
             status.classList.add('warning');
         } else {
@@ -3406,6 +3429,84 @@ function renderProjectMediaManager(overview) {
     const content = document.getElementById('projectMediaManagerContent');
     if (!content) return;
     content.replaceChildren();
+    const navigation = document.createElement('button');
+    navigation.type = 'button';
+    navigation.className = 'btn secondary';
+    navigation.id = projectMediaScreen === 'trash' ? 'backToProjectMedia' : 'openMediaTrash';
+    if (projectMediaScreen === 'trash') {
+        navigation.textContent = 'Back to Media';
+    } else {
+        const count = (overview.trash || []).length;
+        navigation.className = `media-trash-card${count ? ' has-files' : ''}`;
+        navigation.dataset.trashCount = String(count);
+        navigation.innerHTML = '<span class="media-trash-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></span>'
+            + '<span class="media-trash-card__body"><span class="media-trash-card__heading"><strong>Media Trash</strong><span class="media-trash-card__count"></span></span><span class="media-trash-card__description"></span></span>'
+            + '<span class="media-trash-card__action">Open Trash <span aria-hidden="true">→</span></span>';
+        navigation.querySelector('.media-trash-card__count').textContent = `${count} ${count === 1 ? 'file' : 'files'}`;
+        navigation.querySelector('.media-trash-card__description').textContent = count
+            ? 'Restore deleted files or empty the trash.'
+            : 'Trash is empty. You can restore deleted files here.';
+        navigation.title = navigation.querySelector('.media-trash-card__description').textContent;
+    }
+    navigation.addEventListener('click', () => {
+        projectMediaScreen = projectMediaScreen === 'trash' ? 'media' : 'trash';
+        void refreshProjectMediaManager().then(() => document.getElementById(projectMediaScreen === 'trash' ? 'backToProjectMedia' : 'openMediaTrash')?.focus());
+    });
+    const toolbar = document.createElement('div');
+    toolbar.className = 'media-manager-actions';
+    toolbar.style.marginBottom = '16px';
+    if (projectMediaScreen === 'trash') {
+        toolbar.appendChild(navigation);
+        content.appendChild(toolbar);
+    } else {
+        content.appendChild(navigation);
+    }
+    if (projectMediaScreen === 'trash') {
+        const empty = document.createElement('button');
+        empty.type = 'button';
+        empty.id = 'emptyMediaTrash';
+        empty.className = 'btn secondary';
+        empty.textContent = 'Empty Trash…';
+        empty.disabled = overview.readOnly || !(overview.trash || []).length;
+        empty.addEventListener('click', () => runMediaTrashAction(empty, async () => {
+            const result = await DESKTOP_BRIDGE.emptyProjectMediaTrash(PROJECT_CONTEXT.workspaceId, PROJECT_CONTEXT.project, overview.trashToken);
+            if (!result || result.cancelled) return '';
+            return `Permanently deleted ${result.deleted} files. ${result.error || 'Media Trash is empty.'}`;
+        }));
+        toolbar.appendChild(empty);
+        const trashSection = createMediaManagerSection(`Media Trash (${(overview.trash || []).length})`, 'Restore removed files. Existing files are never overwritten. Trash still uses disk space.');
+        if (!(overview.trash || []).length) trashSection.appendChild(createMediaManagerEmpty('Media Trash is empty.'));
+        (overview.trash || []).forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'media-trash-row';
+            row.dataset.trashType = item.type;
+            const preview = document.createElement('div');
+            preview.className = 'media-trash-preview';
+            preview.dataset.mediaType = item.type;
+            preview.dataset.filename = item.filename;
+            preview.dataset.previewUrl = `movement-project://trash/${[PROJECT_CONTEXT.workspaceId, PROJECT_CONTEXT.project, item.trashId, item.type, item.filename].map(encodeURIComponent).join('/')}`;
+            const label = document.createElement('span');
+            label.style.overflowWrap = 'anywhere';
+            label.textContent = `${item.type}/${item.filename} · ${item.trashId.split('--')[0]} `;
+            const restore = document.createElement('button');
+            restore.type = 'button';
+            restore.className = 'btn outline';
+            restore.style.cssText = 'width:auto;flex:0 0 auto;margin:0;';
+            restore.textContent = 'Restore';
+            restore.disabled = overview.readOnly;
+            restore.addEventListener('click', () => runMediaTrashAction(restore, async () => {
+                await DESKTOP_BRIDGE.restoreProjectMedia(PROJECT_CONTEXT.workspaceId, PROJECT_CONTEXT.project,
+                    item.trashId, item.type, item.filename);
+                return `Restored ${item.filename}.`;
+            }));
+            row.append(preview, label, restore);
+            trashSection.appendChild(row);
+        });
+        content.appendChild(trashSection);
+        window.MediaTrashPreview.initialize(content);
+        return;
+
+    }
     const mediaItems = Object.values(overview.media).flat();
     const missingItems = Object.values(overview.missing).flat();
     const unusedItems = mediaItems.filter(item => item.references.length === 0);
@@ -3429,10 +3530,28 @@ function renderProjectMediaManager(overview) {
     unusedColumns.className = 'media-unused-columns';
     ['img', 'speech', 'audio'].forEach(type => {
         const items = overview.media[type].filter(item => item.references.length === 0);
-        unusedColumns.appendChild(createMediaFolderColumn(type, items, {
+        const column = createMediaFolderColumn(type, items, {
             removable: true,
             emptyMessage: 'No unused files'
+        });
+        const cleanupButton = document.createElement('button');
+        cleanupButton.type = 'button';
+        cleanupButton.className = 'btn secondary';
+        cleanupButton.dataset.cleanupType = type;
+        const cleanup = overview.cleanup[type];
+        const label = { img: 'images', audio: 'audio files', speech: 'speech files' }[type];
+        cleanupButton.textContent = `Delete all unused ${label} (${cleanup.files.length})…`;
+        cleanupButton.disabled = overview.readOnly || unsavedChanges || cleanup.files.length === 0;
+        cleanupButton.addEventListener('click', () => runMediaTrashAction(cleanupButton, async () => {
+            if (unsavedChanges) throw new Error('Save the slideshow before removing unused media.');
+            const result = await DESKTOP_BRIDGE.trashUnusedMedia(
+                PROJECT_CONTEXT.workspaceId, PROJECT_CONTEXT.project, type, cleanup.token
+            );
+            if (!result || result.cancelled) return '';
+            return `Moved ${result.moved} ${label} to Media Trash.${result.error ? ` Stopped: ${result.error} Remaining files were kept.` : ''}`;
         }));
+        column.appendChild(cleanupButton);
+        unusedColumns.appendChild(column);
     });
     unusedSection.appendChild(unusedColumns);
     content.appendChild(unusedSection);
@@ -3494,6 +3613,20 @@ function renderProjectMediaManager(overview) {
     }
     usageSection.appendChild(rows);
     content.appendChild(usageSection);
+}
+
+async function runMediaTrashAction(button, action) {
+    window.MediaTrashPreview?.stop(document.getElementById('projectMediaManagerContent'));
+    button.disabled = true;
+    try {
+        const message = await action();
+        desktopMediaVersion = Date.now();
+        await refreshProjectMediaManager(message);
+        if (activeMediaLibFolder) await refreshDesktopMediaLibrary();
+    } catch (error) {
+        alert(error.message || 'Could not update Media Trash.');
+        await refreshProjectMediaManager();
+    }
 }
 
 async function removeUnusedProjectMedia(item, button) {

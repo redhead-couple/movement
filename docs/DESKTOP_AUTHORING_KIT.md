@@ -15,9 +15,10 @@ The kit inherits its version from the root `package.json` in the
 [Windows download page](https://redhead-couple.org/download.php) for the
 recommended Authoring Kit ZIP and its SHA-256 checksum.
 
-The current locally prepared Kit is **`0.1.0-alpha.2`**, not yet published. The
-public alpha.1 release linked above remains unchanged. See the
-[alpha.2 release notes](RELEASE_NOTES_0.1.0-alpha.2.md).
+The current Kit is **`0.1.0-alpha.8`**, available with the installer in
+[the GitHub prerelease](https://github.com/redhead-couple/movement/releases/tag/v0.1.0-alpha.8).
+It includes the previous fixes, Media Trash improvements, and complete audio/speech preloading. See the
+[alpha.8 release notes](RELEASE_NOTES_0.1.0-alpha.8.md).
 
 ## Start the application
 

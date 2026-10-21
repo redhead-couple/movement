@@ -75,7 +75,8 @@ test('desktop editor context requires the desktop host and preserves workspace/p
 
 test('desktop Save Slideshow keeps the bridge, publication state and revision guard', async () => {
   const editor = read('studio/editor/json-maker-logic.js');
-  const source = editor.slice(editor.indexOf('async function saveProject()'), editor.indexOf('async function downloadJSONOnly()'));
+  const source = editor.slice(editor.indexOf('function completeProjectSave('), editor.indexOf('// --- Utils ---'))
+    + editor.slice(editor.indexOf('async function saveProject()'), editor.indexOf('async function downloadJSONOnly()'));
   const calls = [];
   let cleared = false;
   const context = {
@@ -84,11 +85,13 @@ test('desktop Save Slideshow keeps the bridge, publication state and revision gu
     PROJECT_CONTEXT: { workspaceId: 'workspace', project: 'project' },
     activeProjectRevision: 'expected',
     activePublicationState: { isPublished: true, publishedAt: '2026-09-01' },
+    changeVersion: 1,
+    unsavedChanges: true,
     state: { title: 'Fixture', slides: [{ text: 'Fixture slide' }] },
     els: { saveBtn: {}, saveStatus: {} },
     desktopHasPendingMediaFiles: () => false,
     generateFinalJSON: () => ({ title: 'Fixture', schemaVersion: 2 }),
-    clearUnsaved() { cleared = true; },
+    clearUnsaved() { cleared = true; context.unsavedChanges = false; },
     setTimeout() {},
     console: { error(error) { throw error; } },
     alert(message) { assert.fail(message); },
